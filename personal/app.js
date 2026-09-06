@@ -59,10 +59,26 @@ function bodyHTML(a) {
   if (isVerse(a)) {
     return `<div class="poem">${a.body.map(esc).join('<br>')}</div>` +
            (a.images || []).slice(1)
-             .map((src, i) => inlineFig(photoOf(a, i + 1) || { src })).join('');
+             .map((src, i) => inlineFig(Blocks.photoOf(a, i + 1) || { src })).join('');
   }
-  return layoutBlocks(a).map(b =>
-    b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
+  return Blocks.of(a).map(b => renderBlock(a, b)).join('');
+}
+
+// One block in this design's own vocabulary. Archived articles arrive as
+// text and photos only; the newsroom can also produce headings, pull quotes,
+// verse and Q&A turns.
+function renderBlock(a, b) {
+  switch (b.type) {
+    case 'photo':   return inlineFig(b);
+    case 'heading': return `<h2 class="subhead">${esc(b.text)}</h2>`;
+    case 'quote':   return `<blockquote class="pullquote">${esc(b.text)}${b.attrib ? `<cite>${esc(b.attrib)}</cite>` : ''}</blockquote>`;
+    case 'verse':   return `<div class="poem">${(b.lines || []).map(esc).join('<br>')}</div>`;
+    case 'qa':      return `<div class="bubble ${b.role === 'q' ? 'ask' : 'say'}">
+              <div class="bubble-who">${esc(b.who)}</div>
+              <div class="bubble-txt">${esc(b.text)}</div>
+            </div>`;
+    default:        return textHTML(a, b.text);
+  }
 }
 
 function facts(a) {

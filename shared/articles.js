@@ -13,6 +13,7 @@ const ARTICLES = [
     id: 1,
     slug: "copy-of-harvatine-interview",
     section: "campus",
+    form: "story",
     title: "Blanson SkillsUSA Champions the Future Through Santa Donations Project",
     author: "",
     featured: true,
@@ -31,6 +32,7 @@ const ARTICLES = [
     id: 2,
     slug: "copy-of-blanson-skillsusa-champions",
     section: "campus",
+    form: "story",
     title: "Blanson SkillsUSA Students Return to Grantham",
     author: "",
     featured: false,
@@ -49,6 +51,8 @@ const ARTICLES = [
     id: 3,
     slug: "jenkins-interview",
     section: "interviews",
+    form: "qa",
+    interviewer: "Borrego",
     title: "Meet Mr. Jenkins: A Loud and Proud Passion for Film",
     author: "Jason Borrego",
     featured: true,
@@ -95,6 +99,8 @@ const ARTICLES = [
     id: 4,
     slug: "harvatine-interview",
     section: "interviews",
+    form: "qa",
+    interviewer: "Borrego",
     title: "Meet Mr. Harvatine: From the Classroom to the Front Office",
     author: "Jason Borrego",
     featured: false,
@@ -137,6 +143,7 @@ const ARTICLES = [
     id: 5,
     slug: "copy-of-bittersweet",
     section: "sports",
+    form: "story",
     title: "Neymar Jr: The Prince That Never Stood Up",
     author: "José Manuel González",
     featured: true,
@@ -178,6 +185,7 @@ const ARTICLES = [
     id: 6,
     slug: "copy-of-test-your-limits",
     section: "sports",
+    form: "story",
     title: "The Fall of Manchester United!",
     author: "José Manuel González",
     featured: false,
@@ -200,6 +208,7 @@ const ARTICLES = [
     id: 7,
     slug: "nfl-2025-2026-season",
     section: "sports",
+    form: "review",
     title: "NFL 2025-2026 Season",
     author: "Joseph Zapata",
     featured: false,
@@ -228,6 +237,7 @@ const ARTICLES = [
     id: 8,
     slug: "copy-of-phantoms-of-water",
     section: "campus",
+    form: "story",
     title: "Test Your Limits!",
     author: "Nathaniel Castro",
     featured: false,
@@ -245,6 +255,7 @@ const ARTICLES = [
     id: 9,
     slug: "blanson-f-c-2-0",
     section: "sports",
+    form: "story",
     title: "Blanson F.C. Beats Victory 4-0",
     author: "",
     featured: false,
@@ -282,6 +293,7 @@ const ARTICLES = [
     id: 10,
     slug: "blanson-vs-avalos",
     section: "sports",
+    form: "story",
     title: "Blanson F.C. Beats Avalos 3-0",
     author: "",
     featured: false,
@@ -311,6 +323,7 @@ const ARTICLES = [
     id: 11,
     slug: "night-in-the-woods",
     section: "gaming",
+    form: "review",
     title: "Night in the Woods",
     author: "Monzerrat Palacios",
     featured: false,
@@ -340,6 +353,7 @@ const ARTICLES = [
     id: 12,
     slug: "copy-of-paincore",
     section: "gaming",
+    form: "review",
     title: "Emissary Zero",
     author: "Monzerrat Palacios",
     featured: false,
@@ -367,6 +381,7 @@ const ARTICLES = [
     id: 13,
     slug: "copy-of-night-in-the-woods",
     section: "gaming",
+    form: "review",
     title: "Paincore",
     author: "Monzerrat Palacios",
     featured: false,
@@ -395,6 +410,7 @@ const ARTICLES = [
     id: 14,
     slug: "pathologic-ii",
     section: "gaming",
+    form: "story",
     title: "Pathologic II",
     author: "Monzerrat Palacios",
     featured: false,
@@ -424,6 +440,7 @@ const ARTICLES = [
     id: 15,
     slug: "yapyap",
     section: "gaming",
+    form: "story",
     title: "YAPYAP",
     author: "Monzerrat Palacios",
     featured: false,
@@ -451,6 +468,7 @@ const ARTICLES = [
     id: 16,
     slug: "copy-of-eternal-sunshine-of-the-spotl",
     section: "books",
+    form: "review",
     title: "All the Bright Places",
     author: "Keydith Manjarres",
     featured: false,
@@ -466,6 +484,7 @@ const ARTICLES = [
     id: 17,
     slug: "lovely-bones",
     section: "books",
+    form: "review",
     title: "Lovely Bones",
     author: "Keydith Manjarres",
     featured: false,
@@ -484,6 +503,7 @@ const ARTICLES = [
     id: 18,
     slug: "the-giver-by-lois-lowry",
     section: "books",
+    form: "story",
     title: "The Giver by Lois Lowry",
     author: "Melanie Tamez",
     featured: false,
@@ -501,6 +521,7 @@ const ARTICLES = [
     id: 19,
     slug: "copy-of-neymar-jr-the-prince-that-ne",
     section: "books",
+    form: "review",
     title: "The Intruder by Freida McFadden",
     author: "Marlene Garcia",
     featured: false,
@@ -523,6 +544,7 @@ const ARTICLES = [
     id: 20,
     slug: "copy-of-the-intruder-by-freida-mcfadden",
     section: "books",
+    form: "review",
     title: "\"Rock Paper Scissors\" by Alice Feeney",
     author: "Marlene Garcia",
     featured: false,
@@ -546,6 +568,7 @@ const ARTICLES = [
     id: 21,
     slug: "mid90s",
     section: "film",
+    form: "story",
     title: "Mid90s",
     author: "Josue Reyes",
     featured: true,
@@ -574,6 +597,7 @@ const ARTICLES = [
     id: 22,
     slug: "copy-of-rock-paper-scissors-by-alic",
     section: "film",
+    form: "story",
     title: "Whiplash",
     author: "Kelly Martinez",
     featured: false,
@@ -603,6 +627,7 @@ const ARTICLES = [
     id: 23,
     slug: "superman-2025",
     section: "film",
+    form: "story",
     title: "Superman (2025)",
     author: "Oliver Romero",
     featured: false,
@@ -627,6 +652,7 @@ const ARTICLES = [
     id: 24,
     slug: "copy-of-dazed-confused",
     section: "film",
+    form: "story",
     title: "Eternal Sunshine of the Spotless Mind",
     author: "Martha Ramirez",
     featured: false,
@@ -646,6 +672,7 @@ const ARTICLES = [
     id: 25,
     slug: "13-going-on-30",
     section: "film",
+    form: "review",
     title: "13 Going on 30",
     author: "Esther Ramirez",
     featured: false,
@@ -684,6 +711,7 @@ const ARTICLES = [
     id: 26,
     slug: "copy-of-as-above-so-below",
     section: "film",
+    form: "story",
     title: "Dazed & Confused",
     author: "Ashley Choudja",
     featured: false,
@@ -699,6 +727,7 @@ const ARTICLES = [
     id: 27,
     slug: "as-above-so-below",
     section: "film",
+    form: "story",
     title: "As Above, So Below",
     author: "Keydith Manjarres",
     featured: false,
@@ -716,6 +745,7 @@ const ARTICLES = [
     id: 28,
     slug: "alien",
     section: "poetry",
+    form: "verse",
     title: "Alien",
     author: "Josue Reyes",
     featured: false,
@@ -768,6 +798,7 @@ const ARTICLES = [
     id: 29,
     slug: "malignant-review",
     section: "film",
+    form: "review",
     title: "Malignant",
     author: "Keydith Manjarres",
     featured: false,
@@ -783,6 +814,7 @@ const ARTICLES = [
     id: 30,
     slug: "copy-of-as-above-so-below-1",
     section: "film",
+    form: "review",
     title: "Pride & Prejudice",
     author: "Kelly Martinez",
     featured: false,
@@ -812,6 +844,7 @@ const ARTICLES = [
     id: 31,
     slug: "full-metal-alchemist-brotherhood",
     section: "film",
+    form: "story",
     title: "Full Metal Alchemist: Brotherhood",
     author: "Oliver Romero",
     featured: false,
@@ -835,6 +868,7 @@ const ARTICLES = [
     id: 32,
     slug: "a-thief-s-gambit",
     section: "poetry",
+    form: "story",
     title: "A Thief's Gambit #1",
     author: "Melanie Cardenas",
     featured: true,
@@ -923,6 +957,7 @@ const ARTICLES = [
     id: 33,
     slug: "copy-of-a-thief-s-gambit-1",
     section: "poetry",
+    form: "story",
     title: "A Thief's Gambit #2",
     author: "Melanie Cardenas",
     featured: false,
@@ -1021,6 +1056,7 @@ const ARTICLES = [
     id: 34,
     slug: "copy-of-jenkins-interview",
     section: "poetry",
+    form: "verse",
     title: "Believe",
     author: "Josue Reyes",
     featured: false,
@@ -1061,6 +1097,7 @@ const ARTICLES = [
     id: 35,
     slug: "bittersweet",
     section: "poetry",
+    form: "verse",
     title: "Bittersweet",
     author: "Josue Reyes",
     featured: false,
@@ -1101,6 +1138,7 @@ const ARTICLES = [
     id: 36,
     slug: "bittersweet-flame",
     section: "poetry",
+    form: "verse",
     title: "Bittersweet Flame",
     author: "Jason Borrego",
     featured: false,
@@ -1148,6 +1186,7 @@ const ARTICLES = [
     id: 37,
     slug: "phantoms-of-water",
     section: "poetry",
+    form: "verse",
     title: "Phantoms of Water",
     author: "Jason Borrego",
     featured: false,
@@ -1189,6 +1228,7 @@ const ARTICLES = [
     id: 38,
     slug: "copy-of-alien",
     section: "poetry",
+    form: "verse",
     title: "The Balloon",
     author: "Jason Borrego",
     featured: false,
@@ -1234,6 +1274,7 @@ const ARTICLES = [
     id: 39,
     slug: "life-after-blanson",
     section: "alumni",
+    form: "story",
     title: "Life After Blanson",
     author: "Samuel Solis",
     featured: false,
@@ -1251,6 +1292,7 @@ const ARTICLES = [
     id: 40,
     slug: "advice-to-underclassmen",
     section: "campus",
+    form: "story",
     title: "Advice to Underclassmen",
     author: "Jean Folgar",
     featured: false,
@@ -1271,6 +1313,7 @@ const ARTICLES = [
     id: 41,
     slug: "fogo-de-chao",
     section: "houston",
+    form: "story",
     title: "Fogo de Chão",
     author: "Melanie Tamez",
     featured: false,
@@ -1288,123 +1331,29 @@ const ARTICLES = [
   },
 ];
 
-// ── Sections ────────────────────────────────────────────────────────────────
-const SECTIONS = [
-  { slug: 'campus',     name: 'Campus'     },
-  { slug: 'interviews', name: 'Interviews' },
-  { slug: 'sports',     name: 'Sports'     },
-  { slug: 'gaming',     name: 'Gaming'     },
-  { slug: 'books',      name: 'Books'      },
-  { slug: 'film',       name: 'Film & TV'  },
-  { slug: 'poetry',     name: 'Poetry'     },
-  { slug: 'alumni',     name: 'Alumni'     },
-  { slug: 'houston',    name: 'Houston'    }
-];
+// ── Helpers ─────────────────────────────────────────────────────────────────
+// These are thin aliases. The real implementations live in shared/blocks.js and
+// shared/sections.js, so a rendering bug can be fixed by editing JavaScript
+// instead of re-running a Perl build. Load order: sections.js, blocks.js, then
+// this file.
 
-// Each page sets MEDIA_PATH before loading this file; default suits /<design>/.
-const MEDIA_BASE = (typeof MEDIA_PATH !== 'undefined') ? MEDIA_PATH : '../assets/media/';
+const SECTIONS   = Sections.all();
+const sectionName= Sections.name;
 
 const bySection  = s  => ARTICLES.filter(a => a.section === s);
 // String compare: newsroom articles carry ids like "db-a1z2x", and Number() on
 // those is NaN, which never equals anything.
 const byId       = id => ARTICLES.find(a => String(a.id) === String(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
-const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
-const byline     = a  => a.author || 'The Blanson Post';
-const readingTime= a  => Math.max(1, Math.round(a.body.join(' ').split(/\s+/).length / 200));
-// Built-in articles store a bare filename; ones published from the newsroom
-// store a full URL (or a data: URL in local mode). Pass those through as-is.
-const isAbsolute = s => /^(https?:|data:|blob:|\/)/i.test(s);
-const imageUrl   = f  => (isAbsolute(f) ? f : MEDIA_BASE + f);
-const leadImage  = a  => (a.images && a.images.length ? imageUrl(a.images[0]) : null);
 
-// ── Content shapes ──────────────────────────────────────────────────────────
-// Poems keep their line breaks; interviews are speaker-prefixed transcripts.
-// Both need different typesetting from ordinary prose, in every design.
-const isVerse = a => a.section === 'poetry' && !/^A Thief/.test(a.title);
-
-const SPEAKER_RE = /^([A-Z][A-Za-z.'-]{1,24}):\s*(.*)$/;
-const speakerOf  = line => { const m = line.match(SPEAKER_RE); return m ? { who: m[1], text: m[2] } : null; };
-const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
-
-// Escape untrusted-ish strings before injecting into innerHTML.
-const esc = s => String(s).replace(/[&<>"']/g, c =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-// Clamped deliberately. Unclamped, a rating of 10 against a max of 5 produces
-// '☆'.repeat(-5), which throws RangeError *inside the router* — before innerHTML
-// is ever assigned — blanking the home, section and article pages of all three
-// designs. One student's typo must not be able to take the site down.
-const stars = a => {
-  if (a.rating == null || !a.ratingMax) return '';
-  const raw = Math.round((Number(a.rating) / Number(a.ratingMax)) * 5);
-  if (!Number.isFinite(raw)) return '';
-  const n = Math.max(0, Math.min(5, raw));
-  return '★'.repeat(n) + '☆'.repeat(5 - n);
-};
-
-// ── Body layout ─────────────────────────────────────────────────────────────
-// Spreads an article's remaining photos through the text rather than stacking
-// them at the end. images[0] is the lead and is placed by the design itself.
-// Returns a flat block list: { type:'text', text } | { type:'image', src }.
-const PHOTO_MARKER = /\[\[photo:(\d+)\]\]/;
-
-// Each photo owns its caption and credit, addressed by position. Keying that
-// off the image URL instead would make two copies of one picture share a single
-// caption — and re-adding a picture would wipe it.
-const photoOf = (a, i) => {
-  const p = (a.photos || [])[i];
-  if (p && p.src) return { src: p.src, caption: p.caption || '', credit: p.credit || '' };
-  const src = (a.images || [])[i];
-  return src ? { src, caption: '', credit: '' } : null;
-};
-
-function layoutBlocks(a) {
-  const lines  = a.body;
-  const extras = (a.images || []).slice(1);
-
-  // If the writer placed photos by hand in the editor, honour them exactly and
-  // do not second-guess the placement.
-  if (lines.some(l => PHOTO_MARKER.test(l))) {
-    const out = [];
-    lines.forEach(line => {
-      const m = line.match(new RegExp('^\\s*' + PHOTO_MARKER.source + '\\s*$'));
-      if (m) {
-        const p = photoOf(a, Number(m[1]) - 1);
-        if (p) out.push({ type: 'image', ...p });
-        return;
-      }
-      const text = line.replace(new RegExp(PHOTO_MARKER.source, 'g'), '').trim();
-      if (text) out.push({ type: 'text', text });
-    });
-    return out;
-  }
-
-  const text = lines.map(t => ({ type: 'text', text: t }));
-  if (!extras.length) return text;
-
-  // A poem is one visual unit, and a very short piece has nowhere to put them.
-  if (isVerse(a) || lines.length < 4 || extras.length >= lines.length) {
-    return text.concat(extras.map(src => ({ type: 'image', src })));
-  }
-
-  // Space them evenly, keeping clear of the opening and closing paragraphs and
-  // never placing two photos back to back.
-  const used = new Set();
-  const step = lines.length / (extras.length + 1);
-  const slots = extras.map((_, i) => {
-    let at = Math.min(lines.length - 1, Math.max(2, Math.round(step * (i + 1))));
-    while (used.has(at) && at < lines.length - 1) at++;
-    used.add(at);
-    return at;
-  });
-
-  const out = [];
-  lines.forEach((t, i) => {
-    const k = slots.indexOf(i);
-    if (k !== -1) out.push({ type: 'image', ...photoOf(a, k + 1) });
-    out.push({ type: 'text', text: t });
-  });
-  return out;
-}
+const esc        = Blocks.esc;
+const imageUrl   = Blocks.imageUrl;
+const leadImage  = Blocks.leadImage;
+const byline     = Blocks.byline;
+const readingTime= Blocks.readingTime;
+const stars      = Blocks.stars;
+const isVerse    = Blocks.isVerse;
+const isQA       = Blocks.isQA;
+const speakerOf  = Blocks.speakerOf;
+const layoutBlocks = Blocks.of;

@@ -54,10 +54,19 @@ open my $T, '<:encoding(UTF-8)', $tsv or die "no tsv: $!";
 while (my $line = <$T>) {
     chomp $line;
     next if $line =~ /^\s*#/ || $line !~ /\S/;
-    my ($slug, $section, $title, $author, $rating, $featured, $lead) = split /\t/, $line, 7;
+    my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer)
+        = split /\t/, $line, 9;
     next unless $slug && $section;
-    $_ //= '' for ($author, $rating, $featured, $lead);
-    s/^\s+|\s+$//g for ($lead);
+    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer);
+    s/^\s+|\s+$//g for ($lead, $form, $interviewer);
+
+    # `form` replaces two pieces of guesswork: a title-prefix regex for poems
+    # and a count of "Word:" lines for interviews. Warn rather than fail, so an
+    # un-updated row still builds — but never goes unnoticed.
+    if (!$form) {
+        $form = ($section eq 'poetry' && $title !~ /^A Thief/) ? 'verse' : 'story';
+        warn "  no form for '$slug' — guessed '$form'\n";
+    }
 
     open my $B, '<:encoding(UTF-8)', "$txt/$slug.txt" or do { warn "MISSING body: $slug\n"; next; };
     my @body; my %meta; my $dropped = 0;
@@ -101,7 +110,7 @@ while (my $line = <$T>) {
     # Lead with the first line that's actually a sentence, not a stray fragment.
     # Verse is the exception: a poem's opening line is the opening line.
     my $excerpt;
-    if ($section eq 'poetry' && $title !~ /^A Thief/) {
+    if ($form eq 'verse') {
         $excerpt = join(' / ', grep { length } @body[0 .. ($#body < 2 ? $#body : 2)]);
     } else {
         ($excerpt) = grep { length($_) >= 60 } @body;
@@ -129,6 +138,7 @@ while (my $line = <$T>) {
 
     push @rows, {
         id => $id++, slug => $slug, section => $section, title => $title,
+        form => $form, interviewer => $interviewer,
         author => ($author eq '?' ? '' : $author),
         rating => $rv, ratingMax => $rmax,
         featured => ($featured =~ /^y/i ? 1 : 0),
@@ -158,6 +168,8 @@ for my $a (@rows) {
     print $O "    id: $a->{id},\n";
     print $O "    slug: " . jstr($a->{slug}) . ",\n";
     print $O "    section: " . jstr($a->{section}) . ",\n";
+    print $O "    form: " . jstr($a->{form}) . ",\n";
+    print $O "    interviewer: " . jstr($a->{interviewer}) . ",\n" if $a->{interviewer};
     print $O "    title: " . jstr($a->{title}) . ",\n";
     print $O "    author: " . jstr($a->{author}) . ",\n";
     print $O "    featured: " . ($a->{featured} ? 'true' : 'false') . ",\n";
@@ -180,126 +192,32 @@ for my $a (@rows) {
 print $O <<'TAIL';
 ];
 
-// ── Sections ────────────────────────────────────────────────────────────────
-const SECTIONS = [
-  { slug: 'campus',     name: 'Campus'     },
-  { slug: 'interviews', name: 'Interviews' },
-  { slug: 'sports',     name: 'Sports'     },
-  { slug: 'gaming',     name: 'Gaming'     },
-  { slug: 'books',      name: 'Books'      },
-  { slug: 'film',       name: 'Film & TV'  },
-  { slug: 'poetry',     name: 'Poetry'     },
-  { slug: 'alumni',     name: 'Alumni'     },
-  { slug: 'houston',    name: 'Houston'    }
-];
+// ── Helpers ─────────────────────────────────────────────────────────────────
+// These are thin aliases. The real implementations live in shared/blocks.js and
+// shared/sections.js, so a rendering bug can be fixed by editing JavaScript
+// instead of re-running a Perl build. Load order: sections.js, blocks.js, then
+// this file.
 
-// Each page sets MEDIA_PATH before loading this file; default suits /<design>/.
-const MEDIA_BASE = (typeof MEDIA_PATH !== 'undefined') ? MEDIA_PATH : '../assets/media/';
+const SECTIONS   = Sections.all();
+const sectionName= Sections.name;
 
 const bySection  = s  => ARTICLES.filter(a => a.section === s);
 // String compare: newsroom articles carry ids like "db-a1z2x", and Number() on
 // those is NaN, which never equals anything.
 const byId       = id => ARTICLES.find(a => String(a.id) === String(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
-const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
-const byline     = a  => a.author || 'The Blanson Post';
-const readingTime= a  => Math.max(1, Math.round(a.body.join(' ').split(/\s+/).length / 200));
-// Built-in articles store a bare filename; ones published from the newsroom
-// store a full URL (or a data: URL in local mode). Pass those through as-is.
-const isAbsolute = s => /^(https?:|data:|blob:|\/)/i.test(s);
-const imageUrl   = f  => (isAbsolute(f) ? f : MEDIA_BASE + f);
-const leadImage  = a  => (a.images && a.images.length ? imageUrl(a.images[0]) : null);
 
-// ── Content shapes ──────────────────────────────────────────────────────────
-// Poems keep their line breaks; interviews are speaker-prefixed transcripts.
-// Both need different typesetting from ordinary prose, in every design.
-const isVerse = a => a.section === 'poetry' && !/^A Thief/.test(a.title);
-
-const SPEAKER_RE = /^([A-Z][A-Za-z.'-]{1,24}):\s*(.*)$/;
-const speakerOf  = line => { const m = line.match(SPEAKER_RE); return m ? { who: m[1], text: m[2] } : null; };
-const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
-
-// Escape untrusted-ish strings before injecting into innerHTML.
-const esc = s => String(s).replace(/[&<>"']/g, c =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-// Clamped deliberately. Unclamped, a rating of 10 against a max of 5 produces
-// '☆'.repeat(-5), which throws RangeError *inside the router* — before innerHTML
-// is ever assigned — blanking the home, section and article pages of all three
-// designs. One student's typo must not be able to take the site down.
-const stars = a => {
-  if (a.rating == null || !a.ratingMax) return '';
-  const raw = Math.round((Number(a.rating) / Number(a.ratingMax)) * 5);
-  if (!Number.isFinite(raw)) return '';
-  const n = Math.max(0, Math.min(5, raw));
-  return '★'.repeat(n) + '☆'.repeat(5 - n);
-};
-
-// ── Body layout ─────────────────────────────────────────────────────────────
-// Spreads an article's remaining photos through the text rather than stacking
-// them at the end. images[0] is the lead and is placed by the design itself.
-// Returns a flat block list: { type:'text', text } | { type:'image', src }.
-const PHOTO_MARKER = /\[\[photo:(\d+)\]\]/;
-
-// Each photo owns its caption and credit, addressed by position. Keying that
-// off the image URL instead would make two copies of one picture share a single
-// caption — and re-adding a picture would wipe it.
-const photoOf = (a, i) => {
-  const p = (a.photos || [])[i];
-  if (p && p.src) return { src: p.src, caption: p.caption || '', credit: p.credit || '' };
-  const src = (a.images || [])[i];
-  return src ? { src, caption: '', credit: '' } : null;
-};
-
-function layoutBlocks(a) {
-  const lines  = a.body;
-  const extras = (a.images || []).slice(1);
-
-  // If the writer placed photos by hand in the editor, honour them exactly and
-  // do not second-guess the placement.
-  if (lines.some(l => PHOTO_MARKER.test(l))) {
-    const out = [];
-    lines.forEach(line => {
-      const m = line.match(new RegExp('^\\s*' + PHOTO_MARKER.source + '\\s*$'));
-      if (m) {
-        const p = photoOf(a, Number(m[1]) - 1);
-        if (p) out.push({ type: 'image', ...p });
-        return;
-      }
-      const text = line.replace(new RegExp(PHOTO_MARKER.source, 'g'), '').trim();
-      if (text) out.push({ type: 'text', text });
-    });
-    return out;
-  }
-
-  const text = lines.map(t => ({ type: 'text', text: t }));
-  if (!extras.length) return text;
-
-  // A poem is one visual unit, and a very short piece has nowhere to put them.
-  if (isVerse(a) || lines.length < 4 || extras.length >= lines.length) {
-    return text.concat(extras.map(src => ({ type: 'image', src })));
-  }
-
-  // Space them evenly, keeping clear of the opening and closing paragraphs and
-  // never placing two photos back to back.
-  const used = new Set();
-  const step = lines.length / (extras.length + 1);
-  const slots = extras.map((_, i) => {
-    let at = Math.min(lines.length - 1, Math.max(2, Math.round(step * (i + 1))));
-    while (used.has(at) && at < lines.length - 1) at++;
-    used.add(at);
-    return at;
-  });
-
-  const out = [];
-  lines.forEach((t, i) => {
-    const k = slots.indexOf(i);
-    if (k !== -1) out.push({ type: 'image', ...photoOf(a, k + 1) });
-    out.push({ type: 'text', text: t });
-  });
-  return out;
-}
+const esc        = Blocks.esc;
+const imageUrl   = Blocks.imageUrl;
+const leadImage  = Blocks.leadImage;
+const byline     = Blocks.byline;
+const readingTime= Blocks.readingTime;
+const stars      = Blocks.stars;
+const isVerse    = Blocks.isVerse;
+const isQA       = Blocks.isQA;
+const speakerOf  = Blocks.speakerOf;
+const layoutBlocks = Blocks.of;
 TAIL
 close $O;
 

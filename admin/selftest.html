@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Self-test — The Blanson Post</title>
+<meta name="robots" content="noindex">
+<style>
+  body{font:14px/1.6 system-ui,sans-serif;background:#0d1016;color:#eef1f6;margin:0;padding:26px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:#8b94a5;margin-bottom:22px}
+  .tally{display:flex;gap:22px;margin-bottom:20px;flex-wrap:wrap}
+  .tally div{background:#151922;border:1px solid #262d3a;border-radius:10px;padding:12px 18px}
+  .tally b{display:block;font-size:24px}
+  .pass b{color:#35c98a} .fail b{color:#ff6b6b}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{text-align:left;padding:6px 9px;border-bottom:1px solid #1e242f;vertical-align:top}
+  th{color:#8b94a5;font-weight:600;position:sticky;top:0;background:#0d1016}
+  tr.bad{background:rgba(255,107,107,.09)}
+  .ok{color:#35c98a} .no{color:#ff6b6b;font-weight:700}
+  code{font-family:ui-monospace,monospace;font-size:11.5px;color:#a3abbb;word-break:break-all}
+  .banner{border-radius:10px;padding:14px 18px;margin-bottom:20px;font-weight:600}
+  .green{background:rgba(53,201,138,.12);border:1px solid rgba(53,201,138,.4);color:#8ff0c6}
+  .red{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);color:#ffb3b3}
+</style>
+</head>
+<body>
+
+<h1>Self-test</h1>
+<div class="sub">
+  Stage 2 gate: the block model must render the 41 archived articles
+  <b>byte-identically</b> to the code it replaces. This page keeps a verbatim copy
+  of the old implementation and diffs the two.
+</div>
+
+<div id="banner"></div>
+<div class="tally" id="tally"></div>
+<table id="rows"><thead><tr>
+  <th>#</th><th>slug</th><th>verse</th><th>Q&amp;A</th><th>blocks</th><th>bytes</th><th>result</th>
+</tr></thead><tbody></tbody></table>
+
+<script>const MEDIA_PATH = '../assets/media/';</script>
+<script src="../shared/sections.js?v=6"></script>
+<script src="../shared/blocks.js?v=6"></script>
+<script src="../shared/articles.js?v=6"></script>
+<script>
+// ───────────────────────────────────────────────────────────────────────────
+// LEGACY IMPLEMENTATION — a verbatim copy of the code being replaced. It lives
+// only in this file, purely so the replacement can be proved equivalent. Do not
+// "tidy" it; its value is that it is untouched.
+// ───────────────────────────────────────────────────────────────────────────
+const L = (() => {
+  const esc = s => String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const isAbsolute = s => /^(https?:|data:|blob:|\/)/i.test(s);
+  const imageUrl   = f => (isAbsolute(f) ? f : MEDIA_PATH + f);
+  const isVerse = a => a.section === 'poetry' && !/^A Thief/.test(a.title);
+  const SPEAKER_RE = /^([A-Z][A-Za-z.'-]{1,24}):\s*(.*)$/;
+  const speakerOf  = line => { const m = line.match(SPEAKER_RE); return m ? { who: m[1], text: m[2] } : null; };
+  const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
+
+  const PHOTO_MARKER = /\[\[photo:(\d+)\]\]/;
+  const photoOf = (a, i) => {
+    const p = (a.photos || [])[i];
+    if (p && p.src) return { src: p.src, caption: p.caption || '', credit: p.credit || '' };
+    const src = (a.images || [])[i];
+    return src ? { src, caption: '', credit: '' } : null;
+  };
+
+  function layoutBlocks(a) {
+    const lines  = a.body;
+    const extras = (a.images || []).slice(1);
+    if (lines.some(l => PHOTO_MARKER.test(l))) {
+      const out = [];
+      lines.forEach(line => {
+        const m = line.match(new RegExp('^\\s*' + PHOTO_MARKER.source + '\\s*$'));
+        if (m) {
+          const p = photoOf(a, Number(m[1]) - 1);
+          if (p) out.push({ type: 'image', ...p });
+          return;
+        }
+        const text = line.replace(new RegExp(PHOTO_MARKER.source, 'g'), '').trim();
+        if (text) out.push({ type: 'text', text });
+      });
+      return out;
+    }
+    const text = lines.map(t => ({ type: 'text', text: t }));
+    if (!extras.length) return text;
+    if (isVerse(a) || lines.length < 4 || extras.length >= lines.length) {
+      return text.concat(extras.map(src => ({ type: 'image', src })));
+    }
+    const used = new Set();
+    const step = lines.length / (extras.length + 1);
+    const slots = extras.map((_, i) => {
+      let at = Math.min(lines.length - 1, Math.max(2, Math.round(step * (i + 1))));
+      while (used.has(at) && at < lines.length - 1) at++;
+      used.add(at);
+      return at;
+    });
+    const out = [];
+    lines.forEach((t, i) => {
+      const k = slots.indexOf(i);
+      if (k !== -1) out.push({ type: 'image', ...photoOf(a, k + 1) });
+      out.push({ type: 'text', text: t });
+    });
+    return out;
+  }
+
+  // The traditional design's body renderer, as it was.
+  const inlineFig = b => `<figure class="inline-fig">
+    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+    ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
+      b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
+  </figure>`;
+
+  function textHTML(a, line) {
+    if (isQA(a)) {
+      const s = speakerOf(line);
+      if (!s) return `<p class="qa-intro">${esc(line)}</p>`;
+      const interviewer = /borrego|borrega/i.test(s.who);
+      return `<div class="qa ${interviewer ? 'q' : 'a'}">
+              <div class="qa-who">${esc(s.who)}</div>
+              <div class="qa-text">${esc(s.text)}</div>
+            </div>`;
+    }
+    return `<p>${esc(line)}</p>`;
+  }
+
+  function bodyHTML(a) {
+    if (isVerse(a)) {
+      const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
+      return verse + (a.images || []).slice(1)
+        .map((src, i) => inlineFig(photoOf(a, i + 1) || { src })).join('');
+    }
+    return layoutBlocks(a).map(b =>
+      b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
+  }
+
+  return { isVerse, isQA, layoutBlocks, bodyHTML };
+})();
+
+// ───────────────────────────────────────────────────────────────────────────
+// NEW IMPLEMENTATION — the same renderer, driven by Blocks.
+// ───────────────────────────────────────────────────────────────────────────
+const N = (() => {
+  const esc = Blocks.esc;
+  const inlineFig = b => `<figure class="inline-fig">
+    <img src="${esc(Blocks.imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+    ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
+      b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
+  </figure>`;
+
+  function textHTML(a, line) {
+    if (Blocks.isQA(a)) {
+      const s = Blocks.speakerOf(line);
+      if (!s) return `<p class="qa-intro">${esc(line)}</p>`;
+      const q = Blocks.isQuestion(a, s.who);
+      return `<div class="qa ${q ? 'q' : 'a'}">
+              <div class="qa-who">${esc(s.who)}</div>
+              <div class="qa-text">${esc(s.text)}</div>
+            </div>`;
+    }
+    return `<p>${esc(line)}</p>`;
+  }
+
+  function bodyHTML(a) {
+    if (Blocks.isVerse(a)) {
+      const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
+      return verse + (a.images || []).slice(1)
+        .map((src, i) => inlineFig(Blocks.photoOf(a, i + 1) || { src })).join('');
+    }
+    return Blocks.of(a).map(b =>
+      b.type === 'photo' ? inlineFig(b) : textHTML(a, b.text)).join('');
+  }
+  return { bodyHTML };
+})();
+
+// ───────────────────────────────────────────────────────────────────────────
+const builtins = ARTICLES.filter(a => typeof a.id === 'number').sort((x, y) => x.id - y.id);
+let pass = 0, fail = 0;
+const tbody = document.querySelector('#rows tbody');
+
+builtins.forEach(a => {
+  const oldHTML = L.bodyHTML(a);
+  const newHTML = N.bodyHTML(a);
+  const same = oldHTML === newHTML;
+  const shapeSame = L.isVerse(a) === Blocks.isVerse(a) && L.isQA(a) === Blocks.isQA(a);
+  const ok = same && shapeSame;
+  ok ? pass++ : fail++;
+
+  let detail = '';
+  if (!same) {
+    let i = 0;
+    while (i < oldHTML.length && i < newHTML.length && oldHTML[i] === newHTML[i]) i++;
+    detail = `<br><code>at ${i}: old “${oldHTML.slice(i, i + 60)}”<br>` +
+             `new “${newHTML.slice(i, i + 60)}”</code>`;
+  }
+  if (!shapeSame) {
+    detail += `<br><code>shape: verse ${L.isVerse(a)}→${Blocks.isVerse(a)}, ` +
+              `qa ${L.isQA(a)}→${Blocks.isQA(a)}</code>`;
+  }
+
+  const tr = document.createElement('tr');
+  if (!ok) tr.className = 'bad';
+  tr.innerHTML = `<td>${a.id}</td><td><code>${a.slug}</code></td>
+    <td>${Blocks.isVerse(a) ? '✓' : ''}</td><td>${Blocks.isQA(a) ? '✓' : ''}</td>
+    <td>${Blocks.of(a).length}</td><td>${newHTML.length}</td>
+    <td class="${ok ? 'ok' : 'no'}">${ok ? 'identical' : 'DIFFERS' + detail}</td>`;
+  tbody.appendChild(tr);
+});
+
+document.getElementById('tally').innerHTML =
+  `<div class="pass"><b>${pass}</b>identical</div>` +
+  `<div class="fail"><b>${fail}</b>differing</div>` +
+  `<div><b>${builtins.length}</b>archived articles</div>`;
+
+document.getElementById('banner').className = 'banner ' + (fail ? 'red' : 'green');
+document.getElementById('banner').textContent = fail
+  ? `${fail} article(s) render differently — Stage 2 is not done.`
+  : `All ${pass} archived articles render byte-identically. Stage 2 gate passed.`;
+
+window.__selftest = { pass, fail };
+</script>
+</body>
+</html>

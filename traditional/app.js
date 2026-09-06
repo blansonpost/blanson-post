@@ -53,10 +53,26 @@ function bodyHTML(a) {
   if (isVerse(a)) {
     const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
     return verse + (a.images || []).slice(1)
-      .map((src, i) => inlineFig(photoOf(a, i + 1) || { src })).join('');
+      .map((src, i) => inlineFig(Blocks.photoOf(a, i + 1) || { src })).join('');
   }
-  return layoutBlocks(a).map(b =>
-    b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
+  return Blocks.of(a).map(b => renderBlock(a, b)).join('');
+}
+
+// One block in this design's own vocabulary. Archived articles arrive as
+// text and photos only; the newsroom can also produce headings, pull quotes,
+// verse and Q&A turns.
+function renderBlock(a, b) {
+  switch (b.type) {
+    case 'photo':   return inlineFig(b);
+    case 'heading': return `<h2 class="subhead">${esc(b.text)}</h2>`;
+    case 'quote':   return `<blockquote class="pullquote">${esc(b.text)}${b.attrib ? `<cite>${esc(b.attrib)}</cite>` : ''}</blockquote>`;
+    case 'verse':   return `<div class="verse">${(b.lines || []).map(esc).join('<br>')}</div>`;
+    case 'qa':      return `<div class="qa ${b.role === 'q' ? 'q' : 'a'}">
+              <div class="qa-who">${esc(b.who)}</div>
+              <div class="qa-text">${esc(b.text)}</div>
+            </div>`;
+    default:        return textHTML(a, b.text);
+  }
 }
 
 function metaRow(a) {

@@ -201,3 +201,11 @@ footer{background:var(--blue);color:#fff;margin-top:40px}
 /* shown only when the newsroom could not be reached */
 .load-note{background:var(--gold-soft);border-bottom:2px solid var(--gold);color:var(--ink-2);
   font-size:14px;font-weight:700;padding:10px 22px;text-align:center}
+
+/* newsroom block types the archive never used */
+.subhead{font-family:var(--slab);font-size:22px;color:var(--blue);margin:32px 0 12px}
+.pullquote{margin:28px 0;padding:20px 24px;background:var(--gold-soft);
+  border:2px dashed var(--gold);border-radius:16px;
+  font-family:var(--hand);font-size:26px;line-height:1.45;color:var(--blue)}
+.pullquote cite{display:block;margin-top:8px;font-family:var(--sans);font-style:normal;
+  font-size:13.5px;font-weight:700;color:var(--ink-2)}
