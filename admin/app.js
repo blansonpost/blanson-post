@@ -209,13 +209,14 @@ function renderPhotos() {
       <img src="${esc(src)}" alt="">
       <div class="photo-body">
         <div class="photo-top">
-          <b>${i === 0 ? 'Cover photo' : 'Photo ' + (i + 1)}</b>
-          ${i > 0 ? `<span class="placed${used ? ' yes' : ''}">${used ? 'placed in text' : 'not placed'}</span>` : ''}
+          <b>${i === 0 ? '★ Cover' : 'Photo ' + (i + 1)}</b>
+          <span class="placed${used ? ' yes' : ''}">${
+            used ? 'placed in text' : (i === 0 ? 'shown at the top' : 'not placed yet')}</span>
         </div>
         <input class="cap" data-i="${i}" data-k="caption" value="${esc(m.caption)}" placeholder="Caption">
         <input class="cap" data-i="${i}" data-k="credit"  value="${esc(m.credit)}"  placeholder="Photo by…">
         <div class="photo-actions">
-          ${i > 0 ? `<button type="button" class="btn small" data-insert="${i + 1}">Insert here</button>` : ''}
+          <button type="button" class="btn small" data-insert="${i + 1}">↓ Insert here</button>
           ${i > 0 ? `<button type="button" class="btn small ghost" data-cover="${i}">Make cover</button>` : ''}
           <button type="button" class="btn small ghost" data-remove="${i}">Remove</button>
         </div>

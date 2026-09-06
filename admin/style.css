@@ -8,6 +8,9 @@
   --display:"Fraunces",Georgia,serif;
 }
 *{box-sizing:border-box}
+/* Must outrank the display rules below — an author `display` beats the browser's
+   own [hidden]{display:none}, which silently breaks every hidden panel. */
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
   font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 input,select,textarea,button{font:inherit;color:inherit}
@@ -171,4 +174,11 @@ textarea:focus,.row input:focus,.row select:focus{outline:none;border-color:var(
   .col-side{grid-template-columns:1fr}
   .row{grid-template-columns:1fr}
   .title-input{font-size:23px}
+}
+
+/* Give the headline its own row before the action buttons crowd it out. */
+@media(max-width:1280px){
+  .form-head{flex-direction:column;align-items:stretch;gap:12px}
+  .title-input{min-width:0}
+  .form-actions{justify-content:flex-start}
 }

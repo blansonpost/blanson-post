@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -100,10 +100,13 @@
                 <label class="btn small" for="f-photo">＋ Add</label>
                 <input id="f-photo" type="file" accept="image/*" multiple hidden>
               </div>
-              <p class="panel-note">The first photo is the cover, shown at the top of the
-              article. Others appear where you insert them.</p>
+              <p class="panel-note">The first photo is the <b>cover</b> and appears at the top
+              automatically. For any other photo: click in your article where you want it,
+              then press <b>↓ Insert here</b> on that photo.</p>
               <div id="photos" class="photos"></div>
-              <p class="panel-empty" id="photos-empty">No photos yet.</p>
+              <p class="panel-empty" id="photos-empty">
+                No photos yet — press <b>＋ Add</b> above to upload one.
+              </p>
             </div>
 
             <div class="panel">
@@ -121,7 +124,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <script src="../shared/config.js?v=1"></script>
-<script src="../shared/store.js?v=1"></script>
-<script src="app.js?v=1"></script>
+<script src="../shared/store.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>
