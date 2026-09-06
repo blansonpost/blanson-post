@@ -490,11 +490,15 @@ function renderBlocks(force) {
     seen.add(b.id);
     let node = nodes.get(b.id);
     if (!node) { node = buildBlockNode(b); nodes.set(b.id, node); }
-    updateBlockNode(node, b, i, wanted.length);
-    const at = host.children[i * 2];       // adder, block, adder, block…
-    const adder = adderFor(i);
+    // Place the node first, then fill it in — never the other way round.
+    // updateBlockNode measures the textarea to size it, and a node that is not
+    // yet in the document measures zero, which collapsed every paragraph to an
+    // invisible sliver with the writing still inside it. Reopening a story then
+    // looked like the work had gone.
+    const adder = adderFor(i);             // adder, block, adder, block…
     if (host.children[i * 2] !== adder) host.insertBefore(adder, host.children[i * 2] || null);
     if (host.children[i * 2 + 1] !== node) host.insertBefore(node, host.children[i * 2 + 1] || null);
+    updateBlockNode(node, b, i, wanted.length);
   });
 
   // trailing adder
@@ -540,7 +544,17 @@ function buildBlockNode(b) {
   return el;
 }
 
-function autoGrow(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+// Grows a textarea to fit what is typed in it. Two things it must not do:
+// measure a textarea that is not on the page yet (scrollHeight is 0 there), or
+// write a zero height back, either of which hides the writing completely while
+// leaving it in the box.
+function autoGrow(ta) {
+  if (!ta.isConnected) return;
+  ta.style.height = 'auto';
+  const h = ta.scrollHeight;
+  if (h > 0) ta.style.height = h + 'px';
+  else ta.style.removeProperty('height');   // fall back to the rows= default
+}
 
 function updateBlockNode(node, b, index, total) {
   node.className = 'block is-' + b.type;
