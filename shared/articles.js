@@ -227,7 +227,7 @@ const ARTICLES = [
   {
     id: 8,
     slug: "copy-of-phantoms-of-water",
-    section: "sports",
+    section: "campus",
     title: "Test Your Limits!",
     author: "Nathaniel Castro",
     featured: false,
@@ -715,13 +715,16 @@ const ARTICLES = [
   {
     id: 28,
     slug: "alien",
-    section: "film",
+    section: "poetry",
     title: "Alien",
     author: "Josue Reyes",
     featured: false,
     images: ["154bbc_8bbeca6e74e344ccbb15b605967e415e.jpg"],
-    excerpt: "Synopsis: I decided on a theme of social alienation for this poem while listening to the Radiohead song \"Subterranean Homesick Alien\". For my whole life, I haven't felt that I belonged anywhere, and I've only made a handful of close friends. This poem is definitely more emotional and vulnerable…",
+    excerpt: "Sixteen years, / Four months, / And four days ago,",
     body: [
+      "Sixteen years,",
+      "Four months,",
+      "And four days ago,",
       "An alien crash landed on Earth.",
       "Its whole life it's been trying to figure out how to live.",
       "Everything is unfamiliar to it,",
@@ -1247,7 +1250,7 @@ const ARTICLES = [
   {
     id: 40,
     slug: "advice-to-underclassmen",
-    section: "alumni",
+    section: "campus",
     title: "Advice to Underclassmen",
     author: "Jean Folgar",
     featured: false,
