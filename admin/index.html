@@ -8,32 +8,58 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to the newsroom</a>
+
 <!-- ── Sign in ────────────────────────────────────────────────────────────── -->
 <section id="gate" class="gate" hidden>
-  <form class="gate-card" id="login-form">
+  <div class="gate-card">
+    <div class="practice-banner">
+      <b>Practice mode — this computer only.</b>
+      Nothing here is on the internet. It is saved in this browser, on this
+      laptop, and anyone else who opens the newsroom here can read it.
+    </div>
+
     <div class="gate-brand">The Blanson <span>Post</span></div>
-    <div class="gate-sub">Newsroom sign-in</div>
+    <h1 class="gate-title">Who's practising?</h1>
 
-    <label for="email">School email</label>
-    <input id="email" type="email" autocomplete="username" required>
+    <form id="gate-form" autocomplete="off">
+      <label for="who">Your name</label>
+      <input id="who" type="text" name="practice-name" autocomplete="off"
+             placeholder="e.g. Melanie" required>
 
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" required>
+      <fieldset class="roles">
+        <legend>Practise as</legend>
+        <label class="role"><input type="radio" name="role" value="writer" checked>
+          <span><b>Writer</b>Write your own stories and send them to an editor.</span></label>
+        <label class="role"><input type="radio" name="role" value="editor">
+          <span><b>Editor</b>Everything a writer can do, plus publish and take down.</span></label>
+        <label class="role"><input type="radio" name="role" value="advisor">
+          <span><b>Advisor</b>Everything, plus managing who is on staff.</span></label>
+      </fieldset>
 
-    <button class="btn primary wide" type="submit" id="login-btn">Sign in</button>
-    <p class="gate-error" id="login-error" hidden></p>
-    <p class="gate-note" id="gate-note"></p>
-  </form>
+      <button class="btn primary wide" type="submit">Start practising</button>
+      <p class="gate-error" id="gate-error" role="alert" hidden></p>
+    </form>
+
+    <p class="gate-foot">
+      There is no password here on purpose — this is a practice copy, so there is
+      nothing to protect. <b>Never type your school password into it.</b>
+    </p>
+  </div>
 </section>
 
 <!-- ── Newsroom ───────────────────────────────────────────────────────────── -->
 <div id="shell" hidden>
   <header class="bar">
     <div class="bar-brand">The Blanson <span>Post</span> <em>Newsroom</em></div>
+    <nav class="tabs" id="tabs" aria-label="Newsroom sections">
+      <button class="tab on" data-tab="write" aria-current="page">Write</button>
+      <button class="tab" data-tab="staff">Staff</button>
+    </nav>
     <div class="bar-right">
       <span class="badge" id="mode-badge"></span>
       <span class="me" id="me"></span>
@@ -41,90 +67,94 @@
     </div>
   </header>
 
-  <main class="layout">
-    <aside class="side">
-      <button class="btn primary wide" id="new-article">＋ New article</button>
-      <div class="filters" id="filters"></div>
-      <div class="list" id="list"></div>
-    </aside>
+  <main id="main">
+    <!-- Write -->
+    <div class="layout" id="view-write">
+      <aside class="side">
+        <button class="btn primary wide" id="new-article">＋ New article</button>
+        <div class="filters" id="filters" role="group" aria-label="Filter articles"></div>
+        <div class="list" id="list"></div>
+        <div class="space" id="space"></div>
+      </aside>
 
-    <section class="editor" id="editor">
-      <div class="empty" id="empty">
-        <h2>Nothing open</h2>
-        <p>Pick an article on the left, or start a new one.</p>
-      </div>
-
-      <form id="form" hidden>
-        <div class="form-head">
-          <input class="title-input" id="f-title" placeholder="Headline" required>
-          <div class="form-actions">
-            <span class="status-pill" id="f-status-pill"></span>
-            <button class="btn ghost" type="button" id="btn-delete">Delete</button>
-            <button class="btn" type="button" id="btn-save">Save draft</button>
-            <button class="btn primary" type="button" id="btn-submit">Submit for review</button>
-            <button class="btn publish" type="button" id="btn-publish" hidden>Publish</button>
-            <button class="btn ghost" type="button" id="btn-unpublish" hidden>Unpublish</button>
-          </div>
+      <section class="editor">
+        <div class="empty" id="empty">
+          <h2>Nothing open</h2>
+          <p>Pick a story on the left, or start a new one.</p>
         </div>
 
-        <div class="cols">
-          <div class="col-main">
-            <div class="row">
-              <label>Section
-                <select id="f-section"></select>
-              </label>
-              <label>Written by
-                <input id="f-author" placeholder="e.g. Melanie Cardenas">
-              </label>
-              <label>Rating <span class="hint">optional</span>
-                <span class="rating-row">
-                  <input id="f-rating" type="number" step="0.1" min="0" placeholder="—">
-                  <span>/</span>
-                  <select id="f-rating-max"><option value="5">5</option><option value="10">10</option></select>
-                </span>
-              </label>
+        <div id="editor" hidden>
+          <div class="ed-head">
+            <input class="title-input" id="f-title" placeholder="Headline"
+                   aria-label="Headline" autocomplete="off">
+            <div class="ed-actions">
+              <span class="status-pill" id="f-status"></span>
+              <span class="saved" id="saved" aria-live="polite"></span>
+              <span class="spacer"></span>
+              <button class="btn ghost" type="button" id="btn-delete">Delete</button>
+              <button class="btn" type="button" id="btn-save">Save</button>
+              <button class="btn primary" type="button" id="btn-submit">Send to an editor</button>
+              <button class="btn publish" type="button" id="btn-publish">Publish</button>
+              <button class="btn ghost" type="button" id="btn-unpublish">Take down</button>
+              <button class="btn ghost" type="button" id="btn-sendback">Send back</button>
             </div>
-
-            <label class="body-label" for="f-body">
-              Article
-              <span class="hint">Blank line between paragraphs. Put your cursor where you want a
-              photo, then press <b>Insert here</b> on it.</span>
-            </label>
-            <textarea id="f-body" rows="24" placeholder="Start writing…"></textarea>
           </div>
 
-          <div class="col-side">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>Photos</h3>
-                <label class="btn small" for="f-photo">＋ Add</label>
-                <input id="f-photo" type="file" accept="image/*" multiple hidden>
+          <div class="slugline" id="slugline"></div>
+
+          <div class="ed-cols">
+            <div class="ed-main">
+              <div class="row">
+                <label>Section <select id="f-section"></select></label>
+                <label>Written by <input id="f-author" autocomplete="off" placeholder="e.g. Melanie Cardenas"></label>
+                <label>Kind of piece <select id="f-form"></select></label>
+                <label>Rating <span class="hint">optional</span>
+                  <span class="rating-row">
+                    <input id="f-rating" type="number" step="0.1" min="0" placeholder="—"
+                           aria-label="Rating">
+                    <span aria-hidden="true">/</span>
+                    <select id="f-ratingmax" aria-label="Rating out of">
+                      <option value="5">5</option><option value="10">10</option>
+                    </select>
+                  </span>
+                </label>
               </div>
-              <p class="panel-note">The first photo is the <b>cover</b> and appears at the top
-              automatically. For any other photo: click in your article where you want it,
-              then press <b>↓ Insert here</b> on that photo.</p>
-              <div id="photos" class="photos"></div>
-              <p class="panel-empty" id="photos-empty">
-                No photos yet — press <b>＋ Add</b> above to upload one.
-              </p>
+
+              <div class="cover" id="cover"></div>
+              <div class="blocks" id="blocks"></div>
             </div>
 
-            <div class="panel">
-              <div class="panel-head"><h3>Preview</h3></div>
-              <div id="preview" class="preview"></div>
-            </div>
+            <aside class="ed-side">
+              <div class="panel">
+                <div class="panel-head"><h3>Preview</h3></div>
+                <div class="preview" id="preview"></div>
+              </div>
+              <div class="panel" id="warnings-panel" hidden>
+                <div class="panel-head"><h3>Before publishing</h3></div>
+                <div id="warnings"></div>
+              </div>
+            </aside>
           </div>
         </div>
-      </form>
-    </section>
+      </section>
+    </div>
+
+    <!-- Staff -->
+    <div class="staffview" id="view-staff" hidden></div>
   </main>
 </div>
 
-<div id="toast" class="toast" hidden></div>
+<input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="../shared/vendor/supabase.js?v=6"></script>
-<script src="../shared/config.js?v=6"></script>
-<script src="../shared/store.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="../shared/vendor/supabase.js?v=10"></script>
+<script src="../shared/config.js?v=10"></script>
+<script src="../shared/sections.js?v=10"></script>
+<script src="../shared/blocks.js?v=10"></script>
+<script src="../shared/reserved-slugs.js?v=10"></script>
+<script src="../shared/idb.js?v=10"></script>
+<script src="../shared/photos.js?v=10"></script>
+<script src="../shared/store.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

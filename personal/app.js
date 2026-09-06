@@ -49,7 +49,7 @@ function textHTML(a, line) {
 // page keeps the scrapbook feel.
 let tiltSeed = 0;
 const inlineFig = b => `<figure class="inline-fig" style="--tilt:${[-1.2, 1, -.7, 1.4][tiltSeed++ % 4]}deg">
-     <img src="${esc(imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+     <img src="${esc(imageUrl(b.src))}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
      ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
        b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
    </figure>`;

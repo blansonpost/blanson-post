@@ -1,81 +1,111 @@
 // The Blanson Post — data layer
 //
-// One interface, two backends. `local` keeps everything in this browser so the
-// editor can be tried without any setup; `supabase` is the real thing. Both
-// expose the same methods, so no page above this file cares which is running.
+// One interface, two backends. `local` keeps everything in this browser using
+// IndexedDB, so the newsroom works with no setup at all; `supabase` is the real
+// thing. No page above this file cares which is running.
 //
-// Requires config.js (and, in supabase mode, the supabase-js UMD bundle).
+// Requires config.js, idb.js, photos.js. In supabase mode also vendor/supabase.js.
+// One IIFE, one global (see the note in sections.js).
 
 const Store = (() => {
-  const LS_ARTICLES = 'bp_articles';
-  const LS_SESSION  = 'bp_session';
-  const LS_USERS    = 'bp_users';
 
-  const readLS  = (k, fallback) => {
-    try { return JSON.parse(localStorage.getItem(k)) ?? fallback; }
-    catch (e) { return fallback; }
-  };
-  const writeLS = (k, v) => {
-    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
-    catch (e) { return false; }   // private mode, quota, blocked storage
-  };
+  const fail = IDB.fail;
 
-  const slugify = s => s.toLowerCase().trim()
+  const slugify = s => String(s).toLowerCase().trim()
     .replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 
-  // ── local backend ──────────────────────────────────────────────────────────
-  // Seeded with one demo account so the panel is usable straight away.
+  // A photo living in this browser is referenced as `idb:<id>` rather than a
+  // blob: URL, because a blob: URL is only valid for one page load. Persisting
+  // one would produce an article whose photos vanish on refresh.
+  const IDB_REF = /^idb:(.+)$/;
+  const isIdbRef = s => IDB_REF.test(String(s || ''));
+
+  // ── local backend ─────────────────────────────────────────────────────────
   const local = {
     name: 'local',
 
-    async signIn(email, password) {
-      const users = readLS(LS_USERS, [
-        { email: 'editor@blansonpost.test', password: 'blanson', name: 'Demo Editor', role: 'editor' },
-        { email: 'writer@blansonpost.test', password: 'blanson', name: 'Demo Writer', role: 'writer' }
-      ]);
-      writeLS(LS_USERS, users);
-      const u = users.find(x =>
-        x.email.toLowerCase() === String(email).toLowerCase() && x.password === password);
-      if (!u) throw new Error('That email and password do not match an account.');
-      const session = { email: u.email, name: u.name, role: u.role };
-      writeLS(LS_SESSION, session);
+    // Practice accounts. These are not a security boundary and nothing may
+    // treat them as one: in local mode there is no server and no shared state,
+    // so "signing in" only decides what this one browser shows you.
+    seedUsers: [
+      { email: 'advisor@practice', name: 'Practice Advisor', role: 'advisor' },
+      { email: 'editor@practice',  name: 'Practice Editor',  role: 'editor'  },
+      { email: 'writer@practice',  name: 'Practice Writer',  role: 'writer'  }
+    ],
+
+    async ensureSeeded() {
+      const done = await IDB.kvGet('seeded');
+      if (done) return;
+      for (const u of this.seedUsers) await IDB.put('users', u);
+      await IDB.kvSet('seeded', true);
+    },
+
+    async listUsers() {
+      await this.ensureSeeded();
+      return IDB.all('users');
+    },
+
+    async signIn(name, role) {
+      await this.ensureSeeded();
+      const clean = String(name || '').trim() || 'Practice User';
+      const id = 'local:' + slugify(clean);
+      const session = { id, name: clean, role: role || 'writer', email: id };
+      await IDB.put('users', { email: id, name: clean, role: session.role });
+      await IDB.kvSet('session', session);
       return session;
     },
 
-    async signOut() { try { localStorage.removeItem(LS_SESSION); } catch (e) {} },
-    async currentUser() { return readLS(LS_SESSION, null); },
+    async signOut() { await IDB.kvDel('session'); },
+    async currentUser() { return (await IDB.kvGet('session')) || null; },
 
-    async listArticles() { return readLS(LS_ARTICLES, []); },
-
-    async saveArticle(article) {
-      const all = readLS(LS_ARTICLES, []);
-      const i = all.findIndex(a => a.id === article.id);
-      article.updatedAt = new Date().toISOString();
-      if (i === -1) { article.createdAt = article.updatedAt; all.unshift(article); }
-      else all[i] = article;
-      if (!writeLS(LS_ARTICLES, all)) {
-        throw new Error('Could not save — this browser is out of storage space. ' +
-                        'Try smaller photos, or connect Supabase.');
+    async setRole(email, role) {
+      const u = await IDB.get('users', email);
+      if (!u) throw fail('NOTFOUND', 'No such person on the staff list.');
+      u.role = role;
+      await IDB.put('users', u);
+      const session = await IDB.kvGet('session');
+      if (session && session.email === email) {
+        session.role = role;
+        await IDB.kvSet('session', session);
       }
-      return article;
+      return u;
     },
 
-    async deleteArticle(id) {
-      writeLS(LS_ARTICLES, readLS(LS_ARTICLES, []).filter(a => a.id !== id));
+    async listArticles() {
+      const rows = await IDB.all('articles');
+      return rows.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
     },
 
-    // Photos become data URLs. Fine for trying things; real storage is Supabase.
-    async uploadPhoto(file) { return await shrink(file, 1600, 0.82); }
+    async saveArticle(doc) {
+      doc.updatedAt = new Date().toISOString();
+      if (!doc.createdAt) doc.createdAt = doc.updatedAt;
+      await IDB.put('articles', doc);        // throws code QUOTA when full
+      return doc;
+    },
+
+    async deleteArticle(id) { await IDB.del('articles', id); },
+
+    // Returns a reference, never a data URL — see IDB_REF above.
+    async uploadPhoto(file) {
+      const meta = await Photos.add(file);
+      return { ...meta, src: 'idb:' + meta.id };
+    },
+
+    async deletePhoto(ref) {
+      const m = String(ref || '').match(IDB_REF);
+      if (m) await IDB.del('photos', m[1]);
+    }
   };
 
-  // ── supabase backend ───────────────────────────────────────────────────────
+  // ── supabase backend ──────────────────────────────────────────────────────
   const remote = {
     name: 'supabase',
     _c: null,
     client() {
       if (!this._c) {
         if (typeof supabase === 'undefined') {
-          throw new Error('The Supabase library did not load. Check your internet connection.');
+          throw fail('BLOCKED',
+            'The Supabase library did not load, so the newsroom cannot reach the database.');
         }
         this._c = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       }
@@ -83,8 +113,8 @@ const Store = (() => {
     },
 
     async signIn(email, password) {
-      const { data, error } = await this.client().auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message);
+      const { error } = await this.client().auth.signInWithPassword({ email, password });
+      if (error) throw fail('DENIED', error.message);
       return await this.currentUser();
     },
 
@@ -93,96 +123,175 @@ const Store = (() => {
     async currentUser() {
       const { data } = await this.client().auth.getUser();
       if (!data || !data.user) return null;
-      const { data: prof } = await this.client()
-        .from('profiles').select('name, role').eq('id', data.user.id).single();
+      const { data: prof, error } = await this.client()
+        .from('profiles').select('name, role').eq('id', data.user.id).maybeSingle();
+      // A missing profile must not silently demote an advisor to writer.
+      if (error) console.warn('[Store] could not read profile:', error.message);
       return {
         id: data.user.id,
         email: data.user.email,
         name: (prof && prof.name) || data.user.email,
-        role: (prof && prof.role) || 'writer'
+        role: (prof && prof.role) || 'writer',
+        profileMissing: !prof
       };
+    },
+
+    async listUsers() {
+      const { data, error } = await this.client().from('profiles').select('id, name, role');
+      if (error) throw fail('DENIED', error.message);
+      return (data || []).map(p => ({ email: p.id, name: p.name, role: p.role }));
+    },
+
+    async setRole(id, role) {
+      const { error } = await this.client().from('profiles').update({ role }).eq('id', id);
+      if (error) throw fail('DENIED', error.message);
+      return { email: id, role };
     },
 
     async listArticles() {
       const { data, error } = await this.client()
         .from('articles').select('*').order('updated_at', { ascending: false });
-      if (error) throw new Error(error.message);
+      if (error) throw fail('DENIED', error.message);
       return (data || []).map(fromRow);
     },
 
-    async saveArticle(article) {
+    async saveArticle(doc) {
       const { data, error } = await this.client()
-        .from('articles').upsert(toRow(article)).select().single();
-      if (error) throw new Error(error.message);
+        .from('articles').upsert(toRow(doc)).select().single();
+      if (error) {
+        if (/duplicate key/i.test(error.message)) {
+          throw fail('CONFLICT', 'There is already an article at that web address.');
+        }
+        throw fail('DENIED', error.message);
+      }
       return fromRow(data);
     },
 
     async deleteArticle(id) {
       const { error } = await this.client().from('articles').delete().eq('id', id);
-      if (error) throw new Error(error.message);
+      if (error) throw fail('DENIED', error.message);
     },
 
     async uploadPhoto(file) {
-      const small = await shrink(file, 1600, 0.82);
-      const blob  = await (await fetch(small)).blob();
-      const path  = `${Date.now()}-${slugify(file.name) || 'photo'}.jpg`;
+      const meta = await Photos.add(file);              // same validation and resizing
+      const rec  = await IDB.get('photos', meta.id);
+      const ext  = meta.mime === 'image/png' ? 'png' : 'jpg';
+      const path = `${Date.now()}-${slugify(file.name) || 'photo'}.${ext}`;
       const { error } = await this.client().storage
-        .from('photos').upload(path, blob, { contentType: 'image/jpeg' });
-      if (error) throw new Error(error.message);
+        .from('photos').upload(path, rec.blob, { contentType: meta.mime });
+      if (error) throw fail('OFFLINE', error.message);
       const { data } = this.client().storage.from('photos').getPublicUrl(path);
-      return data.publicUrl;
+      await IDB.del('photos', meta.id);                  // the bucket owns it now
+      return { ...meta, src: data.publicUrl, path };
+    },
+
+    async deletePhoto(ref, path) {
+      if (!path) return;
+      await this.client().storage.from('photos').remove([path]);
     }
   };
 
   const toRow = a => ({
-    id: a.id, slug: a.slug, title: a.title, section: a.section, author: a.author,
-    body: a.body.join('\n'), excerpt: a.excerpt, rating: a.rating, rating_max: a.ratingMax,
-    status: a.status, images: a.images, photos: a.photos, updated_at: a.updatedAt
+    id: a.id, slug: a.slug, title: a.title, section: a.section, form: a.form,
+    author: a.author, author_id: a.authorId, interviewer: a.interviewer,
+    body: (a.body || []).join('\n'), excerpt: a.excerpt,
+    rating: a.rating, rating_max: a.ratingMax, status: a.status,
+    featured: !!a.featured, blocks: a.blocks, assets: a.assets, cover: a.cover,
+    meta: a.meta, images: a.images, updated_at: a.updatedAt
   });
 
   const fromRow = r => ({
-    id: r.id, slug: r.slug, title: r.title, section: r.section, author: r.author,
+    id: r.id, slug: r.slug, title: r.title, section: r.section, form: r.form,
+    author: r.author, authorId: r.author_id, interviewer: r.interviewer,
     body: (r.body || '').split('\n'), excerpt: r.excerpt,
     rating: r.rating, ratingMax: r.rating_max, status: r.status,
-    images: r.images || [], photos: r.photos || [],
+    featured: !!r.featured, blocks: r.blocks || [], assets: r.assets || [],
+    cover: r.cover || null, meta: r.meta || {}, images: r.images || [],
     createdAt: r.created_at, updatedAt: r.updated_at
   });
 
-  // Downscale in the browser so a 5 MB phone photo doesn't reach the server.
-  function shrink(file, maxSide, quality) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Could not read that file.'));
-      reader.onload = () => { img.src = reader.result; };
-      img.onerror = () => reject(new Error('That file does not look like an image.'));
-      img.onload = () => {
-        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-        const c = document.createElement('canvas');
-        c.width  = Math.round(img.width  * scale);
-        c.height = Math.round(img.height * scale);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        resolve(c.toDataURL('image/jpeg', quality));
-      };
-      reader.readAsDataURL(file);
-    });
+  const backend = (typeof BACKEND !== 'undefined' && BACKEND === 'supabase') ? remote : local;
+
+  // ── moving off the old localStorage format ────────────────────────────────
+  // Runs once. The old keys are deliberately left in place: if this conversion
+  // is wrong, the student's work still exists to try again from.
+  async function migrateFromLocalStorage() {
+    if (await IDB.kvGet('migratedFromLS')) return { migrated: 0 };
+    let raw = null;
+    try { raw = localStorage.getItem('bp_articles'); } catch (e) { return { migrated: 0 }; }
+    if (!raw) { await IDB.kvSet('migratedFromLS', true); return { migrated: 0 }; }
+
+    let old = [];
+    try { old = JSON.parse(raw) || []; } catch (e) { old = []; }
+
+    let migrated = 0;
+    for (const a of old) {
+      try {
+        const assets = [];
+        for (const p of (a.photos || [])) {
+          if (!/^data:/.test(p.src || '')) { assets.push(p); continue; }
+          const blob = await (await fetch(p.src)).blob();
+          const file = new File([blob], 'migrated.jpg', { type: blob.type || 'image/jpeg' });
+          const meta = await Photos.add(file);
+          assets.push({ ...p, src: 'idb:' + meta.id, id: meta.id });
+        }
+        const doc = {
+          ...a,
+          assets,
+          blocks: Array.isArray(a.blocks) && a.blocks.length ? a.blocks
+                : Blocks.fromLegacy({ ...a, images: assets.map(p => p.src) }),
+          images: assets.map(p => p.src),
+          authorId: a.authorId || a.createdBy || '',
+          form: a.form || 'story'
+        };
+        delete doc.photos;
+        await backend.saveArticle(doc);
+        migrated++;
+      } catch (e) {
+        console.warn('[Store] could not migrate an article:', a && a.title, e);
+      }
+    }
+    await IDB.kvSet('migratedFromLS', true);
+    return { migrated };
   }
 
-  const backend = (typeof BACKEND !== 'undefined' && BACKEND === 'supabase') ? remote : local;
+  // ── photo references → usable URLs ────────────────────────────────────────
+  // Article documents hold `idb:<id>`; the browser needs a blob: URL. Resolved
+  // per page load into a named scope so they can all be revoked together.
+  async function resolvePhotos(article, scope) {
+    const swap = async ref => (isIdbRef(ref)
+      ? (await Photos.url(ref.slice(4), scope)) || ref
+      : ref);
+
+    const out = { ...article };
+    if (out.cover && out.cover.src) out.cover = { ...out.cover, src: await swap(out.cover.src) };
+    if (Array.isArray(out.blocks)) {
+      out.blocks = await Promise.all(out.blocks.map(async b =>
+        b.type === 'photo' && b.src ? { ...b, src: await swap(b.src) } : b));
+    }
+    if (Array.isArray(out.images)) out.images = await Promise.all(out.images.map(swap));
+    return out;
+  }
 
   return {
     mode: backend.name,
-    slugify,
-    signIn:  (e, p) => backend.signIn(e, p),
+    slugify, isIdbRef, resolvePhotos, migrateFromLocalStorage,
+
+    signIn:  (a, b) => backend.signIn(a, b),
     signOut: ()     => backend.signOut(),
     currentUser:   () => backend.currentUser(),
+    listUsers:     () => backend.listUsers(),
+    setRole:  (e, r) => backend.setRole(e, r),
     listArticles:  () => backend.listArticles(),
     saveArticle:   a  => backend.saveArticle(a),
     deleteArticle: id => backend.deleteArticle(id),
     uploadPhoto:   f  => backend.uploadPhoto(f),
+    deletePhoto: (ref, path) => backend.deletePhoto(ref, path),
+    space: () => IDB.space(),
+    persist: () => IDB.persist(),
 
-    // Published articles from the store, shaped like the built-in ones so the
-    // three designs can render both without knowing the difference.
+    // Published articles, shaped like the built-in ones so the three designs
+    // render both without knowing the difference.
     //
     // Returns { articles, error } — never swallows. An empty catch here used to
     // make five separate whole-site failures (missing library, bad key, a
@@ -196,15 +305,22 @@ const Store = (() => {
         console.warn('[Blanson Post] could not load published articles:', e);
         return { articles: [], error: e };
       }
-      const articles = rows.filter(a => a.status === 'published').map(a => ({
-        id: 'db-' + a.id, slug: a.slug, section: a.section, title: a.title,
-        author: a.author || '', featured: !!a.featured,
-        rating: a.rating == null ? undefined : a.rating,
-        ratingMax: a.ratingMax == null ? undefined : a.ratingMax,
-        images: a.images || [], photos: a.photos || [],
-        excerpt: a.excerpt || (a.body.find(l => l.trim().length > 40) || ''),
-        body: a.body.filter(l => l.trim().length)
-      }));
+      const live = rows.filter(a => a.status === 'published');
+      const articles = [];
+      for (const a of live) {
+        const r = await resolvePhotos(a, 'site');
+        articles.push({
+          id: 'db-' + r.id, slug: r.slug, section: r.section, title: r.title,
+          form: r.form || 'story', interviewer: r.interviewer || '',
+          author: r.author || '', featured: !!r.featured,
+          rating: r.rating == null ? undefined : r.rating,
+          ratingMax: r.ratingMax == null ? undefined : r.ratingMax,
+          meta: r.meta || {}, cover: r.cover || null,
+          blocks: r.blocks || [], images: r.images || [],
+          excerpt: r.excerpt || '',
+          body: (r.body || []).filter(l => String(l).trim().length)
+        });
+      }
       return { articles, error: null };
     },
 

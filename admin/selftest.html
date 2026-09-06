@@ -39,9 +39,17 @@
 </tr></thead><tbody></tbody></table>
 
 <script>const MEDIA_PATH = '../assets/media/';</script>
-<script src="../shared/sections.js?v=6"></script>
-<script src="../shared/blocks.js?v=6"></script>
-<script src="../shared/articles.js?v=6"></script>
+<script>
+// Always load the real current files: a self-test that passes against a cached
+// copy of the code is worse than no self-test.
+(function () {
+  var bust = '?dev=' + Date.now();
+  var files = ["../shared/sections.js", "../shared/blocks.js", "../shared/articles.js"];
+  document.write(files.map(function (f) {
+    return '<scr' + 'ipt src="' + f + bust + '"></scr' + 'ipt>';
+  }).join(''));
+})();
+</script>
 <script>
 // ───────────────────────────────────────────────────────────────────────────
 // LEGACY IMPLEMENTATION — a verbatim copy of the code being replaced. It lives

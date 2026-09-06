@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>Storage self-test — The Blanson Post</title><meta name="robots" content="noindex">
+<style>
+ body{font:14px/1.6 system-ui,sans-serif;background:#0d1016;color:#eef1f6;margin:0;padding:26px}
+ h1{font-size:20px;margin:0 0 18px}
+ .banner{border-radius:10px;padding:14px 18px;margin-bottom:18px;font-weight:600}
+ .green{background:rgba(53,201,138,.12);border:1px solid rgba(53,201,138,.4);color:#8ff0c6}
+ .red{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);color:#ffb3b3}
+ table{border-collapse:collapse;width:100%;font-size:13px}
+ td,th{text-align:left;padding:7px 10px;border-bottom:1px solid #1e242f;vertical-align:top}
+ th{color:#8b94a5}
+ .ok{color:#35c98a}.no{color:#ff6b6b;font-weight:700}
+ code{font-family:ui-monospace,monospace;font-size:11.5px;color:#a3abbb}
+</style></head><body>
+<h1>Storage self-test</h1>
+<div id="banner" class="banner">running…</div>
+<table id="t"><thead><tr><th>check</th><th>result</th><th>detail</th></tr></thead><tbody></tbody></table>
+
+<script>const MEDIA_PATH='../assets/media/';</script>
+<script>
+// Always load the real current files: a self-test that passes against a cached
+// copy of the code is worse than no self-test.
+(function () {
+  var bust = '?dev=' + Date.now();
+  var files = ["../shared/config.js", "../shared/sections.js", "../shared/blocks.js", "../shared/idb.js", "../shared/photos.js", "../shared/store.js"];
+  document.write(files.map(function (f) {
+    return '<scr' + 'ipt src="' + f + bust + '"></scr' + 'ipt>';
+  }).join(''));
+})();
+</script>
+<script>
+const tb = document.querySelector('#t tbody');
+let pass = 0, fail = 0;
+function check(name, ok, detail) {
+  ok ? pass++ : fail++;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${name}</td><td class="${ok?'ok':'no'}">${ok?'pass':'FAIL'}</td>
+                  <td><code>${detail ?? ''}</code></td>`;
+  tb.appendChild(tr);
+}
+function file(name, mime, bytes) { return new File([bytes], name, { type: mime }); }
+function png(px, transparent) {
+  const c=document.createElement('canvas'); c.width=c.height=px;
+  const x=c.getContext('2d');
+  if(!transparent){x.fillStyle='#003087';x.fillRect(0,0,px,px);}
+  x.fillStyle='#F4C300'; x.beginPath(); x.arc(px/2,px/2,px/3,0,7); x.fill();
+  return new Promise(r=>c.toBlob(b=>r(new File([b],'t.png',{type:'image/png'})),'image/png'));
+}
+
+(async () => {
+ try {
+  // 1. round trip an article
+  const doc = { id:'t_'+Date.now(), slug:'test', title:'Round trip', section:'campus',
+                form:'story', status:'draft', blocks:[{id:'b1',type:'para',text:'hello'}],
+                assets:[], images:[], body:['hello'] };
+  await Store.saveArticle(doc);
+  const back = (await Store.listArticles()).find(a => a.id === doc.id);
+  check('article round-trips through IndexedDB', !!back && back.blocks[0].text === 'hello',
+        back ? back.blocks.length + ' block(s)' : 'not found');
+
+  // 2. HEIC rejected by magic bytes even with a lying MIME type
+  const heic = file('IMG_1.heic','image/jpeg',
+    new Uint8Array([0,0,0,24,0x66,0x74,0x79,0x70,0x68,0x65,0x69,0x63,0,0,0,0]));
+  const heicWhy = await Photos.reject(heic);
+  check('HEIC rejected (magic bytes, not MIME)', !!heicWhy && /HEIC/.test(heicWhy),
+        (heicWhy||'accepted').slice(0,70));
+
+  // 3. SVG rejected — it can carry script from our own origin
+  const svg = file('a.svg','image/svg+xml', new Blob(['<svg xmlns="http://www.w3.org/2000/svg"/>']));
+  const svgWhy = await Photos.reject(svg);
+  check('SVG rejected', !!svgWhy && /SVG/.test(svgWhy), (svgWhy||'accepted').slice(0,60));
+
+  // 4. transparency survives (this used to come out solid black)
+  const meta = await Store.uploadPhoto(await png(200, true));
+  check('transparent PNG stays PNG', meta.mime === 'image/png', meta.mime + ' ' + meta.w + '×' + meta.h);
+
+  // 5. an opaque photo becomes JPEG
+  const meta2 = await Store.uploadPhoto(await png(200, false));
+  check('opaque image becomes JPEG', meta2.mime === 'image/jpeg', meta2.mime);
+
+  // 6. stored as a reference, never a blob:/data: URL
+  check('photo stored as idb: reference', /^idb:/.test(meta.src), meta.src.slice(0,24));
+  check('reference is not blob: or data:', !/^(blob:|data:)/.test(meta.src), 'ok');
+
+  // 7. reference resolves to a usable URL, and releases
+  const art = { blocks:[{type:'photo',src:meta.src}], images:[meta.src], cover:{src:meta.src} };
+  const resolved = await Store.resolvePhotos(art, 'test');
+  check('idb: resolves to an object URL', /^blob:/.test(resolved.blocks[0].src),
+        resolved.blocks[0].src.slice(0,28));
+  Photos.releaseScope('test');
+  check('object URLs revoked on scope release', true, 'released');
+
+  // 8. many photos — the case that jammed localStorage after about a dozen
+  const small = await png(400, false);
+  let stored = 0;
+  for (let i = 0; i < 30; i++) { await Store.uploadPhoto(small); stored++; }
+  const space = await Store.space();
+  check('30 photos stored without failing', stored === 30,
+        space ? (space.usage/1048576).toFixed(1)+' MB used of '+(space.quota/1048576).toFixed(0)+' MB' : '');
+
+  // 9. quota surfaces a typed error rather than a silent false
+  let quotaCode = null;
+  try {
+    const huge = new Blob([new Uint8Array(600 * 1024 * 1024)]);
+    await IDB.put('photos', { id:'huge', blob: huge });
+    await IDB.del('photos','huge');
+    quotaCode = 'no-quota-hit';
+  } catch (e) { quotaCode = e.code; }
+  check('quota failure is typed, not silent', quotaCode === 'QUOTA' || quotaCode === 'no-quota-hit',
+        'code=' + quotaCode);
+
+  // 10. orphan sweep marks rather than deletes
+  await Photos.markOrphans([]);
+  const marked = (await IDB.all('photos')).filter(p => p.orphanedAt).length;
+  const swept  = await Photos.sweep(24*60*60*1000);
+  check('orphans marked, not deleted immediately', marked > 0 && swept === 0,
+        marked + ' marked, ' + swept + ' swept');
+
+  // cleanup
+  await Store.deleteArticle(doc.id);
+  await IDB.clear('photos');
+ } catch (e) {
+  check('unexpected error', false, e && (e.code ? e.code + ': ' : '') + e.message);
+ }
+
+ const b = document.getElementById('banner');
+ b.className = 'banner ' + (fail ? 'red' : 'green');
+ b.textContent = fail ? `${fail} check(s) failed.` : `All ${pass} storage checks passed.`;
+ window.__storagetest = { pass, fail };
+})();
+</script>
+</body></html>

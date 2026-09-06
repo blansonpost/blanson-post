@@ -44,7 +44,7 @@ function textHTML(a, line) {
 }
 
 const inlineFig = b => `<figure class="inline-fig">
-    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
     ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
       b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
   </figure>`;
