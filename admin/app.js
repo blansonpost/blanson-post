@@ -894,7 +894,10 @@ function renderChrome() {
   const pub = can('publish');
   $('btn-save').textContent = s === 'published' ? 'Update the live story' : 'Save';
   $('btn-save').hidden      = !editable;
-  $('btn-submit').hidden    = !(editable && s === 'draft');
+  // "Send to an editor" is for people who need one. If you can publish, you are
+  // the editor — asking yourself for permission is noise, and Publish is
+  // already sitting next to it.
+  $('btn-submit').hidden    = !(editable && s === 'draft' && !pub);
   $('btn-publish').hidden   = !(pub && s !== 'published');
   $('btn-unpublish').hidden = !(pub && s === 'published');
   $('btn-sendback').hidden  = !(pub && s === 'review');
