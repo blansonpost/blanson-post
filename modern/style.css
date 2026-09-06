@@ -24,14 +24,17 @@ h1,h2,h3,h4{margin:0;letter-spacing:-.022em;line-height:1.13}
 /* ── Header ───────────────────────────────────────────────────────────────── */
 .top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.top-inner{max-width:var(--max);margin:0 auto;padding:12px 22px;
-  display:flex;align-items:center;gap:22px}
+.top-inner{max-width:var(--max);margin:0 auto;padding:11px 22px;
+  display:flex;align-items:center;gap:14px}
 .brand{display:flex;align-items:center;gap:10px;flex:none}
 .brand-mark{width:32px;height:32px;border-radius:9px;background:var(--fg);color:var(--bg);
   display:grid;place-items:center;font-weight:900;font-size:13px;letter-spacing:-.04em}
 .brand-name{font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:-.02em}
-.tabs{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
+/* Wraps rather than scrolls. It used to scroll sideways with the scrollbar
+   hidden, so once the nav outgrew one line there was nothing on screen to
+   say the rest existed — Advice, Scholarships and the search box were simply
+   unreachable. Wrapping costs a second row and can never hide anything. */
+.tabs{display:flex;flex-wrap:wrap;align-items:center;gap:3px;flex:1;min-width:0}
 .tabs a{padding:7px 12px;border-radius:99px;font-size:13.5px;font-weight:500;
   color:var(--fg-2);white-space:nowrap}
 .tabs a:hover{background:var(--bg-2);color:var(--fg)}
@@ -183,6 +186,17 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
   .cards{grid-template-columns:1fr}
   .rail{grid-template-columns:1fr}
   .brand-name{display:none}
+  /* Thirteen wrapped links stand about 250px tall — a third of a phone screen.
+     Sticky was fine when the nav was one row; at this height it would follow the
+     reader down every article. Let it scroll away instead: nothing is hidden,
+     it is just one flick back up. */
+  .top{position:static}
+  .top-inner{padding:10px 15px;gap:9px}
+  .tabs{gap:2px}
+  .tabs a{padding:6px 10px;font-size:12.5px}
+  .searchbox{margin-left:0;width:100%}
+  .searchbox input{width:100%}
+  .searchbox input:focus{width:100%}
   .turn{grid-template-columns:1fr;gap:3px}
   .turn-who{padding-top:0}
   .read-body p{font-size:17px}
@@ -256,7 +270,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
 .alum-at{margin-top:9px;font-size:13px;color:var(--fg-3,#8b94a5)}
 
 /* ── Search, gallery, headshots, F.C. link ──────────────────────────────── */
-.searchbox{margin-left:8px;display:flex;align-items:center}
+.searchbox{margin-left:auto;display:flex;align-items:center}
 .searchbox input{font:inherit;font-size:13px;background:var(--panel-2,#1c212c);
   border:1px solid var(--line,#262d3a);border-radius:999px;padding:6px 13px;
   width:120px;color:var(--fg,#eef1f6);transition:width .18s}
