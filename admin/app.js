@@ -675,12 +675,21 @@ function pickPhotosAt(index) {
   pendingPhotoTarget = { index };
   $('file-input').click();
 }
+// The cover is a field on the article, not a block in the body. Routing it
+// through addPhotos() inserted a photo block as well, so one chosen file turned
+// into both a cover and a picture in the story.
+function pickCover() {
+  pendingPhotoTarget = { cover: true };
+  $('file-input').click();
+}
 
 $('file-input').onchange = async e => {
   const files = [...e.target.files];
   e.target.value = '';
   const target = pendingPhotoTarget; pendingPhotoTarget = null;
   if (!files.length) return;
+
+  if (target && target.cover) { await setCoverFromFile(files[0]); return; }
 
   if (target && target.blockId) {
     const b = Ed.doc.blocks.find(x => x.id === target.blockId);
@@ -690,12 +699,32 @@ $('file-input').onchange = async e => {
   await addPhotos(files, target ? target.index : Ed.doc.blocks.length);
 };
 
+async function setCoverFromFile(file) {
+  $('cover').innerHTML = `<div class="cover-empty"><b>Adding ${esc(file.name)}…</b></div>`;
+  try {
+    const meta = await Store.uploadPhoto(file);
+    Ed.doc.cover = { src: meta.src, assetId: meta.id, alt: '', caption: '', credit: '' };
+    Ed.doc.assets = Ed.doc.assets.filter(a => a.id !== meta.id).concat([meta]);
+    touched(); renderCover(); renderSpace();
+    toast('Cover photo set', 'good');
+  } catch (err) {
+    explain(err);
+    renderCover();               // put the chooser back, not a stuck message
+  }
+}
+
 const indexOf = b => Ed.doc.blocks.findIndex(x => x.id === b.id);
 
 async function fillPhotoBlock(b, file) {
   const node = nodes.get(b.id);
   const body = node && node.querySelector('.b-body');
-  if (body) body.innerHTML = `<div class="ph-loading">Adding ${esc(file.name)}…</div>`;
+  if (body) {
+    body.innerHTML = `<div class="ph-loading">Adding ${esc(file.name)}…</div>`;
+    // renderPhotoBlock only rebuilds when this marker doesn't match. Leaving it
+    // set means the "Adding…" placeholder is never replaced, so a *successful*
+    // upload sticks on the loading message forever.
+    body.dataset.kind = 'loading';
+  }
   try {
     const meta = await Store.uploadPhoto(file);
     b.src = meta.src; b.assetId = meta.id;
@@ -791,7 +820,7 @@ async function renderCover() {
       <span>The cover is the big picture at the top of the page.</span>
       <button type="button" class="btn small" id="pick-cover">Choose one</button></div>`;
     const pick = $('pick-cover');
-    if (pick) pick.onclick = () => pickPhotosAt(0);
+    if (pick) pick.onclick = pickCover;
     return;
   }
   const src = Store.isIdbRef(Ed.doc.cover.src)
@@ -799,7 +828,9 @@ async function renderCover() {
   c.innerHTML = `<div class="cover-set">
       <img src="${esc(src || '')}" alt="">
       <div><b>Cover photo</b><span>Shown big at the top of the article.</span></div>
+      <button type="button" class="btn small" id="change-cover">Change</button>
       <button type="button" class="btn small ghost" id="clear-cover">Remove</button></div>`;
+  $('change-cover').onclick = pickCover;
   $('clear-cover').onclick = () => { Ed.doc.cover = null; touched(); renderCover(); renderBlocks(); };
 }
 
