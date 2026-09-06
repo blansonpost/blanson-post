@@ -344,6 +344,72 @@ const Paper = (() => {
            'playoffs, player of the game, awards, records and photos.'
   };
 
+  // ── What's on ───────────────────────────────────────────────────────────
+  // Events an editor adds in the newsroom. Unlike everything else in this file
+  // they are not written here — they live in storage, because the whole point
+  // is that the club can change them without a developer.
+  //
+  // An event is { id, title, date, time, place, note }. Only title and date are
+  // required; the rest are left out of the display when empty.
+
+  // Yesterday's assembly is not news. Anything before today drops off on its
+  // own, so nobody has to remember to delete it — which is the difference
+  // between a calendar people trust and one they stop reading.
+  function upcoming(events, limit) {
+    const today = midnight(new Date());
+    const live = (events || [])
+      .filter(e => e && e.title && e.date)
+      .map(e => ({ ...e, at: Blocks.parseDate(e.date) }))
+      .filter(e => e.at && midnight(e.at) >= today)
+      .sort((a, b) => a.at - b.at);
+    return limit ? live.slice(0, limit) : live;
+  }
+
+  // "Today" and "Tomorrow" beat a date somebody has to work out.
+  function whenText(e) {
+    const d = Blocks.parseDate(e && e.date);
+    if (!d) return '';
+    const days = Math.round((midnight(d) - midnight(new Date())) / 86400000);
+    const day = days === 0 ? 'Today' : days === 1 ? 'Tomorrow'
+              : days > 1 && days < 7 ? DAYS[d.getDay()]
+              : Blocks.dateText({ date: e.date });
+    return e.time ? day + ' · ' + e.time : day;
+  }
+
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  // Blocks keeps its own copy for article dates but does not export it, and one
+  // IIFE reaching into another's locals is how you get a ReferenceError that
+  // only shows up on the one page that uses it.
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                  'August', 'September', 'October', 'November', 'December'];
+
+  // A short badge for the corner of a card.
+  function dayBadge(e) {
+    const d = Blocks.parseDate(e && e.date);
+    if (!d) return { top: '', bottom: '' };
+    return { top: MONTHS[d.getMonth()].slice(0, 3).toUpperCase(), bottom: String(d.getDate()) };
+  }
+
+  const newEventId = () => 'e_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  // ── Writers ─────────────────────────────────────────────────────────────
+  // Every byline gets a page, whether or not the person is on the About page.
+  // Six people wrote for the paper this year without a profile, and a byline
+  // that goes nowhere is the same as no credit at all.
+  const writerSlug = name => String(name || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  // Built from the bylines that actually exist, so it stays right when someone
+  // new publishes without being added to STAFF.
+  function writer(slug) {
+    if (typeof ARTICLES === 'undefined') return null;
+    const stories = ARTICLES.filter(a => a.author && writerSlug(a.author) === slug);
+    if (!stories.length) return null;
+    const name = stories[0].author;
+    return { name, slug, stories, profile: STAFF.find(m => m.name === name) || null };
+  }
+
   // ── Search ──────────────────────────────────────────────────────────────
   // Everything is already in memory — 41 archived articles plus anything the
   // newsroom has published — so this is a plain scan, no index to keep in step.
@@ -529,6 +595,8 @@ const Paper = (() => {
     artwork: () => ARTWORK.slice(),
     fc: () => FC,
     photoCount: () => GALLERIES.reduce((n, g) => n + g.photos.length, 0) + ARTWORK.length,
+    upcoming, whenText, dayBadge, newEventId,
+    writerSlug, writer,
     search, highlight,
     scholarships, openCount, deadline, storiesBy, contributors, initials
   };

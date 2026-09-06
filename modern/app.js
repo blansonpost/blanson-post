@@ -126,6 +126,7 @@ function renderHome() {
   const grid = rest.slice(2, 11);
 
   return `
+  <div id="whats-on"></div>
   <section class="hero">
     <a class="hero-main" href="#/a/${esc(lead.slug)}">
       ${thumb(lead, 'hero-img')}
@@ -236,6 +237,16 @@ function currentQuery() {
 addEventListener('pageshow', () => syncSearchBox(currentQuery()));
 syncSearchBox(currentQuery());
 
+// A byline that links to the writer's page. Only safe where the byline is not
+// already inside a card's own link — an <a> inside an <a> is invalid HTML and
+// the browser silently splits it, breaking both links. That is why the cards
+// keep plain text and only the article page links.
+const bylineLink = a => {
+  const name = byline(a);
+  if (!a.author) return esc(name);
+  return `<a class="by-link" href="#/w/${esc(Paper.writerSlug(a.author))}">${esc(name)}</a>`;
+};
+
 // ── Search results ───────────────────────────────────────────────────────────
 function renderSearch(q) {
   syncSearchBox(q);
@@ -258,6 +269,87 @@ function renderSearch(q) {
       </a>`).join('')}</div>`
     : `<p class="no-hits">Nothing matched <b>${esc(q)}</b>. Try a writer&rsquo;s name,
         part of a headline, or a word from the story.</p>`}
+  </section>`;
+}
+
+// ── What's On ────────────────────────────────────────────────────────────────
+// Events come from storage, not from a file, so this renders after the page is
+// already up rather than blocking the front page on it. If the calendar cannot
+// be read the block simply does not appear — a broken calendar should never
+// take the newspaper down with it.
+let eventsCache = null;
+async function loadEvents() {
+  if (eventsCache) return eventsCache;
+  try { eventsCache = await Store.listEvents(); }
+  catch (e) { console.warn('[Blanson Post] calendar unavailable:', e); eventsCache = []; }
+  return eventsCache;
+}
+
+function eventsHTML(list) {
+  return `
+    <section class="sec-head"><h1>What&rsquo;s On</h1>
+      <p>${list.length} coming up at Blanson</p></section>
+    <section class="block">
+      <div class="ev-strip">
+        ${list.map(e => {
+          const b = Paper.dayBadge(e);
+          return `<div class="ev-card">
+            <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
+            <h3>${esc(e.title)}</h3>
+            <div class="ev-meta">${esc(Paper.whenText(e))}${
+              e.place ? ' · ' + esc(e.place) : ''}</div>
+            ${e.note ? `<p>${esc(e.note)}</p>` : ''}
+          </div>`; }).join('')}
+      </div>
+    </section>`;
+}
+
+async function paintEvents() {
+  const soon = Paper.upcoming(await loadEvents(), 5);
+  // Looked up AFTER the await, not before: hydrating the newsroom articles
+  // re-runs route(), which replaces the page and with it this slot. Holding a
+  // reference across the await wrote the calendar into a detached element and
+  // left the real one empty.
+  const slot = document.getElementById('whats-on');
+  if (!slot) return;
+  try { slot.innerHTML = soon.length ? eventsHTML(soon) : ''; }
+  catch (e) {
+    // A calendar that cannot draw must not take the front page down, but it
+    // must not vanish without a word either.
+    console.error('[Blanson Post] could not draw the calendar:', e);
+    slot.innerHTML = '';
+  }
+}
+
+// ── One writer ───────────────────────────────────────────────────────────────
+function renderWriter(slug) {
+  const w = Paper.writer(slug);
+  if (!w) return `<section class="sec-head"><h1>No such writer</h1></section>`;
+  const p = w.profile;
+  return `
+  <section class="sec-head">
+    <h1>${esc(w.name)}</h1>
+    <p>${w.stories.length} ${w.stories.length === 1 ? 'story' : 'stories'}${
+      p ? ' · ' + esc(p.beats) : ''}</p>
+  </section>
+  <section class="block">
+    ${p ? `<div class="person writer-card">
+      ${p.photo ? `<img class="avatar lg photo" src="${esc(imageUrl(p.photo))}" alt="${esc(p.name)}">`
+                : `<div class="avatar lg">${esc(Paper.initials(p.name))}</div>`}
+      <div class="person-in"><p class="person-bio">${esc(p.bio)}</p></div>
+    </div>` : `<p class="writer-none">We haven&rsquo;t got a profile up for
+      ${esc(w.name)} yet &mdash; here is everything they have written.</p>`}
+    <div class="cards">
+      ${w.stories.map(a => `
+        <a class="card" href="#/a/${esc(a.slug)}">
+          ${thumb(a, 'card-img')}
+          <div class="card-body">
+            ${chip(a)}
+            <h3>${esc(a.title)}</h3>
+            <p>${esc(a.excerpt.slice(0, 140))}…</p>
+          </div>
+        </a>`).join('')}
+    </div>
   </section>`;
 }
 
@@ -324,7 +416,7 @@ function renderStaff() {
               alt="${esc(m.name)}" loading="lazy">`
             : `<div class="avatar lg">${esc(Paper.initials(m.name))}</div>`}
           <div class="person-in">
-            <h3>${esc(m.name)}</h3>
+            <h3><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h3>
             <div class="person-beat">${esc(m.beats)}</div>
             <p class="person-bio">${esc(m.bio)}</p>
             ${mine.length ? `<div class="person-work">
@@ -339,7 +431,7 @@ function renderStaff() {
     <p>Bylines without a profile yet</p></section>
   <section class="block">
     <div class="chips">
-      ${also.map(c => `<a class="chip-link" href="#/s/${esc((byAuthor(c.name)||{}).section||'campus')}">
+      ${also.map(c => `<a class="chip-link" href="#/w/${esc(Paper.writerSlug(c.name))}">
          ${esc(c.name)} <b>${c.count}</b></a>`).join('')}
     </div>
   </section>` : ''}`;
@@ -460,7 +552,7 @@ function renderArticle(slug) {
       <div class="read-meta">
         <div class="avatar">${esc((byline(a).match(/\b[A-Za-z]/g) || ['B']).slice(0, 2).join('').toUpperCase())}</div>
         <div>
-          <div class="who">${esc(byline(a))}</div>
+          <div class="who">${bylineLink(a)}</div>
           <div class="sub">${esc(sectionName(a.section))} · ${readingTime(a)} min read${
             when(a, true) ? ' · ' + when(a, true) : ''}</div>
           ${updatedText(a) ? `<div class="sub upd">${esc(updatedText(a))}</div>` : ''}
@@ -502,10 +594,12 @@ function route() {
   else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
   else if (h.startsWith('q/'))   { active = 'search';
                                    app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
+  else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));
   scrollTo(0, 0);
+  paintEvents();
 }
 addEventListener('hashchange', route);
 

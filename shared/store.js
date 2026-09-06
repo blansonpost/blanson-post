@@ -85,6 +85,20 @@ const Store = (() => {
 
     async deleteArticle(id) { await IDB.del('articles', id); },
 
+    async listEvents() {
+      const rows = await IDB.all('events');
+      return rows.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    },
+
+    async saveEvent(ev) {
+      ev.updatedAt = new Date().toISOString();
+      if (!ev.createdAt) ev.createdAt = ev.updatedAt;
+      await IDB.put('events', ev);
+      return ev;
+    },
+
+    async deleteEvent(id) { await IDB.del('events', id); },
+
     // Returns a reference, never a data URL — see IDB_REF above.
     async uploadPhoto(file) {
       const meta = await Photos.add(file);
@@ -188,6 +202,18 @@ const Store = (() => {
     async deletePhoto(ref, path) {
       if (!path) return;
       await this.client().storage.from('photos').remove([path]);
+    },
+
+    // Events are not in the SQL schema yet, so say so plainly instead of
+    // throwing something cryptic the day this backend is switched on. The
+    // newsroom shows the message; nothing silently disappears.
+    async listEvents() { return []; },
+    async saveEvent() {
+      throw fail('DENIED', 'The calendar is not connected to the database yet. ' +
+        'Ask whoever set the website up to add the events table.');
+    },
+    async deleteEvent() {
+      throw fail('DENIED', 'The calendar is not connected to the database yet.');
     }
   };
 
@@ -294,6 +320,9 @@ const Store = (() => {
     listArticles:  () => backend.listArticles(),
     saveArticle:   a  => backend.saveArticle(a),
     deleteArticle: id => backend.deleteArticle(id),
+    listEvents:    () => backend.listEvents(),
+    saveEvent:     e  => backend.saveEvent(e),
+    deleteEvent:   id => backend.deleteEvent(id),
     uploadPhoto:   f  => backend.uploadPhoto(f),
     deletePhoto: (ref, path) => backend.deletePhoto(ref, path),
     space: () => IDB.space(),

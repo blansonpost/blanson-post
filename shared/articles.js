@@ -236,7 +236,7 @@ const ARTICLES = [
   {
     id: 8,
     slug: "copy-of-phantoms-of-water",
-    section: "campus",
+    section: "life",
     form: "story",
     title: "Test Your Limits!",
     author: "Nathaniel Castro",
@@ -1291,7 +1291,7 @@ const ARTICLES = [
   {
     id: 40,
     slug: "advice-to-underclassmen",
-    section: "campus",
+    section: "life",
     form: "story",
     title: "Advice to Underclassmen",
     author: "Jean Folgar",

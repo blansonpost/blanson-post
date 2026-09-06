@@ -10,13 +10,16 @@
 
 const IDB = (() => {
   const DB_NAME = 'blanson-post';
-  const VERSION = 1;
+  // 2 added `events`. The upgrade below only creates stores that are missing,
+  // so raising this never touches what is already saved.
+  const VERSION = 2;
 
   const STORES = {
     articles: { keyPath: 'id', indexes: [['status', 'status'], ['updatedAt', 'updatedAt']] },
     photos:   { keyPath: 'id' },
     users:    { keyPath: 'email' },
-    kv:       { keyPath: 'k' }
+    kv:       { keyPath: 'k' },
+    events:   { keyPath: 'id', indexes: [['date', 'date']] }
   };
 
   // Errors carry a code so callers can react to the situation rather than

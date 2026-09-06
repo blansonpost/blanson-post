@@ -174,6 +174,7 @@ function renderHome() {
             <h3 class="brief-hed">${esc(a.title)}</h3>
             <div class="brief-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
+        <div id="whats-on"></div>
         <div class="col-head" style="margin-top:22px">By the Numbers</div>
         <div class="stat"><b>${ARTICLES.length}</b> articles published</div>
         <div class="stat"><b>${new Set(ARTICLES.map(a => a.author).filter(Boolean)).size}</b> student writers</div>
@@ -223,6 +224,16 @@ function currentQuery() {
 addEventListener('pageshow', () => syncSearchBox(currentQuery()));
 syncSearchBox(currentQuery());
 
+// A byline that links to the writer's page. Only safe where the byline is not
+// already inside a card's own link — an <a> inside an <a> is invalid HTML and
+// the browser silently splits it, breaking both links. That is why the cards
+// keep plain text and only the article page links.
+const bylineLink = a => {
+  const name = byline(a);
+  if (!a.author) return esc(name);
+  return `<a class="by-link" href="#/w/${esc(Paper.writerSlug(a.author))}">${esc(name)}</a>`;
+};
+
 // ── Search results ───────────────────────────────────────────────────────────
 function renderSearch(q) {
   syncSearchBox(q);
@@ -246,6 +257,83 @@ function renderSearch(q) {
       </a>`).join('')
     : `<p class="no-hits">Nothing matched <b>${esc(q)}</b>. Try a writer&rsquo;s name,
         part of a headline, or a word from the story.</p>`}
+  </div>`;
+}
+
+// ── What's On ────────────────────────────────────────────────────────────────
+// Events come from storage, not from a file, so this renders after the page is
+// already up rather than blocking the front page on it. If the calendar cannot
+// be read the block simply does not appear — a broken calendar should never
+// take the newspaper down with it.
+let eventsCache = null;
+async function loadEvents() {
+  if (eventsCache) return eventsCache;
+  try { eventsCache = await Store.listEvents(); }
+  catch (e) { console.warn('[Blanson Post] calendar unavailable:', e); eventsCache = []; }
+  return eventsCache;
+}
+
+// A standing column of what is coming up, set like the rest of the front page.
+function eventsHTML(list) {
+  return `
+    <div class="col-head">What&rsquo;s On</div>
+    ${list.map(e => {
+      const b = Paper.dayBadge(e);
+      return `<div class="ev-item">
+        <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
+        <div>
+          <h4>${esc(e.title)}</h4>
+          <div class="ev-meta">${esc(Paper.whenText(e))}${
+            e.place ? ' · ' + esc(e.place) : ''}</div>
+          ${e.note ? `<p>${esc(e.note)}</p>` : ''}
+        </div>
+      </div>`; }).join('')}`;
+}
+
+async function paintEvents() {
+  const soon = Paper.upcoming(await loadEvents(), 5);
+  // Looked up AFTER the await, not before: hydrating the newsroom articles
+  // re-runs route(), which replaces the page and with it this slot. Holding a
+  // reference across the await wrote the calendar into a detached element and
+  // left the real one empty.
+  const slot = document.getElementById('whats-on');
+  if (!slot) return;
+  try { slot.innerHTML = soon.length ? eventsHTML(soon) : ''; }
+  catch (e) {
+    // A calendar that cannot draw must not take the front page down, but it
+    // must not vanish without a word either.
+    console.error('[Blanson Post] could not draw the calendar:', e);
+    slot.innerHTML = '';
+  }
+}
+
+// ── One writer ───────────────────────────────────────────────────────────────
+function renderWriter(slug) {
+  const w = Paper.writer(slug);
+  if (!w) return `<div class="wrap"><div class="page-head"><h1>No such writer</h1></div></div>`;
+  const p = w.profile;
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>${esc(w.name)}</h1>
+      <p>${w.stories.length} ${w.stories.length === 1 ? 'story' : 'stories'}${
+        p ? ' · ' + esc(p.beats) : ''}</p>
+    </div>
+    ${p ? `<div class="writer-card">
+      ${p.photo ? `<img src="${esc(imageUrl(p.photo))}" alt="${esc(p.name)}">` : ''}
+      <p>${esc(p.bio)}</p>
+    </div>` : `<p class="writer-none">We haven&rsquo;t got a profile up for
+      ${esc(w.name)} yet &mdash; here is everything they have written.</p>`}
+    ${w.stories.map((a, i) => `
+      <a class="list-item" href="#/a/${esc(a.slug)}">
+        <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
+        <div>
+          <div class="kicker">${esc(sectionName(a.section))}</div>
+          <h3>${esc(a.title)}</h3>
+          <p>${esc(a.excerpt)}</p>
+        </div>
+        ${figure(a, 'list-fig')}
+      </a>`).join('')}
   </div>`;
 }
 
@@ -313,7 +401,7 @@ function renderStaff() {
         <div class="ros-person">
           ${m.photo ? `<img class="ros-face" src="${esc(imageUrl(m.photo))}"
              alt="${esc(m.name)}" loading="lazy">` : ''}
-          <h3 class="ros-name">${esc(m.name)}</h3>
+          <h3 class="ros-name"><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h3>
           <div class="ros-beat">${esc(m.beats)}</div>
           <p class="ros-bio">${esc(m.bio)}</p>
           ${mine.length ? `<div class="ros-work">
@@ -325,7 +413,7 @@ function renderStaff() {
       <div class="page-head sub-head"><h2>Also in this year&rsquo;s paper</h2>
         <p>Bylines we have not written a profile for yet</p></div>
       <div class="also-list">
-        ${also.map(c => `<a class="also" href="#/s/${esc((byAuthor(c.name)||{}).section||'campus')}">
+        ${also.map(c => `<a class="also" href="#/w/${esc(Paper.writerSlug(c.name))}">
            <b>${esc(c.name)}</b><i>${c.count} ${c.count === 1 ? 'story' : 'stories'}</i></a>`).join('')}
       </div>` : ''}
   </div>`;
@@ -451,7 +539,7 @@ function renderArticle(slug) {
       <h1>${esc(a.title)}</h1>
       ${isVerse(a) ? '' : `<p class="standfirst">${esc(a.excerpt)}</p>`}
       <div class="art-meta">
-        <span>By <b>${esc(byline(a))}</b></span>
+        <span>By <b>${bylineLink(a)}</b></span>
         ${when(a, true) ? `<span>Published ${when(a, true)}</span>` : ''}
         <span>${readingTime(a)} min read</span>
         ${a.rating != null ? `<span>${rated(a)} <b>${a.rating}/${a.ratingMax}</b></span>` : ''}
@@ -492,11 +580,13 @@ function route() {
   else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
   else if (h.startsWith('q/'))   { active = 'search';
                                    app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
+  else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
   else                         { app.innerHTML = renderHome(); }
 
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));
   window.scrollTo(0, 0);
+  paintEvents();
 }
 
 addEventListener('hashchange', route);

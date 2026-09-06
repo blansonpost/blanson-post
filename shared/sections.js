@@ -10,6 +10,7 @@
 const Sections = (() => {
   const LIST = [
     { slug: 'campus',     name: 'Campus'     },
+    { slug: 'life',       name: 'Life at Blanson' },
     { slug: 'interviews', name: 'Interviews' },
     { slug: 'sports',     name: 'Sports'     },
     { slug: 'gaming',     name: 'Gaming'     },

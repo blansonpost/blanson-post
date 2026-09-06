@@ -320,3 +320,38 @@ mark{background:rgba(77,139,255,.3);color:inherit;border-radius:3px;padding:0 2p
 .finder b{display:block;font-size:15.5px}
 .finder i{display:block;font-size:12px;color:var(--fg-3,#8b94a5);margin-top:2px;font-style:normal}
 .finder span{display:block;margin-top:7px;font-size:13.5px;line-height:1.5;color:var(--fg-2,#a3abbb)}
+
+/* ── Writer pages and clickable bylines ─────────────────────────────────── */
+.by-link{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}
+.by-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.person h3 a{color:inherit;text-decoration:none}
+.person h3 a:hover{color:var(--accent)}
+.writer-card{margin-bottom:16px}
+.writer-none{font-size:15px;line-height:1.6;color:var(--fg-2);margin-bottom:18px}
+
+/* ── Printing ────────────────────────────────────────────────────────────────
+   Teachers print articles. Without this you get the nav, the search box, the
+   related-stories rail and a dark background across several sheets of paper.
+   Everything that is furniture goes; the story stays, in black on white. */
+@media print{
+  .top,.searchbox,footer,.crumb,.read-more,.rail,.load-note,.scrollbar{display:none!important}
+  body{background:#fff;color:#000;font-size:11pt}
+  .wrap,.block,.sec-head{max-width:none;padding:0;margin:0 0 10pt}
+  .read-hero img,.inline-fig img{max-width:70%;height:auto}
+  a{color:#000;text-decoration:none}
+  .read-body a[href^="http"]::after{content:" (" attr(href) ")";font-size:9pt;word-break:break-all}
+  h1,h2,h3{page-break-after:avoid}
+  figure,blockquote{page-break-inside:avoid}
+}
+
+/* ── What's On ──────────────────────────────────────────────────────────── */
+.ev-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
+.ev-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.ev-cal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:11px;background:var(--bg-2);border:1px solid var(--line);
+  margin-bottom:10px}
+.ev-cal span{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--accent)}
+.ev-cal b{font-size:18px;line-height:1.05}
+.ev-card h3{margin:0;font-size:15.5px;line-height:1.3}
+.ev-card .ev-meta{margin-top:5px;font-size:12.5px;color:var(--accent);font-weight:600}
+.ev-card p{margin:7px 0 0;font-size:13.5px;line-height:1.5;color:var(--fg-2)}

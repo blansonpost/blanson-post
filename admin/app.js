@@ -120,6 +120,9 @@ async function showShell() {
   $('shell').hidden = false;
   $('me').textContent = `${Ed.user.name} · ${Ed.user.role}`;
   $('tabs').querySelector('[data-tab="staff"]').hidden = false;
+  // Anyone can write a story; the calendar speaks for the whole school, so it
+  // is kept to the people who already decide what gets published.
+  $('tabs').querySelector('[data-tab="events"]').hidden = !can('publish');
   buildSelects();
   buildFilters();
   await refresh();
@@ -163,7 +166,9 @@ function showTab(name) {
   });
   $('view-write').hidden = name !== 'write';
   $('view-staff').hidden = name !== 'staff';
+  $('view-events').hidden = name !== 'events';
   if (name === 'staff') renderStaff();
+  if (name === 'events') renderEvents();
 }
 
 // ── article list ─────────────────────────────────────────────────────────────
@@ -932,6 +937,119 @@ async function renderPreview() {
      <div class="pv-by">${esc(Ed.doc.author || 'no byline yet')}${
        Blocks.dateText(Ed.doc) ? ' · ' + esc(Blocks.dateText(Ed.doc)) : ''}</div>` +
     (parts.join('') || '<p class="pv-empty">Nothing written yet.</p>');
+}
+
+// ── What's On ────────────────────────────────────────────────────────────────
+// A calendar the club keeps itself. Each event is a row you edit in place —
+// there is no separate "edit" mode to get stuck in, and no save button to
+// forget, because a half-typed event nobody saved is worse than no event.
+
+async function renderEvents() {
+  const host = $('view-events');
+  let events;
+  try { events = await Store.listEvents(); }
+  catch (err) {
+    host.innerHTML = `<div class="ev-wrap"><p class="ev-error">${
+      esc(err.message || 'The calendar could not be opened.')}</p></div>`;
+    return;
+  }
+
+  const soon = Paper.upcoming(events);
+  const past = events.filter(e => !soon.some(u => u.id === e.id))
+                     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  host.innerHTML = `
+    <div class="ev-wrap">
+      <div class="ev-head">
+        <div>
+          <h2>What&rsquo;s On</h2>
+          <p>Games, deadlines, spirit weeks &mdash; anything the school should know about.
+             ${soon.length ? soon.length + ' coming up.' : 'Nothing coming up yet.'}</p>
+        </div>
+        <button class="btn primary" id="ev-add">＋ Add an event</button>
+      </div>
+      <div class="ev-list" id="ev-list">
+        ${soon.map(e => eventRow(e)).join('') ||
+          `<p class="ev-empty">No events yet. Add the next game or deadline and it
+            shows up on the front page straight away.</p>`}
+      </div>
+      ${past.length ? `
+        <h3 class="ev-past-head">Already happened</h3>
+        <p class="ev-past-note">These drop off the website on their own the day after
+           they happen. Delete them whenever you like.</p>
+        <div class="ev-list is-past">${past.map(e => eventRow(e)).join('')}</div>` : ''}
+    </div>`;
+
+  $('ev-add').onclick = addEvent;
+  host.querySelectorAll('.ev').forEach(wireEventRow);
+}
+
+function eventRow(e) {
+  return `
+    <div class="ev" data-id="${esc(e.id)}">
+      <div class="ev-when">${esc(Paper.whenText(e) || 'No date')}</div>
+      <div class="ev-fields">
+        <input data-f="title" class="ev-title" value="${esc(e.title || '')}"
+               placeholder="What is happening?" aria-label="Event name">
+        <div class="ev-row">
+          <label>Date <input data-f="date" type="date" value="${esc(e.date || '')}"
+                 aria-label="Date"></label>
+          <label>Time <span class="hint">optional</span>
+                 <input data-f="time" value="${esc(e.time || '')}"
+                 placeholder="e.g. 7 p.m." aria-label="Time"></label>
+          <label>Where <span class="hint">optional</span>
+                 <input data-f="place" value="${esc(e.place || '')}"
+                 placeholder="e.g. Main gym" aria-label="Place"></label>
+        </div>
+        <input data-f="note" value="${esc(e.note || '')}"
+               placeholder="Anything else worth saying (optional)" aria-label="Note">
+      </div>
+      <button class="btn ghost small ev-del" data-act="del" aria-label="Delete this event">Delete</button>
+    </div>`;
+}
+
+// Saves as you type, debounced. The row keeps its own timer so typing in one
+// event never cancels the save of another.
+const evTimers = new Map();
+function wireEventRow(row) {
+  const id = row.dataset.id;
+  row.querySelectorAll('[data-f]').forEach(input => {
+    input.addEventListener('input', () => {
+      clearTimeout(evTimers.get(id));
+      evTimers.set(id, setTimeout(() => saveEventRow(row), 500));
+    });
+  });
+  row.querySelector('[data-act=del]').onclick = () => removeEvent(id, row);
+}
+
+async function saveEventRow(row) {
+  const id = row.dataset.id;
+  const ev = { id };
+  row.querySelectorAll('[data-f]').forEach(i => { ev[i.dataset.f] = i.value.trim(); });
+  if (!ev.title && !ev.date) return;          // an empty row is not worth saving
+  try {
+    const existing = (await Store.listEvents()).find(e => e.id === id) || {};
+    await Store.saveEvent({ ...existing, ...ev });
+    row.querySelector('.ev-when').textContent = Paper.whenText(ev) || 'No date';
+    row.classList.toggle('needs-date', !ev.date);
+    toast('Calendar saved', 'good');
+  } catch (err) { explain(err); }
+}
+
+async function addEvent() {
+  const ev = { id: Paper.newEventId(), title: '', date: '', time: '', place: '', note: '' };
+  try { await Store.saveEvent(ev); } catch (err) { return explain(err); }
+  await renderEvents();
+  const row = $('view-events').querySelector(`.ev[data-id="${ev.id}"]`);
+  if (row) row.querySelector('[data-f=title]').focus();
+}
+
+async function removeEvent(id, row) {
+  const name = row.querySelector('[data-f=title]').value.trim();
+  if (name && !confirm(`Delete “${name}” from the calendar?`)) return;
+  try { await Store.deleteEvent(id); } catch (err) { return explain(err); }
+  await renderEvents();
+  toast('Event deleted', 'good');
 }
 
 // ── status, saving ───────────────────────────────────────────────────────────

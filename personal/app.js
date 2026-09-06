@@ -21,7 +21,7 @@ document.getElementById('foot-sections').innerHTML =
 
 // A small emoji per section — this design leans friendly on purpose.
 const ICON = {
-  campus: '🏫', interviews: '🎙️', sports: '⚽', gaming: '🎮', books: '📚',
+  campus: '🏫', life: '🐾', interviews: '🎙️', sports: '⚽', gaming: '🎮', books: '📚',
   film: '🎬', poetry: '✍️', alumni: '🎓', houston: '🌆'
 };
 const icon = s => ICON[s] || '📰';
@@ -117,6 +117,7 @@ function renderHome() {
   const writers = new Set(ARTICLES.map(a => a.author).filter(Boolean)).size;
 
   return `
+  <div id="whats-on"></div>
   <section class="welcome">
     <div class="welcome-txt">
       <div class="hi">Hey Jaguars 👋</div>
@@ -220,6 +221,16 @@ function currentQuery() {
 addEventListener('pageshow', () => syncSearchBox(currentQuery()));
 syncSearchBox(currentQuery());
 
+// A byline that links to the writer's page. Only safe where the byline is not
+// already inside a card's own link — an <a> inside an <a> is invalid HTML and
+// the browser silently splits it, breaking both links. That is why the cards
+// keep plain text and only the article page links.
+const bylineLink = a => {
+  const name = byline(a);
+  if (!a.author) return esc(name);
+  return `<a class="by-link" href="#/w/${esc(Paper.writerSlug(a.author))}">${esc(name)}</a>`;
+};
+
 // ── Search results ───────────────────────────────────────────────────────────
 function renderSearch(q) {
   syncSearchBox(q);
@@ -242,6 +253,91 @@ function renderSearch(q) {
       </a>`).join('')}</div>`
     : `<p class="no-hits">Nothing matched <b>${esc(q)}</b> \u{1F937} Try a writer&rsquo;s name,
         part of a headline, or a word from the story.</p>`}
+  </section>`;
+}
+
+// ── What's On ────────────────────────────────────────────────────────────────
+// Events come from storage, not from a file, so this renders after the page is
+// already up rather than blocking the front page on it. If the calendar cannot
+// be read the block simply does not appear — a broken calendar should never
+// take the newspaper down with it.
+let eventsCache = null;
+async function loadEvents() {
+  if (eventsCache) return eventsCache;
+  try { eventsCache = await Store.listEvents(); }
+  catch (e) { console.warn('[Blanson Post] calendar unavailable:', e); eventsCache = []; }
+  return eventsCache;
+}
+
+function eventsHTML(list) {
+  return `
+    <section class="sechead"><div class="sechead-icon">\u{1F4C5}</div>
+      <h1>What&rsquo;s On</h1>
+      <p>Coming up at Blanson</p></section>
+    <section class="shelf">
+      <div class="ev-strip">
+        ${list.map((e, i) => {
+          const b = Paper.dayBadge(e);
+          return `<div class="ev-card" style="--tilt:${[-1, .8, -.6, 1][i % 4]}deg">
+            <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
+            <h3>${esc(e.title)}</h3>
+            <div class="ev-meta">${esc(Paper.whenText(e))}${
+              e.place ? ' · ' + esc(e.place) : ''}</div>
+            ${e.note ? `<p>${esc(e.note)}</p>` : ''}
+          </div>`; }).join('')}
+      </div>
+    </section>`;
+}
+
+async function paintEvents() {
+  const soon = Paper.upcoming(await loadEvents(), 5);
+  // Looked up AFTER the await, not before: hydrating the newsroom articles
+  // re-runs route(), which replaces the page and with it this slot. Holding a
+  // reference across the await wrote the calendar into a detached element and
+  // left the real one empty.
+  const slot = document.getElementById('whats-on');
+  if (!slot) return;
+  try { slot.innerHTML = soon.length ? eventsHTML(soon) : ''; }
+  catch (e) {
+    // A calendar that cannot draw must not take the front page down, but it
+    // must not vanish without a word either.
+    console.error('[Blanson Post] could not draw the calendar:', e);
+    slot.innerHTML = '';
+  }
+}
+
+// ── One writer ───────────────────────────────────────────────────────────────
+function renderWriter(slug) {
+  const w = Paper.writer(slug);
+  if (!w) return `<section class="sechead"><h1>No such writer</h1></section>`;
+  const p = w.profile;
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u{1F58A}\uFE0F</div>
+    <h1>${esc(w.name)}</h1>
+    <p>${w.stories.length} ${w.stories.length === 1 ? 'story' : 'stories'}${
+      p ? ' · ' + esc(p.beats) : ''}</p>
+  </section>
+  <section class="shelf">
+    ${p ? `<div class="mate writer-card">
+      <div class="mate-top">
+        ${p.photo ? `<img class="face lg photo" src="${esc(imageUrl(p.photo))}" alt="${esc(p.name)}">`
+                  : `<div class="face lg">${esc(Paper.initials(p.name))}</div>`}
+        <div><b>${esc(p.name)}</b><i>${esc(p.beats)}</i></div>
+      </div>
+      <p>${esc(p.bio)}</p>
+    </div>` : `<p class="writer-none">We haven&rsquo;t got a profile up for
+      ${esc(w.name)} yet &mdash; here is everything they have written.</p>`}
+    <div class="grid">
+      ${w.stories.map((a, i) => `
+        <a class="pcard" href="#/a/${esc(a.slug)}">
+          ${pic(a, 'pcard-pic', (i % 3) - 1)}
+          <div class="pcard-body">
+            <h4>${esc(a.title)}</h4>
+            <p>${esc(a.excerpt.slice(0, 110))}…</p>
+          </div>
+        </a>`).join('')}
+    </div>
   </section>`;
 }
 
@@ -313,7 +409,7 @@ function renderStaff() {
                 alt="${esc(m.name)}" loading="lazy">`
               : `<div class="face lg">${esc(Paper.initials(m.name))}</div>`}
             <div>
-              <b>${esc(m.name)}</b>
+              <b><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></b>
               <i>${esc(m.beats)}</i>
             </div>
           </div>
@@ -330,7 +426,7 @@ function renderStaff() {
     <p>We haven&rsquo;t got a profile up for them yet</p></section>
   <section class="shelf">
     <div class="alsos">
-      ${also.map(c => `<a class="also" href="#/s/${esc((byAuthor(c.name)||{}).section||'campus')}">
+      ${also.map(c => `<a class="also" href="#/w/${esc(Paper.writerSlug(c.name))}">
         <span class="face sm">${esc(Paper.initials(c.name))}</span>
         <b>${esc(c.name)}</b><i>${c.count} ${c.count === 1 ? 'story' : 'stories'}</i></a>`).join('')}
     </div>
@@ -455,7 +551,7 @@ function renderArticle(slug) {
     <div class="signoff">
       <div class="face">${esc((byline(a).match(/\b[A-Za-z]/g) || ['B']).slice(0, 2).join('').toUpperCase())}</div>
       <div>
-        <b>${esc(byline(a))}</b>
+        <b>${bylineLink(a)}</b>
         <i>${when(a, true) ? when(a, true) + ' · ' : ''}${readingTime(a)} min read${
           updatedText(a) ? ' · ' + esc(updatedText(a)) : ''}</i>
       </div>
@@ -498,10 +594,12 @@ function route() {
   else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
   else if (h.startsWith('q/'))   { active = 'search';
                                    app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
+  else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));
   scrollTo(0, 0);
+  paintEvents();
 }
 addEventListener('hashchange', route);
 

@@ -316,3 +316,42 @@ mark{background:#ffe9a8;color:inherit;border-radius:4px;padding:0 2px}
 .finder b{display:block;font-size:15.5px}
 .finder i{display:block;font-size:12px;opacity:.7;margin-top:2px;font-style:normal}
 .finder span{display:block;margin-top:7px;font-size:13.5px;line-height:1.5}
+
+/* ── Writer pages and clickable bylines ─────────────────────────────────── */
+.by-link{color:inherit;text-decoration:none;border-bottom:1.5px solid var(--ink-soft,#e6e2d8)}
+.by-link:hover{color:var(--accent,#2f5fd0);border-bottom-color:currentColor}
+.mate-top b a{color:inherit;text-decoration:none}
+.mate-top b a:hover{color:var(--accent,#2f5fd0)}
+.writer-card{transform:none;margin-bottom:18px}
+.writer-none{font-size:15px;line-height:1.6;margin-bottom:18px}
+
+/* ── Printing ────────────────────────────────────────────────────────────────
+   Teachers print articles. Without this you get the nav, the search box, the
+   related-stories rail and a dark background across several sheets of paper.
+   Everything that is furniture goes; the story stays, in black on white. */
+@media print{
+  header,.menu,.searchbox,footer,.banner,.back,.more,.load-note,.topstory .ribbon{display:none!important}
+  body{background:#fff;color:#000;font-size:11pt}
+  .shelf,.wrap{max-width:none;padding:0;margin:0 0 10pt}
+  .story-pic img,.inline-fig img{max-width:70%;height:auto}
+  /* The scrapbook tilt is charming on screen and just crooked on paper. */
+  .inline-fig,.solo,.mate,.pcard,.gal-item{transform:none!important;box-shadow:none!important}
+  a{color:#000;text-decoration:none}
+  .story-body a[href^="http"]::after{content:" (" attr(href) ")";font-size:9pt;word-break:break-all}
+  h1,h2,h3,h4{page-break-after:avoid}
+  figure,blockquote{page-break-inside:avoid}
+}
+
+/* ── What's On ──────────────────────────────────────────────────────────── */
+.ev-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:16px}
+.ev-card{background:var(--paper-2,#fff);border:2px solid var(--ink-soft,#e6e2d8);
+  border-radius:16px;padding:16px;transform:rotate(var(--tilt,0deg));
+  box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.ev-cal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:48px;height:48px;border-radius:12px;background:var(--paper,#faf7f0);
+  border:2px solid var(--ink-soft,#e6e2d8);margin-bottom:10px}
+.ev-cal span{font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--accent,#2f5fd0)}
+.ev-cal b{font-size:19px;line-height:1.05}
+.ev-card h3{margin:0;font-size:16px;line-height:1.3}
+.ev-card .ev-meta{margin-top:5px;font-size:13px;font-weight:700;color:var(--accent,#2f5fd0)}
+.ev-card p{margin:7px 0 0;font-size:13.5px;line-height:1.5}
