@@ -8,16 +8,16 @@ document.getElementById('dateline').textContent =
 
 document.getElementById('nav').innerHTML =
   `<a href="#/">Front Page</a>` +
-  SECTIONS.map(s => `<a href="#/s/${s.slug}" data-sec="${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
 document.getElementById('foot-sections').innerHTML =
-  SECTIONS.map(s => `<a href="#/s/${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
 // ── shared pieces ────────────────────────────────────────────────────────────
 const kicker = a => `<div class="kicker">${esc(sectionName(a.section))}</div>`;
 
 const rated = a => a.rating == null ? ''
-  : `<span class="rating" title="${a.rating} out of ${a.ratingMax}">${stars(a)}</span>`;
+  : `<span class="rating" title="${esc(a.rating)} out of ${esc(a.ratingMax)}">${stars(a)}</span>`;
 
 const bylineOf = a => `<div class="byline">By <b>${esc(byline(a))}</b>${
   a.rating != null ? ' &nbsp;·&nbsp; ' + rated(a) : ''}</div>`;
@@ -81,12 +81,12 @@ function renderHome() {
       <section class="band">
         <div class="band-head">
           <h2 class="band-title">${esc(s.name)}</h2>
-          <a class="band-note" href="#/s/${s.slug}">All ${bySection(s.slug).length} &rarr;</a>
+          <a class="band-note" href="#/s/${esc(s.slug)}">All ${bySection(s.slug).length} &rarr;</a>
         </div>
         <div class="grid-3">
           ${items.map(a => `
             <article class="story">
-              <a href="#/a/${a.slug}">
+              <a href="#/a/${esc(a.slug)}">
                 ${figure(a, 'story-fig')}
                 ${kicker(a)}
                 <h3 class="story-hed">${esc(a.title)}</h3>
@@ -109,7 +109,7 @@ function renderHome() {
       <aside>
         <div class="col-head">Also Today</div>
         ${briefs.map(a => `
-          <a class="brief" href="#/a/${a.slug}">
+          <a class="brief" href="#/a/${esc(a.slug)}">
             <h3 class="brief-hed">${esc(a.title)}</h3>
             <p class="brief-dek">${esc(a.excerpt.slice(0, 120))}…</p>
             <div class="brief-by">${esc(byline(a))}</div>
@@ -119,17 +119,17 @@ function renderHome() {
       <div>
         ${figure(lead, 'lead-fig')}
         ${kicker(lead)}
-        <a href="#/a/${lead.slug}"><h1 class="lead-hed">${esc(lead.title)}</h1></a>
+        <a href="#/a/${esc(lead.slug)}"><h1 class="lead-hed">${esc(lead.title)}</h1></a>
         <p class="lead-dek">${esc(lead.excerpt)}</p>
         ${bylineOf(lead)}
         <div class="lead-body">${lead.body.slice(0, 3).map(p => `<p>${esc(p)}</p>`).join('')}</div>
-        <a class="more-link" href="#/a/${lead.slug}">Continue reading</a>
+        <a class="more-link" href="#/a/${esc(lead.slug)}">Continue reading</a>
       </div>
 
       <aside>
         <div class="col-head">In This Issue</div>
         ${secondCol.map(a => `
-          <a class="brief" href="#/a/${a.slug}">
+          <a class="brief" href="#/a/${esc(a.slug)}">
             <div class="kicker">${esc(sectionName(a.section))}</div>
             <h3 class="brief-hed">${esc(a.title)}</h3>
             <div class="brief-by">${esc(byline(a))}</div>
@@ -154,7 +154,7 @@ function renderSection(slug) {
       <p>${items.length} ${items.length === 1 ? 'article' : 'articles'}</p>
     </div>
     ${items.map((a, i) => `
-      <a class="list-item" href="#/a/${a.slug}">
+      <a class="list-item" href="#/a/${esc(a.slug)}">
         <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
         <div>
           <h3>${esc(a.title)}</h3>
@@ -174,7 +174,7 @@ function renderArticle(slug) {
   return `
   <div class="wrap">
     <article class="article ${isVerse(a) ? 'is-verse' : ''} ${isQA(a) ? 'is-qa' : ''}">
-      <a class="back" href="#/s/${a.section}">&larr; ${esc(sectionName(a.section))}</a>
+      <a class="back" href="#/s/${esc(a.section)}">&larr; ${esc(sectionName(a.section))}</a>
       ${kicker(a)}
       <h1>${esc(a.title)}</h1>
       ${isVerse(a) ? '' : `<p class="standfirst">${esc(a.excerpt)}</p>`}
@@ -194,7 +194,7 @@ function renderArticle(slug) {
         <div class="band-head"><h2 class="band-title">More from ${esc(sectionName(a.section))}</h2></div>
         <div class="grid-3">
           ${more.map(x => `
-            <article class="story"><a href="#/a/${x.slug}">
+            <article class="story"><a href="#/a/${esc(x.slug)}">
               <h3 class="story-hed">${esc(x.title)}</h3>
               <p class="story-dek">${esc(x.excerpt.slice(0, 130))}…</p>
               <div class="brief-by">${esc(byline(x))}</div>
@@ -222,5 +222,20 @@ function route() {
 
 addEventListener('hashchange', route);
 
-// Merge in anything published from the newsroom, then draw.
-Store.hydrate().catch(() => {}).then(route);
+// Merge in anything published from the newsroom, then draw. If the newsroom
+// couldn't be reached, say so rather than quietly serving only the archive —
+// a silent fallback here is indistinguishable from a healthy site.
+function loadNotice(msg) {
+  const el = document.createElement('div');
+  el.className = 'load-note';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.insertBefore(el, document.body.firstChild);
+}
+
+Store.hydrate()
+  .then(({ error }) => {
+    if (error) loadNotice('Couldn’t load the newest stories — showing the archive.');
+  })
+  .catch(err => { console.error('[Blanson Post]', err); })
+  .finally(route);

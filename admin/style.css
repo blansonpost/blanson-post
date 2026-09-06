@@ -1,7 +1,7 @@
 /* ── The Blanson Post — newsroom ─────────────────────────────────────────── */
 :root{
   --bg:#0d1016; --panel:#151922; --panel-2:#1c212c; --panel-3:#232a37;
-  --fg:#eef1f6; --fg-2:#a3abbb; --fg-3:#6d7686;
+  --fg:#eef1f6; --fg-2:#a3abbb; --fg-3:#8b94a5;
   --line:#262d3a; --blue:#4d8bff; --gold:#F4C300;
   --good:#35c98a; --bad:#ff6b6b; --review:#f0a83c;
   --sans:"Inter",system-ui,-apple-system,sans-serif;
@@ -145,15 +145,15 @@ textarea:focus,.row input:focus,.row select:focus{outline:none;border-color:var(
 .preview{background:#fbf9f4;color:#1a1c20;border-radius:9px;padding:16px 17px;
   max-height:460px;overflow-y:auto}
 .preview h4{font-family:var(--display);font-size:19px;line-height:1.2;margin-bottom:4px}
-.pv-by{font-size:11.5px;color:#7b8393;margin-bottom:12px}
+.pv-by{font-size:11.5px;color:#5b6472;margin-bottom:12px}
 .preview p{margin:0 0 11px;font-size:13.5px;line-height:1.65}
 .pv-fig{margin:0 0 12px}
 .pv-fig img{width:100%;border-radius:7px;display:block}
-.pv-fig figcaption{font-size:11px;color:#6b7280;margin-top:5px;line-height:1.45}
-.pv-fig figcaption i{color:#9aa1ad}
+.pv-fig figcaption{font-size:11px;color:#54606f;margin-top:5px;line-height:1.45}
+.pv-fig figcaption i{color:#5b6472}
 .pv-missing{background:#ffe8e8;color:#9b2c2c;font-size:12px;padding:8px 10px;
   border-radius:7px;margin-bottom:11px}
-.pv-empty{color:#9aa1ad;font-style:italic}
+.pv-empty{color:#5b6472;font-style:italic}
 
 /* ── Toast ────────────────────────────────────────────────────────────────── */
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;

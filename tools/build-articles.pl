@@ -197,7 +197,9 @@ const SECTIONS = [
 const MEDIA_BASE = (typeof MEDIA_PATH !== 'undefined') ? MEDIA_PATH : '../assets/media/';
 
 const bySection  = s  => ARTICLES.filter(a => a.section === s);
-const byId       = id => ARTICLES.find(a => a.id === Number(id)) || null;
+// String compare: newsroom articles carry ids like "db-a1z2x", and Number() on
+// those is NaN, which never equals anything.
+const byId       = id => ARTICLES.find(a => String(a.id) === String(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
 const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
@@ -222,9 +224,15 @@ const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
 const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// Clamped deliberately. Unclamped, a rating of 10 against a max of 5 produces
+// '☆'.repeat(-5), which throws RangeError *inside the router* — before innerHTML
+// is ever assigned — blanking the home, section and article pages of all three
+// designs. One student's typo must not be able to take the site down.
 const stars = a => {
-  if (a.rating == null) return '';
-  const n = Math.round(a.rating / a.ratingMax * 5);
+  if (a.rating == null || !a.ratingMax) return '';
+  const raw = Math.round((Number(a.rating) / Number(a.ratingMax)) * 5);
+  if (!Number.isFinite(raw)) return '';
+  const n = Math.max(0, Math.min(5, raw));
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 };
 

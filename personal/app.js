@@ -6,9 +6,9 @@ document.getElementById('banner-date').textContent =
 
 document.getElementById('nav').innerHTML =
   `<a href="#/">Home</a>` +
-  SECTIONS.map(s => `<a href="#/s/${s.slug}" data-sec="${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 document.getElementById('foot-sections').innerHTML =
-  SECTIONS.map(s => `<a href="#/s/${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
 // A small emoji per section — this design leans friendly on purpose.
 const ICON = {
@@ -20,7 +20,7 @@ const icon = s => ICON[s] || '📰';
 const tag = a => `<span class="tag">${icon(a.section)} ${esc(sectionName(a.section))}</span>`;
 
 const hearts = a => a.rating == null ? '' :
-  `<span class="stars" title="${a.rating} out of ${a.ratingMax}">${stars(a)}</span>`;
+  `<span class="stars" title="${esc(a.rating)} out of ${esc(a.ratingMax)}">${stars(a)}</span>`;
 
 const who = a => `<span class="who"><span class="dot"></span>${esc(byline(a))}</span>`;
 
@@ -96,7 +96,7 @@ function renderHome() {
 
   <section class="topstory">
     <div class="ribbon">⭐ Top Story</div>
-    <a class="topstory-in" href="#/a/${lead.slug}">
+    <a class="topstory-in" href="#/a/${esc(lead.slug)}">
       ${pic(lead, 'topstory-pic')}
       <div class="topstory-txt">
         ${tag(lead)}
@@ -114,11 +114,11 @@ function renderHome() {
     <section class="shelf">
       <div class="shelf-head">
         <h3>${icon(s.slug)} ${esc(s.name)}</h3>
-        <a href="#/s/${s.slug}">see all ${bySection(s.slug).length}</a>
+        <a href="#/s/${esc(s.slug)}">see all ${bySection(s.slug).length}</a>
       </div>
       <div class="shelf-row">
         ${items.map((a, i) => `
-          <a class="pcard" href="#/a/${a.slug}">
+          <a class="pcard" href="#/a/${esc(a.slug)}">
             ${pic(a, 'pcard-pic', [-1.5, 1, -1][i])}
             <div class="pcard-body">
               <h4>${esc(a.title)}</h4>
@@ -152,7 +152,7 @@ function renderSection(slug) {
   <section class="shelf">
     <div class="grid">
       ${items.map((a, i) => `
-        <a class="pcard" href="#/a/${a.slug}">
+        <a class="pcard" href="#/a/${esc(a.slug)}">
           ${pic(a, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
             <h4>${esc(a.title)}</h4>
@@ -173,7 +173,7 @@ function renderArticle(slug) {
 
   return `
   <article class="story ${isVerse(a) ? 'is-poem' : ''} ${isQA(a) ? 'is-chat' : ''}">
-    <a class="crumb" href="#/s/${a.section}">← back to ${esc(sectionName(a.section))}</a>
+    <a class="crumb" href="#/s/${esc(a.section)}">← back to ${esc(sectionName(a.section))}</a>
     ${tag(a)}
     <h1>${esc(a.title)}</h1>
     ${isVerse(a) ? '' : `<p class="kicker">${esc(a.excerpt)}</p>`}
@@ -199,7 +199,7 @@ function renderArticle(slug) {
     <div class="shelf-head"><h3>More ${esc(sectionName(a.section))}</h3></div>
     <div class="shelf-row">
       ${more.map((x, i) => `
-        <a class="pcard" href="#/a/${x.slug}">
+        <a class="pcard" href="#/a/${esc(x.slug)}">
           ${pic(x, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
             <h4>${esc(x.title)}</h4>
@@ -225,5 +225,20 @@ function route() {
 }
 addEventListener('hashchange', route);
 
-// Merge in anything published from the newsroom, then draw.
-Store.hydrate().catch(() => {}).then(route);
+// Merge in anything published from the newsroom, then draw. If the newsroom
+// couldn't be reached, say so rather than quietly serving only the archive —
+// a silent fallback here is indistinguishable from a healthy site.
+function loadNotice(msg) {
+  const el = document.createElement('div');
+  el.className = 'load-note';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.insertBefore(el, document.body.firstChild);
+}
+
+Store.hydrate()
+  .then(({ error }) => {
+    if (error) loadNotice('Couldn’t load the newest stories — showing the archive.');
+  })
+  .catch(err => { console.error('[Blanson Post]', err); })
+  .finally(route);

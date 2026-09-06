@@ -17,9 +17,9 @@ document.getElementById('theme').onclick = () => {
 
 // ── chrome ───────────────────────────────────────────────────────────────────
 document.getElementById('nav').innerHTML =
-  SECTIONS.map(s => `<a href="#/s/${s.slug}" data-sec="${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 document.getElementById('foot-sections').innerHTML =
-  SECTIONS.map(s => `<a href="#/s/${s.slug}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
 addEventListener('scroll', () => {
   const max = document.body.scrollHeight - innerHeight;
@@ -92,7 +92,7 @@ function renderHome() {
 
   return `
   <section class="hero">
-    <a class="hero-main" href="#/a/${lead.slug}">
+    <a class="hero-main" href="#/a/${esc(lead.slug)}">
       ${thumb(lead, 'hero-img')}
       <div class="hero-txt">
         ${chip(lead)}
@@ -103,7 +103,7 @@ function renderHome() {
     </a>
     <div class="hero-side">
       ${spot.map(a => `
-        <a class="spot" href="#/a/${a.slug}">
+        <a class="spot" href="#/a/${esc(a.slug)}">
           ${thumb(a, 'spot-img')}
           <div>
             ${chip(a)}
@@ -125,7 +125,7 @@ function renderHome() {
     <div class="block-head"><h2>Latest</h2></div>
     <div class="cards">
       ${grid.map(a => `
-        <a class="card" href="#/a/${a.slug}">
+        <a class="card" href="#/a/${esc(a.slug)}">
           ${thumb(a, 'card-img')}
           <div class="card-body">
             ${chip(a)}
@@ -144,11 +144,11 @@ function renderHome() {
     <section class="block">
       <div class="block-head">
         <h2>${esc(s.name)}</h2>
-        <a href="#/s/${s.slug}">See all ${bySection(s.slug).length} →</a>
+        <a href="#/s/${esc(s.slug)}">See all ${bySection(s.slug).length} →</a>
       </div>
       <div class="rail">
         ${items.map(a => `
-          <a class="mini" href="#/a/${a.slug}">
+          <a class="mini" href="#/a/${esc(a.slug)}">
             ${thumb(a, 'mini-img')}
             <h4>${esc(a.title)}</h4>
             <div class="mini-by">${esc(byline(a))}</div>
@@ -170,7 +170,7 @@ function renderSection(slug) {
   <section class="block">
     <div class="cards">
       ${items.map(a => `
-        <a class="card" href="#/a/${a.slug}">
+        <a class="card" href="#/a/${esc(a.slug)}">
           ${thumb(a, 'card-img')}
           <div class="card-body">
             ${chip(a)}
@@ -192,7 +192,7 @@ function renderArticle(slug) {
   return `
   <article class="read ${isVerse(a) ? 'is-verse' : ''} ${isQA(a) ? 'is-qa' : ''}">
     <div class="read-head">
-      <a class="crumb" href="#/s/${a.section}">← ${esc(sectionName(a.section))}</a>
+      <a class="crumb" href="#/s/${esc(a.section)}">← ${esc(sectionName(a.section))}</a>
       <h1>${esc(a.title)}</h1>
       ${isVerse(a) ? '' : `<p class="standfirst">${esc(a.excerpt)}</p>`}
       <div class="read-meta">
@@ -216,7 +216,7 @@ function renderArticle(slug) {
     <div class="block-head"><h2>More ${esc(sectionName(a.section))}</h2></div>
     <div class="rail">
       ${more.map(x => `
-        <a class="mini" href="#/a/${x.slug}">
+        <a class="mini" href="#/a/${esc(x.slug)}">
           ${thumb(x, 'mini-img')}
           <h4>${esc(x.title)}</h4>
           <div class="mini-by">${esc(byline(x))}</div>
@@ -240,5 +240,20 @@ function route() {
 }
 addEventListener('hashchange', route);
 
-// Merge in anything published from the newsroom, then draw.
-Store.hydrate().catch(() => {}).then(route);
+// Merge in anything published from the newsroom, then draw. If the newsroom
+// couldn't be reached, say so rather than quietly serving only the archive —
+// a silent fallback here is indistinguishable from a healthy site.
+function loadNotice(msg) {
+  const el = document.createElement('div');
+  el.className = 'load-note';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.insertBefore(el, document.body.firstChild);
+}
+
+Store.hydrate()
+  .then(({ error }) => {
+    if (error) loadNotice('Couldn’t load the newest stories — showing the archive.');
+  })
+  .catch(err => { console.error('[Blanson Post]', err); })
+  .finally(route);

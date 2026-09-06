@@ -191,3 +191,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
 .inline-fig figcaption{font-size:13px;color:var(--fg-3);padding:10px 14px;line-height:1.5;
   border-top:1px solid var(--line);background:var(--bg-2)}
 .inline-fig figcaption span{color:var(--accent);font-weight:600}
+
+/* shown only when the newsroom could not be reached */
+.load-note{background:var(--bg-2);border-bottom:1px solid var(--line);color:var(--fg-2);
+  font-size:13.5px;padding:10px 22px;text-align:center}

@@ -183,25 +183,51 @@ const Store = (() => {
 
     // Published articles from the store, shaped like the built-in ones so the
     // three designs can render both without knowing the difference.
+    //
+    // Returns { articles, error } — never swallows. An empty catch here used to
+    // make five separate whole-site failures (missing library, bad key, a
+    // free-tier project auto-paused over a holiday, broken RLS, offline) all
+    // render as a perfectly healthy-looking site showing only the archive.
     async published() {
-      let rows = [];
-      try { rows = await backend.listArticles(); } catch (e) { rows = []; }
-      return rows.filter(a => a.status === 'published').map(a => ({
+      let rows;
+      try {
+        rows = await backend.listArticles();
+      } catch (e) {
+        console.warn('[Blanson Post] could not load published articles:', e);
+        return { articles: [], error: e };
+      }
+      const articles = rows.filter(a => a.status === 'published').map(a => ({
         id: 'db-' + a.id, slug: a.slug, section: a.section, title: a.title,
-        author: a.author || '', featured: false,
+        author: a.author || '', featured: !!a.featured,
         rating: a.rating == null ? undefined : a.rating,
         ratingMax: a.ratingMax == null ? undefined : a.ratingMax,
         images: a.images || [], photos: a.photos || [],
         excerpt: a.excerpt || (a.body.find(l => l.trim().length > 40) || ''),
         body: a.body.filter(l => l.trim().length)
       }));
+      return { articles, error: null };
     },
 
-    // Called by each design before its first render. Newest first.
-    async hydrate() {
-      const extra = await this.published();
-      if (extra.length) ARTICLES.unshift(...extra);
-      return ARTICLES;
+    // Called by each design before its first render.
+    //
+    // Memoised: without a guard this is one re-entrant call away from showing
+    // every published article twice (the chooser page already embeds all three
+    // designs as iframes). Deduped by slug so a newsroom article that collides
+    // with a built-in replaces it rather than shadowing it — otherwise the
+    // built-in stays visible in listings while its link opens the other one.
+    _hydrated: null,
+    hydrate() {
+      return this._hydrated || (this._hydrated = (async () => {
+        const { articles: extra, error } = await this.published();
+        if (extra.length) {
+          const incoming = new Set(extra.map(a => a.slug));
+          for (let i = ARTICLES.length - 1; i >= 0; i--) {
+            if (incoming.has(ARTICLES[i].slug)) ARTICLES.splice(i, 1);
+          }
+          ARTICLES.unshift(...extra);
+        }
+        return { articles: ARTICLES, error };
+      })());
     }
   };
 })();
