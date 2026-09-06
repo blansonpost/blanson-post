@@ -898,6 +898,11 @@ function renderChrome() {
   // the editor — asking yourself for permission is noise, and Publish is
   // already sitting next to it.
   $('btn-submit').hidden    = !(editable && s === 'draft' && !pub);
+  // A writer who submitted by accident, or isn't finished after all, can pull
+  // their own story back out of the queue. Deliberate and labelled — the old
+  // behaviour did this silently as a side effect of pressing Save, so articles
+  // disappeared from review with nothing to show for it.
+  $('btn-withdraw').hidden  = !(editable && s === 'review' && !pub);
   $('btn-publish').hidden   = !(pub && s !== 'published');
   $('btn-unpublish').hidden = !(pub && s === 'published');
   $('btn-sendback').hidden  = !(pub && s === 'review');
@@ -975,7 +980,7 @@ function scheduleCrashDraft() {
   }, 800);
 }
 
-async function save(nextStatus, quiet) {
+async function save(nextStatus, quiet, message) {
   if (!Ed.doc || Ed.saving) return false;
 
   // The buttons are hidden and the fields are read-only, but neither is a rule.
@@ -1018,9 +1023,13 @@ async function save(nextStatus, quiet) {
     await Photos.markOrphans(liveAssetIds()).catch(() => {});
     await refresh();
     renderChrome(); updateSlugline();
-    if (!quiet) toast(nextStatus === 'published' ? 'Published — it is on the site now'
-                    : nextStatus === 'review'    ? 'Sent to an editor'
-                    : 'Saved', 'good');
+    // Three different actions land on 'draft' — taking a live story down,
+    // sending one back, and a writer withdrawing their own — so the caller says
+    // which one it was rather than everyone reading "Saved".
+    if (!quiet) toast(message
+                    || (nextStatus === 'published' ? 'Published — it is on the site now'
+                      : nextStatus === 'review'    ? 'Sent to an editor'
+                      : 'Saved'), 'good');
     else $('saved').textContent = 'Saved ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     return true;
   } catch (err) {
@@ -1044,9 +1053,15 @@ function liveAssetIds() {
 
 $('btn-save').onclick      = () => save(null);
 $('btn-submit').onclick    = () => save('review');
+$('btn-withdraw').onclick  = () => {
+  // An editor may already be reading it, so make this a decision rather than a
+  // stray click.
+  if (!confirm('Take this back from the editors?\n\nIt goes back to being your draft, and they will no longer see it waiting.')) return;
+  save('draft', false, 'Taken back — it is your draft again');
+};
 $('btn-publish').onclick   = () => save('published');
-$('btn-unpublish').onclick = () => save('draft');
-$('btn-sendback').onclick  = () => save('draft');
+$('btn-unpublish').onclick = () => save('draft', false, 'Taken down — it is no longer on the site');
+$('btn-sendback').onclick  = () => save('draft', false, 'Sent back to the writer');
 $('btn-delete').onclick = async () => {
   if (!confirm(`Delete “${Ed.doc.title || 'Untitled'}” for good?`)) return;
   try {
