@@ -1171,6 +1171,16 @@ async function save(nextStatus, quiet, message) {
     return false;
   }
 
+  // Going live, or coming back down, is the transition the buttons hide from a
+  // writer — but hiding a button is not the same as refusing the action. The
+  // hidden button still clicks from the console, and a stale handler can still
+  // fire. Say no here as well.
+  if ((nextStatus === 'published' || (nextStatus === 'draft' && Ed.doc.status === 'published'))
+      && !can('publish')) {
+    if (!quiet) toast('Only an editor or an advisor can put a story on the site or take it down.', 'bad');
+    return false;
+  }
+
   if (nextStatus && nextStatus !== 'draft') {
     const missing = problems();
     if (missing.length) { toast('Still needs ' + missing.join(' and ') + '.', 'bad'); return false; }

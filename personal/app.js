@@ -19,6 +19,12 @@ document.getElementById('nav').insertAdjacentHTML('beforeend',
 document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
+// Heading levels are the outline a screen-reader user navigates by, so a page
+// must not jump from h1 straight to h3 — a listener stepping through headings
+// hears the jump as a missing section. Card headlines therefore sit at h2 under
+// the page's own h1, which is flat but never skips. Styling is by class, so the
+// level is free to be whatever the outline needs.
+
 // A small emoji per section — this design leans friendly on purpose.
 const ICON = {
   campus: '🏫', life: '🐾', interviews: '🎙️', sports: '⚽', gaming: '🎮', books: '📚',
@@ -151,7 +157,7 @@ function renderHome() {
     return `
     <section class="shelf">
       <div class="shelf-head">
-        <h3>${icon(s.slug)} ${esc(s.name)}</h3>
+        <h2>${icon(s.slug)} ${esc(s.name)}</h2>
         <a href="#/s/${esc(s.slug)}">see all ${bySection(s.slug).length}</a>
       </div>
       <div class="shelf-row">
@@ -159,7 +165,7 @@ function renderHome() {
           <a class="pcard" href="#/a/${esc(a.slug)}">
             ${pic(a, 'pcard-pic', [-1.5, 1, -1][i])}
             <div class="pcard-body">
-              <h4>${esc(a.title)}</h4>
+              <h2 class="pcard-hed">${esc(a.title)}</h2>
               ${a.rating != null ? hearts(a) : ''}
               <p>${esc(a.excerpt.slice(0, 100))}…</p>
               ${who(a)}
@@ -170,7 +176,7 @@ function renderHome() {
   }).join('')}
 
   <section class="wall">
-    <h3>✏️ Everyone who wrote for us</h3>
+    <h2>✏️ Everyone who wrote for us</h2>
     <div class="names">
       ${[...new Set(ARTICLES.map(a => a.author).filter(Boolean))].sort()
         .map(n => `<span>${esc(n)}</span>`).join('')}
@@ -246,7 +252,7 @@ function renderSearch(q) {
       <a class="pcard" href="#/a/${esc(h.article.slug)}">
         ${pic(h.article, 'pcard-pic', (i % 3) - 1)}
         <div class="pcard-body">
-          <h4>${Paper.highlight(esc(h.article.title), q)}</h4>
+          <h2 class="pcard-hed">${Paper.highlight(esc(h.article.title), q)}</h2>
           <p>${Paper.highlight(esc(h.snippet), q)}</p>
           ${who(h.article)}
         </div>
@@ -280,7 +286,7 @@ function eventsHTML(list) {
           const b = Paper.dayBadge(e);
           return `<div class="ev-card" style="--tilt:${[-1, .8, -.6, 1][i % 4]}deg">
             <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
-            <h3>${esc(e.title)}</h3>
+            <h2 class="ev-hed">${esc(e.title)}</h2>
             <div class="ev-meta">${esc(Paper.whenText(e))}${
               e.place ? ' · ' + esc(e.place) : ''}</div>
             ${e.note ? `<p>${esc(e.note)}</p>` : ''}
@@ -333,7 +339,7 @@ function renderWriter(slug) {
         <a class="pcard" href="#/a/${esc(a.slug)}">
           ${pic(a, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
-            <h4>${esc(a.title)}</h4>
+            <h2 class="pcard-hed">${esc(a.title)}</h2>
             <p>${esc(a.excerpt.slice(0, 110))}…</p>
           </div>
         </a>`).join('')}
@@ -512,7 +518,7 @@ function alumniBlock() {
 function renderSection(slug) {
   const items = bySection(slug);
   const extra = slug === 'alumni' ? alumniBlock() : (slug === 'sports' ? fcBlock() : '');
-  if (!items.length) return `<section class="shelf"><h3>Nothing here yet!</h3></section>` + extra;
+  if (!items.length) return `<section class="shelf"><h1>Nothing here yet!</h1></section>` + extra;
   return `
   <section class="sechead">
     <div class="sechead-icon">${icon(slug)}</div>
@@ -525,7 +531,7 @@ function renderSection(slug) {
         <a class="pcard" href="#/a/${esc(a.slug)}">
           ${pic(a, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
-            <h4>${esc(a.title)}</h4>
+            <h2 class="pcard-hed">${esc(a.title)}</h2>
             ${a.rating != null ? hearts(a) : ''}
             <p>${esc(a.excerpt.slice(0, 110))}…</p>
             ${who(a)}
@@ -537,7 +543,7 @@ function renderSection(slug) {
 
 function renderArticle(slug) {
   const a = bySlug(slug);
-  if (!a) return `<section class="shelf"><h3>Can't find that one!</h3></section>`;
+  if (!a) return `<section class="shelf"><h1>Can't find that one!</h1></section>`;
   const more = bySection(a.section).filter(x => x.id !== a.id).slice(0, 3);
   const src = leadImage(a);
 
@@ -567,13 +573,13 @@ function renderArticle(slug) {
 
   ${more.length ? `
   <section class="shelf">
-    <div class="shelf-head"><h3>More ${esc(sectionName(a.section))}</h3></div>
+    <div class="shelf-head"><h2>More ${esc(sectionName(a.section))}</h2></div>
     <div class="shelf-row">
       ${more.map((x, i) => `
         <a class="pcard" href="#/a/${esc(x.slug)}">
           ${pic(x, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
-            <h4>${esc(x.title)}</h4>
+            <h2 class="pcard-hed">${esc(x.title)}</h2>
             ${who(x)}
           </div>
         </a>`).join('')}

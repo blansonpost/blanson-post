@@ -36,6 +36,12 @@ addEventListener('scroll', () => {
     (max > 0 ? (scrollY / max) * 100 : 0) + '%';
 }, { passive: true });
 
+// Heading levels are the outline a screen-reader user navigates by, so a page
+// must not jump from h1 straight to h3 — a listener stepping through headings
+// hears the jump as a missing section. Card headlines therefore sit at h2 under
+// the page's own h1, which is flat but never skips. Styling is by class, so the
+// level is free to be whatever the outline needs.
+
 // ── pieces ───────────────────────────────────────────────────────────────────
 const chip = a => `<span class="chip">${esc(sectionName(a.section))}</span>`;
 
@@ -143,7 +149,7 @@ function renderHome() {
           ${thumb(a, 'spot-img')}
           <div>
             ${chip(a)}
-            <h3>${esc(a.title)}</h3>
+            <h2 class="card-hed">${esc(a.title)}</h2>
             ${meta(a)}
           </div>
         </a>`).join('')}
@@ -165,7 +171,7 @@ function renderHome() {
           ${thumb(a, 'card-img')}
           <div class="card-body">
             ${chip(a)}
-            <h3>${esc(a.title)}</h3>
+            <h2 class="card-hed">${esc(a.title)}</h2>
             <p>${esc(a.excerpt.slice(0, 120))}…</p>
             ${meta(a)}
           </div>
@@ -186,7 +192,7 @@ function renderHome() {
         ${items.map(a => `
           <a class="mini" href="#/a/${esc(a.slug)}">
             ${thumb(a, 'mini-img')}
-            <h4>${esc(a.title)}</h4>
+            <h2 class="mini-hed">${esc(a.title)}</h2>
             <div class="mini-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
       </div>
@@ -262,7 +268,7 @@ function renderSearch(q) {
         ${thumb(h.article, 'card-img')}
         <div class="card-body">
           ${chip(h.article)}
-          <h3>${Paper.highlight(esc(h.article.title), q)}</h3>
+          <h2 class="card-hed">${Paper.highlight(esc(h.article.title), q)}</h2>
           <p>${Paper.highlight(esc(h.snippet), q)}</p>
           ${meta(h.article)}
         </div>
@@ -295,7 +301,7 @@ function eventsHTML(list) {
           const b = Paper.dayBadge(e);
           return `<div class="ev-card">
             <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
-            <h3>${esc(e.title)}</h3>
+            <h2 class="ev-hed">${esc(e.title)}</h2>
             <div class="ev-meta">${esc(Paper.whenText(e))}${
               e.place ? ' · ' + esc(e.place) : ''}</div>
             ${e.note ? `<p>${esc(e.note)}</p>` : ''}
@@ -345,7 +351,7 @@ function renderWriter(slug) {
           ${thumb(a, 'card-img')}
           <div class="card-body">
             ${chip(a)}
-            <h3>${esc(a.title)}</h3>
+            <h2 class="card-hed">${esc(a.title)}</h2>
             <p>${esc(a.excerpt.slice(0, 140))}…</p>
           </div>
         </a>`).join('')}
@@ -416,7 +422,7 @@ function renderStaff() {
               alt="${esc(m.name)}" loading="lazy">`
             : `<div class="avatar lg">${esc(Paper.initials(m.name))}</div>`}
           <div class="person-in">
-            <h3><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h3>
+            <h2 class="person-hed"><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h2>
             <div class="person-beat">${esc(m.beats)}</div>
             <p class="person-bio">${esc(m.bio)}</p>
             ${mine.length ? `<div class="person-work">
@@ -450,8 +456,8 @@ function renderScholarships() {
         <span class="sch-amt">${esc(s.amount || '—')}</span>
         <span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span>
       </div>
-      <h3>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`
-                  : esc(s.name)}</h3>
+      <h2 class="sch-hed">${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`
+                  : esc(s.name)}</h2>
       ${s.org ? `<div class="sch-prov">${esc(s.org)}</div>` : ''}
       ${s.who ? `<p class="sch-who">${esc(s.who)}</p>` : ''}
       ${s.note ? `<p class="sch-note">${esc(s.note)}</p>` : ''}
@@ -503,7 +509,7 @@ function alumniBlock() {
       ${list.map(v => `
         <div class="card alum">
           <div class="alum-what">${esc(v.what)}</div>
-          ${v.name ? `<h3>${esc(v.name)}</h3>` : ''}
+          ${v.name ? `<h2 class="alum-hed">${esc(v.name)}</h2>` : ''}
           <p>${esc(v.note)}</p>
           ${v.handle ? `<div class="alum-at">${esc(v.handle)}</div>` : ''}
         </div>`).join('')}
@@ -518,8 +524,13 @@ function renderSection(slug) {
   return `
   <section class="sec-head">
     <h1>${esc(sectionName(slug))}</h1>
-    <p>${items.length} ${items.length === 1 ? 'story' : 'stories'} by ${
-      new Set(items.map(a => a.author).filter(Boolean)).size || '—'} writers</p>
+    <p>${items.length} ${items.length === 1 ? 'story' : 'stories'}${(() => {
+      // Four archived articles still have no byline. When a section happens to
+      // hold only those, "by — writers" is worse than saying nothing, and
+      // "by 1 writers" is worse again.
+      const n = new Set(items.map(a => a.author).filter(Boolean)).size;
+      return n ? ` by ${n} ${n === 1 ? 'writer' : 'writers'}` : '';
+    })()}</p>
   </section>
   <section class="block">
     <div class="cards">
@@ -528,7 +539,7 @@ function renderSection(slug) {
           ${thumb(a, 'card-img')}
           <div class="card-body">
             ${chip(a)}
-            <h3>${esc(a.title)}</h3>
+            <h2 class="card-hed">${esc(a.title)}</h2>
             <p>${esc(a.excerpt.slice(0, 140))}…</p>
             ${meta(a)}
           </div>
@@ -574,7 +585,7 @@ function renderArticle(slug) {
       ${more.map(x => `
         <a class="mini" href="#/a/${esc(x.slug)}">
           ${thumb(x, 'mini-img')}
-          <h4>${esc(x.title)}</h4>
+          <h2 class="mini-hed">${esc(x.title)}</h2>
           <div class="mini-by">${esc(byline(x))}${when(x) ? ' · ' + when(x) : ''}</div>
         </a>`).join('')}
     </div>

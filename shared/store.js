@@ -59,6 +59,13 @@ const Store = (() => {
     async currentUser() { return (await IDB.kvGet('session')) || null; },
 
     async setRole(email, role) {
+      // Roles decide who can publish, so this is the last thing that should be
+      // guarded only by which buttons happen to be on screen. Checked here,
+      // where the console reaches too.
+      const me = await IDB.kvGet('session');
+      if (!me || me.role !== 'advisor') {
+        throw fail('DENIED', 'Only an advisor can change what someone is allowed to do.');
+      }
       const u = await IDB.get('users', email);
       if (!u) throw fail('NOTFOUND', 'No such person on the staff list.');
       u.role = role;

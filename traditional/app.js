@@ -22,6 +22,12 @@ document.getElementById('nav').insertAdjacentHTML('beforeend',
 document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
+// Heading levels are the outline a screen-reader user navigates by, so a page
+// must not jump from h1 straight to h3 — a listener stepping through headings
+// hears the jump as a missing section. Card headlines therefore sit at h2 under
+// the page's own h1, which is flat but never skips. Styling is by class, so the
+// level is free to be whatever the outline needs.
+
 // ── shared pieces ────────────────────────────────────────────────────────────
 const kicker = a => `<div class="kicker">${esc(sectionName(a.section))}</div>`;
 
@@ -147,7 +153,7 @@ function renderHome() {
   <div class="wrap">
     <div class="front">
       <aside>
-        <div class="col-head">Also Today</div>
+        <h2 class="col-head">Also Today</h2>
         ${briefs.map(a => `
           <a class="brief" href="#/a/${esc(a.slug)}">
             <h3 class="brief-hed">${esc(a.title)}</h3>
@@ -167,7 +173,7 @@ function renderHome() {
       </div>
 
       <aside>
-        <div class="col-head">In This Issue</div>
+        <h2 class="col-head">In This Issue</h2>
         ${secondCol.map(a => `
           <a class="brief" href="#/a/${esc(a.slug)}">
             <div class="kicker">${esc(sectionName(a.section))}</div>
@@ -175,7 +181,7 @@ function renderHome() {
             <div class="brief-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
         <div id="whats-on"></div>
-        <div class="col-head" style="margin-top:22px">By the Numbers</div>
+        <h2 class="col-head" style="margin-top:22px">By the Numbers</h2>
         <div class="stat"><b>${ARTICLES.length}</b> articles published</div>
         <div class="stat"><b>${new Set(ARTICLES.map(a => a.author).filter(Boolean)).size}</b> student writers</div>
         <div class="stat"><b>${SECTIONS.length}</b> sections</div>
@@ -249,7 +255,7 @@ function renderSearch(q) {
         <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
         <div>
           <div class="kicker">${esc(sectionName(h.article.section))}</div>
-          <h3>${Paper.highlight(esc(h.article.title), q)}</h3>
+          <h2 class="list-hed">${Paper.highlight(esc(h.article.title), q)}</h2>
           <p>${Paper.highlight(esc(h.snippet), q)}</p>
           ${bylineOf(h.article)}
         </div>
@@ -276,13 +282,13 @@ async function loadEvents() {
 // A standing column of what is coming up, set like the rest of the front page.
 function eventsHTML(list) {
   return `
-    <div class="col-head">What&rsquo;s On</div>
+    <h2 class="col-head">What&rsquo;s On</h2>
     ${list.map(e => {
       const b = Paper.dayBadge(e);
       return `<div class="ev-item">
         <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
         <div>
-          <h4>${esc(e.title)}</h4>
+          <h3>${esc(e.title)}</h3>
           <div class="ev-meta">${esc(Paper.whenText(e))}${
             e.place ? ' · ' + esc(e.place) : ''}</div>
           ${e.note ? `<p>${esc(e.note)}</p>` : ''}
@@ -329,7 +335,7 @@ function renderWriter(slug) {
         <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
         <div>
           <div class="kicker">${esc(sectionName(a.section))}</div>
-          <h3>${esc(a.title)}</h3>
+          <h2 class="list-hed">${esc(a.title)}</h2>
           <p>${esc(a.excerpt)}</p>
         </div>
         ${figure(a, 'list-fig')}
@@ -401,7 +407,7 @@ function renderStaff() {
         <div class="ros-person">
           ${m.photo ? `<img class="ros-face" src="${esc(imageUrl(m.photo))}"
              alt="${esc(m.name)}" loading="lazy">` : ''}
-          <h3 class="ros-name"><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h3>
+          <h2 class="ros-name"><a href="#/w/${esc(Paper.writerSlug(m.name))}">${esc(m.name)}</a></h2>
           <div class="ros-beat">${esc(m.beats)}</div>
           <p class="ros-bio">${esc(m.bio)}</p>
           ${mine.length ? `<div class="ros-work">
@@ -516,7 +522,7 @@ function renderSection(slug) {
       <a class="list-item" href="#/a/${esc(a.slug)}">
         <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
         <div>
-          <h3>${esc(a.title)}</h3>
+          <h2 class="list-hed">${esc(a.title)}</h2>
           <p>${esc(a.excerpt)}</p>
           ${bylineOf(a)}
         </div>

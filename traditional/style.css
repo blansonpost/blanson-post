@@ -114,7 +114,7 @@ img{max-width:100%;display:block}
   padding:22px 0;border-bottom:1px solid var(--rule-soft)}
 .list-num{font-family:var(--display);font-size:34px;font-weight:800;color:var(--rule);line-height:1}
 .list-item:hover .list-num{color:var(--accent)}
-.list-item h3{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.2;margin:0 0 8px}
+.list-item .list-hed{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.2;margin:0 0 8px}
 .list-item p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.55}
 .list-fig{border:1px solid var(--rule-soft)}
 .list-fig img{width:100%;height:120px;object-fit:cover;filter:saturate(.9)}
@@ -368,7 +368,7 @@ table.sch.is-old{opacity:.6;margin-top:4px}
 .ev-cal span{display:block;font-family:var(--cond);font-size:9.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--accent)}
 .ev-cal b{display:block;font-family:var(--display,Georgia,serif);font-size:19px;line-height:1.1}
-.ev-item h4{margin:0;font-family:var(--display,Georgia,serif);font-size:15px;line-height:1.25}
+.ev-item h3{margin:0;font-family:var(--display,Georgia,serif);font-size:15px;line-height:1.25}
 .ev-item .ev-meta{font-family:var(--cond);font-size:11px;letter-spacing:.07em;
   text-transform:uppercase;color:var(--ink-3);margin-top:3px}
 .ev-item p{margin:5px 0 0;font-size:13px;line-height:1.5;color:var(--ink-2)}
