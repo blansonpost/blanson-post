@@ -10,7 +10,14 @@ document.getElementById('nav').innerHTML =
   `<a href="#/">Front Page</a>` +
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
   `<a href="#/staff" data-sec="staff">The Team</a>` +
+  `<a href="#/gallery" data-sec="gallery">Art &amp; Photos</a>` +
+  `<a href="#/a/advice-to-underclassmen">Advice</a>` +
   `<a href="#/scholarships" data-sec="scholarships">Scholarships</a>`;
+
+document.getElementById('nav').insertAdjacentHTML('beforeend',
+  `<form class="searchbox" role="search" onsubmit="return false">
+     <input id="q" type="search" placeholder="Search the paper" aria-label="Search the paper"
+            autocomplete="off"></form>`);
 
 document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
@@ -177,6 +184,115 @@ function renderHome() {
   </div>`;
 }
 
+// ── Search box ───────────────────────────────────────────────────────────────
+// Typing updates the address, so a search can be bookmarked, shared, and gone
+// back to. Debounced so every keystroke is not a new history entry.
+let searchTimer = null;
+function wireSearch() {
+  const box = document.getElementById('q');
+  if (!box) return;
+  box.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const v = box.value.trim();
+    searchTimer = setTimeout(() => {
+      const want = v ? '#/q/' + encodeURIComponent(v) : '#/';
+      if (location.hash !== want) location.replace(want);
+    }, 180);
+  });
+  box.addEventListener('keydown', e => { if (e.key === 'Escape') { box.value = ''; location.replace('#/'); } });
+}
+wireSearch();
+
+// After a re-render, put back what was typed without stealing the caret.
+function syncSearchBox(q) {
+  const box = document.getElementById('q');
+  if (box && document.activeElement !== box && box.value !== q) box.value = q || '';
+}
+
+// The address is the real query, so read it back from there.
+function currentQuery() {
+  const h = location.hash.replace(/^#\/?/, '');
+  return h.startsWith('q/') ? decodeURIComponent(h.slice(2)) : '';
+}
+
+// Browsers put back whatever was last typed in a search box when the page is
+// reloaded or reached with the back button — and they do it *after* this script
+// runs, so the box could sit there saying one thing while the results below it
+// answered another. pageshow fires after that restoring, which is the only
+// moment late enough to correct it.
+addEventListener('pageshow', () => syncSearchBox(currentQuery()));
+syncSearchBox(currentQuery());
+
+// ── Search results ───────────────────────────────────────────────────────────
+function renderSearch(q) {
+  syncSearchBox(q);
+  const hits = Paper.search(q);
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>${esc(q)}</h1>
+      <p>${hits.length} ${hits.length === 1 ? 'result' : 'results'}</p>
+    </div>
+    ${hits.length ? hits.map((h, i) => `
+      <a class="list-item" href="#/a/${esc(h.article.slug)}">
+        <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
+        <div>
+          <div class="kicker">${esc(sectionName(h.article.section))}</div>
+          <h3>${Paper.highlight(esc(h.article.title), q)}</h3>
+          <p>${Paper.highlight(esc(h.snippet), q)}</p>
+          ${bylineOf(h.article)}
+        </div>
+        ${figure(h.article, 'list-fig')}
+      </a>`).join('')
+    : `<p class="no-hits">Nothing matched <b>${esc(q)}</b>. Try a writer&rsquo;s name,
+        part of a headline, or a word from the story.</p>`}
+  </div>`;
+}
+
+// ── Art & photography ────────────────────────────────────────────────────────
+function renderGallery() {
+  const gals = Paper.galleries();
+  const art = Paper.artwork();
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Art &amp; Photography</h1>
+      <p>${Paper.photoCount()} pictures by Blanson students and staff</p>
+    </div>
+    <div class="art-solo">
+      ${art.map(a => `
+        <figure class="solo">
+          <img src="${esc(imageUrl(a.file))}" alt="${esc(a.title + ' by ' + a.by)}" loading="lazy">
+          <figcaption><b>${esc(a.title)}</b><span>${esc(a.credit)}</span></figcaption>
+        </figure>`).join('')}
+    </div>
+    ${gals.map(g => `
+      <div class="page-head sub-head">
+        <h2>${esc(g.title)}</h2>
+        <p>${esc(g.year ? g.year + ' · ' : '')}${esc(g.credit)}${
+          g.note ? ` <i>${esc(g.note)}</i>` : ''}</p>
+      </div>
+      <div class="gal">
+        ${g.photos.map(f => `<a class="gal-item" href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
+           <img src="${esc(imageUrl(f))}" alt="${esc(g.title)}" loading="lazy"></a>`).join('')}
+      </div>`).join('')}
+  </div>`;
+}
+
+// ── Blanson F.C. ─────────────────────────────────────────────────────────────
+// Shown on the Sports page. An outside link, marked as one.
+function fcBlock() {
+  const fc = Paper.fc();
+  return `
+    <a class="fc-card" href="${esc(fc.url)}" target="_blank" rel="noopener">
+      <div class="fc-badge">⚽</div>
+      <div>
+        <b>${esc(fc.name)} has its own site ↗</b>
+        <span>${esc(fc.blurb)}</span>
+      </div>
+    </a>`;
+}
+
 // ── The team ─────────────────────────────────────────────────────────────────
 // Set as a masthead: who runs the paper, what they cover, and what they wrote.
 function renderStaff() {
@@ -195,6 +311,8 @@ function renderStaff() {
         const mine = Paper.storiesBy(m.name);
         return `
         <div class="ros-person">
+          ${m.photo ? `<img class="ros-face" src="${esc(imageUrl(m.photo))}"
+             alt="${esc(m.name)}" loading="lazy">` : ''}
           <h3 class="ros-name">${esc(m.name)}</h3>
           <div class="ros-beat">${esc(m.beats)}</div>
           <p class="ros-bio">${esc(m.bio)}</p>
@@ -270,7 +388,7 @@ function alumniBlock() {
 
 function renderSection(slug) {
   const items = bySection(slug);
-  const extra = slug === 'alumni' ? alumniBlock() : '';
+  const extra = slug === 'alumni' ? alumniBlock() : (slug === 'sports' ? fcBlock() : '');
   if (!items.length) return `<div class="wrap"><div class="page-head"><h1>Nothing here yet</h1></div>${extra}</div>`;
   return `
   <div class="wrap">
@@ -343,6 +461,9 @@ function route() {
   else if (h.startsWith('s/')) { active = h.slice(2); app.innerHTML = renderSection(active); }
   else if (h === 'staff')        { active = 'staff'; app.innerHTML = renderStaff(); }
   else if (h === 'scholarships') { active = 'scholarships'; app.innerHTML = renderScholarships(); }
+  else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
+  else if (h.startsWith('q/'))   { active = 'search';
+                                   app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
   else                         { app.innerHTML = renderHome(); }
 
   document.querySelectorAll('#nav a').forEach(el =>

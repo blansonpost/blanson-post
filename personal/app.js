@@ -8,7 +8,14 @@ document.getElementById('nav').innerHTML =
   `<a href="#/">Home</a>` +
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
   `<a href="#/staff" data-sec="staff">Our Team</a>` +
+  `<a href="#/gallery" data-sec="gallery">Art &amp; Photos</a>` +
+  `<a href="#/a/advice-to-underclassmen">Advice</a>` +
   `<a href="#/scholarships" data-sec="scholarships">Scholarships</a>`;
+
+document.getElementById('nav').insertAdjacentHTML('beforeend',
+  `<form class="searchbox" role="search" onsubmit="return false">
+     <input id="q" type="search" placeholder="Search the paper" aria-label="Search the paper"
+            autocomplete="off"></form>`);
 document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
 
@@ -174,6 +181,117 @@ function renderHome() {
 // paper has no profile for them.
 function byAuthor(name) { return ARTICLES.find(a => a.author === name) || null; }
 
+// ── Search box ───────────────────────────────────────────────────────────────
+// Typing updates the address, so a search can be bookmarked, shared, and gone
+// back to. Debounced so every keystroke is not a new history entry.
+let searchTimer = null;
+function wireSearch() {
+  const box = document.getElementById('q');
+  if (!box) return;
+  box.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const v = box.value.trim();
+    searchTimer = setTimeout(() => {
+      const want = v ? '#/q/' + encodeURIComponent(v) : '#/';
+      if (location.hash !== want) location.replace(want);
+    }, 180);
+  });
+  box.addEventListener('keydown', e => { if (e.key === 'Escape') { box.value = ''; location.replace('#/'); } });
+}
+wireSearch();
+
+// After a re-render, put back what was typed without stealing the caret.
+function syncSearchBox(q) {
+  const box = document.getElementById('q');
+  if (box && document.activeElement !== box && box.value !== q) box.value = q || '';
+}
+
+// The address is the real query, so read it back from there.
+function currentQuery() {
+  const h = location.hash.replace(/^#\/?/, '');
+  return h.startsWith('q/') ? decodeURIComponent(h.slice(2)) : '';
+}
+
+// Browsers put back whatever was last typed in a search box when the page is
+// reloaded or reached with the back button — and they do it *after* this script
+// runs, so the box could sit there saying one thing while the results below it
+// answered another. pageshow fires after that restoring, which is the only
+// moment late enough to correct it.
+addEventListener('pageshow', () => syncSearchBox(currentQuery()));
+syncSearchBox(currentQuery());
+
+// ── Search results ───────────────────────────────────────────────────────────
+function renderSearch(q) {
+  syncSearchBox(q);
+  const hits = Paper.search(q);
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u{1F50E}</div>
+    <h1>${esc(q)}</h1>
+    <p>${hits.length} ${hits.length === 1 ? 'story' : 'stories'} found</p>
+  </section>
+  <section class="shelf">
+    ${hits.length ? `<div class="grid">${hits.map((h, i) => `
+      <a class="pcard" href="#/a/${esc(h.article.slug)}">
+        ${pic(h.article, 'pcard-pic', (i % 3) - 1)}
+        <div class="pcard-body">
+          <h4>${Paper.highlight(esc(h.article.title), q)}</h4>
+          <p>${Paper.highlight(esc(h.snippet), q)}</p>
+          ${who(h.article)}
+        </div>
+      </a>`).join('')}</div>`
+    : `<p class="no-hits">Nothing matched <b>${esc(q)}</b> \u{1F937} Try a writer&rsquo;s name,
+        part of a headline, or a word from the story.</p>`}
+  </section>`;
+}
+
+// ── Art & photography ────────────────────────────────────────────────────────
+function renderGallery() {
+  const gals = Paper.galleries();
+  const art = Paper.artwork();
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u{1F3A8}</div>
+    <h1>Art &amp; Photos</h1>
+    <p>${Paper.photoCount()} pictures by Blanson students and staff</p>
+  </section>
+  <section class="shelf">
+    <div class="art-solo">
+      ${art.map((a, i) => `
+        <figure class="solo" style="--tilt:${[-1, .8, -.6][i % 3]}deg">
+          <img src="${esc(imageUrl(a.file))}" alt="${esc(a.title + ' by ' + a.by)}" loading="lazy">
+          <figcaption><b>${esc(a.title)}</b><span>${esc(a.credit)}</span></figcaption>
+        </figure>`).join('')}
+    </div>
+  </section>
+  ${gals.map(g => `
+    <section class="sechead"><div class="sechead-icon">\u{1F4F7}</div>
+      <h1>${esc(g.title)}</h1>
+      <p>${esc(g.year ? g.year + ' · ' : '')}${esc(g.credit)}${g.note ? ' · ' + esc(g.note) : ''}</p></section>
+    <section class="shelf">
+      <div class="gal">
+        ${g.photos.map((f, i) => `<a class="gal-item" style="--tilt:${[-1.4,1.1,-.7,1.3][i%4]}deg"
+           href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
+           <img src="${esc(imageUrl(f))}" alt="${esc(g.title)}" loading="lazy"></a>`).join('')}
+      </div>
+    </section>`).join('')}`;
+}
+
+// ── Blanson F.C., shown on the Sports page ───────────────────────────────────
+function fcBlock() {
+  const fc = Paper.fc();
+  return `
+  <section class="shelf">
+    <a class="fc-card" href="${esc(fc.url)}" target="_blank" rel="noopener">
+      <div class="fc-badge">\u26BD</div>
+      <div>
+        <b>${esc(fc.name)} has its own site \u2197</b>
+        <span>${esc(fc.blurb)}</span>
+      </div>
+    </a>
+  </section>`;
+}
+
 // ── The team ─────────────────────────────────────────────────────────────────
 function renderStaff() {
   const team = Paper.staff();
@@ -191,7 +309,9 @@ function renderStaff() {
         return `
         <div class="mate" style="--tilt:${[-1.1, .9, -.6, 1.2][i % 4]}deg">
           <div class="mate-top">
-            <div class="face lg">${esc(Paper.initials(m.name))}</div>
+            ${m.photo ? `<img class="face lg photo" src="${esc(imageUrl(m.photo))}"
+                alt="${esc(m.name)}" loading="lazy">`
+              : `<div class="face lg">${esc(Paper.initials(m.name))}</div>`}
             <div>
               <b>${esc(m.name)}</b>
               <i>${esc(m.beats)}</i>
@@ -270,7 +390,7 @@ function alumniBlock() {
 
 function renderSection(slug) {
   const items = bySection(slug);
-  const extra = slug === 'alumni' ? alumniBlock() : '';
+  const extra = slug === 'alumni' ? alumniBlock() : (slug === 'sports' ? fcBlock() : '');
   if (!items.length) return `<section class="shelf"><h3>Nothing here yet!</h3></section>` + extra;
   return `
   <section class="sechead">
@@ -350,6 +470,9 @@ function route() {
   else if (h.startsWith('s/')) { active = h.slice(2); app.innerHTML = renderSection(active); }
   else if (h === 'staff')        { active = 'staff'; app.innerHTML = renderStaff(); }
   else if (h === 'scholarships') { active = 'scholarships'; app.innerHTML = renderScholarships(); }
+  else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
+  else if (h.startsWith('q/'))   { active = 'search';
+                                   app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));

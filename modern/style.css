@@ -254,3 +254,34 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
 .alum h3{margin:6px 0 0;font-size:16px}
 .alum p{margin:7px 0 0;font-size:14px;line-height:1.55;color:var(--fg-2,#a3abbb)}
 .alum-at{margin-top:9px;font-size:13px;color:var(--fg-3,#8b94a5)}
+
+/* ── Search, gallery, headshots, F.C. link ──────────────────────────────── */
+.searchbox{margin-left:8px;display:flex;align-items:center}
+.searchbox input{font:inherit;font-size:13px;background:var(--panel-2,#1c212c);
+  border:1px solid var(--line,#262d3a);border-radius:999px;padding:6px 13px;
+  width:120px;color:var(--fg,#eef1f6);transition:width .18s}
+.searchbox input:focus{outline:none;border-color:var(--blue,#4d8bff);width:190px}
+mark{background:rgba(77,139,255,.3);color:inherit;border-radius:3px;padding:0 2px}
+.no-hits{font-size:15px;line-height:1.6;color:var(--fg-2,#a3abbb);max-width:56ch}
+
+.avatar.lg.photo{object-fit:cover;border-radius:50%;padding:0}
+.art-solo{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.solo{margin:0;background:var(--panel,#151922);border:1px solid var(--line,#262d3a);
+  border-radius:14px;overflow:hidden}
+.solo img{width:100%;height:auto;display:block}
+.solo figcaption{padding:12px 14px;font-size:13px}
+.solo figcaption b{display:block;font-size:15px;margin-bottom:3px}
+.solo figcaption span{color:var(--fg-3,#8b94a5)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.gal-item{display:block;aspect-ratio:1;overflow:hidden;border-radius:10px;
+  border:1px solid var(--line,#262d3a)}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
+.gal-item:hover img{transform:scale(1.06)}
+
+.fc-card{display:flex;gap:15px;align-items:center;padding:18px;border-radius:14px;
+  background:var(--panel,#151922);border:1px solid var(--line,#262d3a);
+  text-decoration:none;color:var(--fg,#eef1f6)}
+.fc-card:hover{border-color:var(--blue,#4d8bff)}
+.fc-badge{font-size:28px;flex:none}
+.fc-card b{display:block;font-size:16px}
+.fc-card span{display:block;margin-top:4px;font-size:13.5px;color:var(--fg-2,#a3abbb);line-height:1.5}
