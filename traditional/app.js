@@ -8,7 +8,9 @@ document.getElementById('dateline').textContent =
 
 document.getElementById('nav').innerHTML =
   `<a href="#/">Front Page</a>` +
-  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
+  `<a href="#/staff" data-sec="staff">The Team</a>` +
+  `<a href="#/scholarships" data-sec="scholarships">Scholarships</a>`;
 
 document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
@@ -175,9 +177,101 @@ function renderHome() {
   </div>`;
 }
 
+// ── The team ─────────────────────────────────────────────────────────────────
+// Set as a masthead: who runs the paper, what they cover, and what they wrote.
+function renderStaff() {
+  const team = Paper.staff();
+  const also = Paper.contributors();
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>The News Team</h1>
+      <p>2025 &ndash; 2026</p>
+    </div>
+    <p class="staff-intro">Get to know the people responsible for publishing all of
+       the News Team&rsquo;s content from behind the scenes.</p>
+    <div class="roster">
+      ${team.map(m => {
+        const mine = Paper.storiesBy(m.name);
+        return `
+        <div class="ros-person">
+          <h3 class="ros-name">${esc(m.name)}</h3>
+          <div class="ros-beat">${esc(m.beats)}</div>
+          <p class="ros-bio">${esc(m.bio)}</p>
+          ${mine.length ? `<div class="ros-work">
+            ${mine.map(a => `<a href="#/a/${esc(a.slug)}">${esc(a.title)}</a>`).join('')}
+          </div>` : ''}
+        </div>`; }).join('')}
+    </div>
+    ${also.length ? `
+      <div class="page-head sub-head"><h2>Also in this year&rsquo;s paper</h2>
+        <p>Bylines we have not written a profile for yet</p></div>
+      <div class="also-list">
+        ${also.map(c => `<a class="also" href="#/s/${esc((byAuthor(c.name)||{}).section||'campus')}">
+           <b>${esc(c.name)}</b><i>${c.count} ${c.count === 1 ? 'story' : 'stories'}</i></a>`).join('')}
+      </div>` : ''}
+  </div>`;
+}
+
+// First section a writer appears in — enough to point at their work when we have
+// no profile page for them.
+function byAuthor(name) { return ARTICLES.find(a => a.author === name) || null; }
+
+// ── Scholarships ─────────────────────────────────────────────────────────────
+function renderScholarships() {
+  const list = Paper.scholarships();
+  const open = Paper.openCount();
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Scholarships</h1>
+      <p>${open ? open + ' still open' : 'None open right now'}</p>
+    </div>
+    ${open ? '' : `<p class="sch-stale">Every deadline below has passed. These are
+      the ones the paper listed last year, kept here so the list is not lost &mdash;
+      a club member can put this year&rsquo;s dates in and they will show as open
+      again on their own.</p>`}
+    <table class="sch">
+      <thead><tr><th>Scholarship</th><th>Award</th><th>Given</th><th>Deadline</th><th></th></tr></thead>
+      <tbody>
+        ${list.map(s => `
+        <tr class="is-${esc(s.due.state)}">
+          <td class="sch-name">${esc(s.name)}${s.provider ? ` <span>${esc(s.provider)}</span>` : ''}</td>
+          <td class="sch-amt">${esc(s.amount || '\u2014')}</td>
+          <td>${esc(String(s.awards))}</td>
+          <td>${esc(s.due.when)}</td>
+          <td class="sch-state"><span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span>
+            ${s.url ? ` <a class="sch-apply" href="${esc(s.url)}" rel="noopener">Apply</a>` : ''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ── Alumni directory ─────────────────────────────────────────────────────────
+// Appended to the Alumni section page: the old site listed what graduates went
+// on to do alongside the one article about it.
+function alumniBlock() {
+  const list = Paper.alumni();
+  if (!list.length) return '';
+  return `
+    <div class="page-head sub-head"><h2>Where they are now</h2>
+      <p>See what the graduates of Blanson are up to</p></div>
+    <div class="alum-grid">
+      ${list.map(v => `
+        <div class="alum">
+          <div class="alum-what">${esc(v.what)}</div>
+          ${v.name ? `<div class="alum-who">${esc(v.name)}</div>` : ''}
+          <p>${esc(v.note)}</p>
+          ${v.handle ? `<div class="alum-at">${esc(v.handle)}</div>` : ''}
+        </div>`).join('')}
+    </div>`;
+}
+
 function renderSection(slug) {
   const items = bySection(slug);
-  if (!items.length) return `<div class="wrap"><div class="page-head"><h1>Nothing here yet</h1></div></div>`;
+  const extra = slug === 'alumni' ? alumniBlock() : '';
+  if (!items.length) return `<div class="wrap"><div class="page-head"><h1>Nothing here yet</h1></div>${extra}</div>`;
   return `
   <div class="wrap">
     <div class="page-head">
@@ -194,6 +288,7 @@ function renderSection(slug) {
         </div>
         ${figure(a, 'list-fig')}
       </a>`).join('')}
+    ${extra}
   </div>`;
 }
 
@@ -246,6 +341,8 @@ function route() {
   if (h.startsWith('a/'))      { const s = h.slice(2); app.innerHTML = renderArticle(s);
                                  const a = bySlug(s); active = a ? a.section : ''; }
   else if (h.startsWith('s/')) { active = h.slice(2); app.innerHTML = renderSection(active); }
+  else if (h === 'staff')        { active = 'staff'; app.innerHTML = renderStaff(); }
+  else if (h === 'scholarships') { active = 'scholarships'; app.innerHTML = renderScholarships(); }
   else                         { app.innerHTML = renderHome(); }
 
   document.querySelectorAll('#nav a').forEach(el =>

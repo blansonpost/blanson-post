@@ -209,3 +209,48 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
    Tabular figures stop a grid of cards shifting as the day changes. */
 .pubdate{font-variant-numeric:tabular-nums;white-space:nowrap}
 .read-meta .sub.upd{font-style:italic;opacity:.85;margin-top:2px}
+
+/* ── The team, scholarships, alumni ─────────────────────────────────────── */
+.people{display:grid;gap:14px}
+.person{display:flex;gap:15px;background:var(--panel,#151922);border:1px solid var(--line,#262d3a);
+  border-radius:14px;padding:17px}
+.avatar.lg{width:52px;height:52px;font-size:16px;flex:none}
+.person-in{min-width:0}
+.person-in h3{margin:0;font-size:16.5px}
+.person-beat{font-size:12.5px;color:var(--blue,#4d8bff);margin:3px 0 8px;font-weight:600}
+.person-bio{margin:0;font-size:14px;line-height:1.6;color:var(--fg-2,#a3abbb)}
+.person-work{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
+.person-work a{font-size:12.5px;background:var(--panel-2,#1c212c);border:1px solid var(--line,#262d3a);
+  border-radius:999px;padding:4px 11px;color:var(--fg,#eef1f6);text-decoration:none}
+.person-work a:hover{border-color:var(--blue,#4d8bff)}
+.person-none{margin-top:9px;font-size:12.5px;color:var(--fg-3,#8b94a5);font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip-link{display:inline-flex;align-items:center;gap:8px;background:var(--panel,#151922);
+  border:1px solid var(--line,#262d3a);border-radius:999px;padding:7px 14px;
+  color:var(--fg,#eef1f6);text-decoration:none;font-size:13.5px}
+.chip-link b{color:var(--fg-3,#8b94a5);font-size:12px}
+.chip-link:hover{border-color:var(--blue,#4d8bff)}
+
+.stale{background:rgba(240,168,60,.1);border:1px solid rgba(240,168,60,.35);color:#f7d6a0;
+  border-radius:12px;padding:13px 15px;margin-bottom:16px;font-size:13.5px;line-height:1.55}
+.sch-card{padding:17px;display:flex;flex-direction:column;gap:7px}
+.sch-card h3{margin:0;font-size:16px}
+.sch-card.is-closed{opacity:.62}
+.sch-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sch-amt{font-size:21px;font-weight:750;font-variant-numeric:tabular-nums}
+.sch-prov{font-size:12.5px;color:var(--fg-3,#8b94a5)}
+.sch-foot{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;
+  color:var(--fg-3,#8b94a5);margin-top:2px}
+.pill{font-size:11px;font-weight:650;border-radius:999px;padding:3px 9px;white-space:nowrap;
+  border:1px solid currentColor}
+.p-open{color:var(--good,#35c98a)}.p-soon{color:var(--review,#f0a83c)}
+.p-closed{color:var(--fg-3,#8b94a5)}
+.sch-apply{align-self:flex-start;margin-top:4px;font-size:13px;font-weight:600;
+  color:var(--blue,#4d8bff);text-decoration:none}
+
+.alum{padding:17px}
+.alum-what{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--blue,#4d8bff)}
+.alum h3{margin:6px 0 0;font-size:16px}
+.alum p{margin:7px 0 0;font-size:14px;line-height:1.55;color:var(--fg-2,#a3abbb)}
+.alum-at{margin-top:9px;font-size:13px;color:var(--fg-3,#8b94a5)}
