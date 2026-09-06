@@ -413,11 +413,21 @@ function moveBlock(id, dir) {
   const i = Ed.doc.blocks.findIndex(b => b.id === id);
   const j = i + dir;
   if (i === -1 || j < 0 || j >= Ed.doc.blocks.length) return;
+
+  // Moving a node in the DOM blurs whatever inside it had focus, so remember
+  // exactly where the caret was and put it back — otherwise pressing Alt+Up
+  // twice in a row silently stops working after the first press.
+  const active = document.activeElement;
+  const hadFocus = active && active.closest && active.closest('.block')
+                   && active.closest('.block').dataset.id === id;
+  const caret = hadFocus && active.selectionStart != null ? active.selectionStart : null;
+  const role = hadFocus ? active.getAttribute('data-role') : null;
+
   const [b] = Ed.doc.blocks.splice(i, 1);
   Ed.doc.blocks.splice(j, 0, b);
   touched(); renderBlocks();
   announce(`Moved to position ${j + 1} of ${Ed.doc.blocks.length}`);
-  focusBlock(id);
+  if (hadFocus) focusBlock(id, caret, role);
 }
 
 function announce(msg) { $('saved').textContent = msg; }
@@ -621,16 +631,28 @@ function wireTextBlock(body, b) {
   });
 }
 
-function focusBlock(id, caret) {
-  requestAnimationFrame(() => {
+// Deliberately not requestAnimationFrame: rAF is throttled or paused whenever
+// the tab isn't visible, which would silently drop focus restoration. A
+// microtask-then-timeout pair always runs.
+function focusBlock(id, caret, role) {
+  const place = () => {
     const node = nodes.get(id);
-    if (!node) return;
-    const f = node.querySelector('[data-role=main]');
-    if (!f) { const b = node.querySelector('button'); if (b) b.focus(); return; }
-    f.focus();
-    if (typeof caret === 'number' && f.setSelectionRange) f.setSelectionRange(caret, caret);
-    if (f.tagName === 'TEXTAREA') autoGrow(f);
-  });
+    if (!node || !node.isConnected) return false;
+    const f = node.querySelector(`[data-role="${role || 'main'}"]`)
+           || node.querySelector('[data-role="main"]');
+    // A photo block has no text field; land on its first control rather than
+    // dropping focus to the document.
+    const el = f || node.querySelector('input, button');
+    if (!el) return false;
+    el.focus();
+    if (f && typeof caret === 'number' && f.setSelectionRange) {
+      const at = Math.min(caret, (f.value || '').length);
+      try { f.setSelectionRange(at, at); } catch (e) { /* not a text field */ }
+    }
+    if (el.tagName === 'TEXTAREA') autoGrow(el);
+    return document.activeElement === el;
+  };
+  if (!place()) setTimeout(place, 0);
 }
 
 // Alt+arrow moves the block you're in, so reordering never needs a mouse.

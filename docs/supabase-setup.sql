@@ -1,3 +1,39 @@
+-- ############################################################################
+-- ##  DO NOT RUN THIS FILE YET.
+-- ##
+-- ##  It has known security gaps. They are harmless while there is no Supabase
+-- ##  project — there is no server to attack — but running this as-is would put
+-- ##  a real hole on a real site.
+-- ##
+-- ##  Must be fixed first:
+-- ##
+-- ##   1. Turn OFF public email sign-ups BEFORE creating any tables.
+-- ##      Supabase enables them by default. The instruction is currently at the
+-- ##      BOTTOM of this file, so anyone reading top-to-bottom runs with open
+-- ##      registration for as long as it takes them to reach the end.
+-- ##
+-- ##   2. articles_insert has no status guard. Any signed-in account can run
+-- ##        insert({ status: 'published' })
+-- ##      from the browser console and put a story straight on the front page,
+-- ##      with no editor and no review. Hiding the Publish button in the
+-- ##      newsroom is decoration; this is the actual rule.
+-- ##
+-- ##   3. The photos bucket has no size limit and no allowed_mime_types, so any
+-- ##      account can upload a 500MB file, or an HTML page, to a permanent
+-- ##      public URL on the school's domain. Only editors can delete it.
+-- ##
+-- ##   4. Anonymous readers can select * from articles, which exposes the
+-- ##      auth user id of every student author. Read through a view instead.
+-- ##
+-- ##   5. `section` has no CHECK constraint, and `role` is protected by a
+-- ##      subquery whose correctness depends on transaction snapshot timing
+-- ##      rather than by a trigger.
+-- ##
+-- ##  See the "Deferred with the rest of the database work" section of the
+-- ##  rebuild plan. When someone picks this up, fix the five items above first,
+-- ##  then delete this header.
+-- ############################################################################
+
 -- The Blanson Post — Supabase setup
 --
 -- Run this ONCE in your Supabase project: SQL Editor -> New query -> paste -> Run.
