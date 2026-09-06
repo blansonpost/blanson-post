@@ -137,14 +137,14 @@ const Store = (() => {
   const toRow = a => ({
     id: a.id, slug: a.slug, title: a.title, section: a.section, author: a.author,
     body: a.body.join('\n'), excerpt: a.excerpt, rating: a.rating, rating_max: a.ratingMax,
-    status: a.status, images: a.images, photo_meta: a.photoMeta, updated_at: a.updatedAt
+    status: a.status, images: a.images, photos: a.photos, updated_at: a.updatedAt
   });
 
   const fromRow = r => ({
     id: r.id, slug: r.slug, title: r.title, section: r.section, author: r.author,
     body: (r.body || '').split('\n'), excerpt: r.excerpt,
     rating: r.rating, ratingMax: r.rating_max, status: r.status,
-    images: r.images || [], photoMeta: r.photo_meta || {},
+    images: r.images || [], photos: r.photos || [],
     createdAt: r.created_at, updatedAt: r.updated_at
   });
 
@@ -191,7 +191,7 @@ const Store = (() => {
         author: a.author || '', featured: false,
         rating: a.rating == null ? undefined : a.rating,
         ratingMax: a.ratingMax == null ? undefined : a.ratingMax,
-        images: a.images || [], photoMeta: a.photoMeta || {},
+        images: a.images || [], photos: a.photos || [],
         excerpt: a.excerpt || (a.body.find(l => l.trim().length > 40) || ''),
         body: a.body.filter(l => l.trim().length)
       }));

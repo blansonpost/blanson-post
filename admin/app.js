@@ -133,7 +133,7 @@ function blank() {
     id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     slug: '', title: '', section: 'campus', author: me.name, body: [''],
     excerpt: '', rating: null, ratingMax: 5, status: 'draft',
-    images: [], photoMeta: {}, createdBy: me.email
+    photos: [], images: [], createdBy: me.email
   };
 }
 
@@ -189,8 +189,8 @@ $('f-photo').onchange = async e => {
     try {
       toast(`Adding ${f.name}…`);
       const url = await Store.uploadPhoto(f);
-      current.images.push(url);
-      current.photoMeta[url] = { caption: '', credit: '' };
+      // A fresh object per upload: two copies of one picture stay independent.
+      current.photos.push({ src: url, caption: '', credit: '' });
       dirty = true;
       renderPhotos(); renderPreview();
       toast(`Added ${f.name}`, 'good');
@@ -199,10 +199,10 @@ $('f-photo').onchange = async e => {
 };
 
 function renderPhotos() {
-  const n = current.images.length;
+  const n = current.photos.length;
   $('photos-empty').hidden = n > 0;
-  $('photos').innerHTML = current.images.map((src, i) => {
-    const m = current.photoMeta[src] || {};
+  $('photos').innerHTML = current.photos.map((m, i) => {
+    const src = m.src;
     const used = new RegExp('\\[\\[photo:' + (i + 1) + '\\]\\]').test($('f-body').value);
     return `
     <div class="photo">
@@ -225,26 +225,22 @@ function renderPhotos() {
   }).join('');
 
   $('photos').querySelectorAll('.cap').forEach(inp => inp.oninput = () => {
-    const src = current.images[+inp.dataset.i];
-    current.photoMeta[src] = current.photoMeta[src] || { caption: '', credit: '' };
-    current.photoMeta[src][inp.dataset.k] = inp.value;
+    current.photos[+inp.dataset.i][inp.dataset.k] = inp.value;
     dirty = true; renderPreview();
   });
   $('photos').querySelectorAll('[data-insert]').forEach(b =>
     b.onclick = () => insertMarker(+b.dataset.insert));
   $('photos').querySelectorAll('[data-cover]').forEach(b => b.onclick = () => {
     const i = +b.dataset.cover;
-    const [src] = current.images.splice(i, 1);
-    current.images.unshift(src);
+    const [p] = current.photos.splice(i, 1);
+    current.photos.unshift(p);
     renumberMarkers();
     dirty = true; renderPhotos(); renderPreview();
   });
   $('photos').querySelectorAll('[data-remove]').forEach(b => b.onclick = () => {
     const i = +b.dataset.remove;
-    const src = current.images[i];
     if (!confirm('Remove this photo from the article?')) return;
-    current.images.splice(i, 1);
-    delete current.photoMeta[src];
+    current.photos.splice(i, 1);
     $('f-body').value = $('f-body').value
       .replace(new RegExp('^\\s*\\[\\[photo:' + (i + 1) + '\\]\\]\\s*$\\n?', 'gm'), '');
     renumberMarkers();
@@ -256,7 +252,7 @@ function renderPhotos() {
 function renumberMarkers() {
   // Nothing to remap reliably after a reorder, so drop stale markers rather than
   // silently pointing them at the wrong picture.
-  const valid = current.images.length;
+  const valid = current.photos.length;
   $('f-body').value = $('f-body').value.replace(/\[\[photo:(\d+)\]\]/g,
     (m, n) => (+n <= valid ? m : ''));
 }
@@ -280,19 +276,18 @@ function renderPreview() {
   const html = lines.map(l => {
     const m = l.match(/^\[\[photo:(\d+)\]\]$/);
     if (m) {
-      const src = current.images[+m[1] - 1];
-      if (!src) return `<div class="pv-missing">Photo ${esc(m[1])} is gone</div>`;
-      const meta = current.photoMeta[src] || {};
-      return `<figure class="pv-fig"><img src="${esc(src)}" alt="">${
-        meta.caption || meta.credit
-          ? `<figcaption>${esc(meta.caption)}${
-              meta.credit ? ` <i>${esc(meta.credit)}</i>` : ''}</figcaption>`
+      const ph = current.photos[+m[1] - 1];
+      if (!ph) return `<div class="pv-missing">Photo ${esc(m[1])} is gone</div>`;
+      return `<figure class="pv-fig"><img src="${esc(ph.src)}" alt="">${
+        ph.caption || ph.credit
+          ? `<figcaption>${esc(ph.caption)}${
+              ph.credit ? ` <i>${esc(ph.credit)}</i>` : ''}</figcaption>`
           : ''}</figure>`;
     }
     return `<p>${esc(l)}</p>`;
   }).join('');
 
-  const cover = current.images[0];
+  const cover = (current.photos[0] || {}).src;
   $('preview').innerHTML =
     `<h4>${esc($('f-title').value || 'Untitled')}</h4>
      <div class="pv-by">${esc($('f-author').value || 'no byline yet')}</div>
@@ -312,7 +307,9 @@ function collect() {
     excerpt: body.find(l => !/^\[\[photo:\d+\]\]$/.test(l) && l.length > 40) || body[0] || '',
     rating: rating === '' ? null : Number(rating),
     ratingMax: Number($('f-rating-max').value),
-    slug: current.slug || Store.slugify($('f-title').value) || current.id
+    slug: current.slug || Store.slugify($('f-title').value) || current.id,
+    // `images` stays as the plain list of sources the designs read.
+    images: current.photos.map(p => p.src)
   });
   return current;
 }

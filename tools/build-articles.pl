@@ -234,12 +234,14 @@ const stars = a => {
 // Returns a flat block list: { type:'text', text } | { type:'image', src }.
 const PHOTO_MARKER = /\[\[photo:(\d+)\]\]/;
 
-// Photos carry a caption and credit when the admin panel supplied them.
+// Each photo owns its caption and credit, addressed by position. Keying that
+// off the image URL instead would make two copies of one picture share a single
+// caption — and re-adding a picture would wipe it.
 const photoOf = (a, i) => {
+  const p = (a.photos || [])[i];
+  if (p && p.src) return { src: p.src, caption: p.caption || '', credit: p.credit || '' };
   const src = (a.images || [])[i];
-  if (!src) return null;
-  const m = (a.photoMeta || {})[src] || {};
-  return { src, caption: m.caption || '', credit: m.credit || '' };
+  return src ? { src, caption: '', credit: '' } : null;
 };
 
 function layoutBlocks(a) {

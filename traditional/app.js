@@ -53,7 +53,7 @@ function bodyHTML(a) {
   if (isVerse(a)) {
     const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
     return verse + (a.images || []).slice(1)
-      .map((src, i) => inlineFig({ src, ...(a.photoMeta || {})[src] })).join('');
+      .map((src, i) => inlineFig(photoOf(a, i + 1) || { src })).join('');
   }
   return layoutBlocks(a).map(b =>
     b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');

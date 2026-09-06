@@ -48,7 +48,7 @@ create table if not exists public.articles (
   rating_max  integer default 5,
   status      text not null default 'draft' check (status in ('draft','review','published')),
   images      jsonb not null default '[]'::jsonb,
-  photo_meta  jsonb not null default '{}'::jsonb,
+  photos      jsonb not null default '[]'::jsonb,
   author_id   uuid references auth.users(id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()

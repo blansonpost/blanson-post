@@ -59,7 +59,7 @@ function bodyHTML(a) {
   if (isVerse(a)) {
     return `<div class="poem">${a.body.map(esc).join('<br>')}</div>` +
            (a.images || []).slice(1)
-             .map(src => inlineFig({ src, ...(a.photoMeta || {})[src] })).join('');
+             .map((src, i) => inlineFig(photoOf(a, i + 1) || { src })).join('');
   }
   return layoutBlocks(a).map(b =>
     b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
