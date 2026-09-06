@@ -32,18 +32,34 @@ function pic(a, cls, tilt) {
     : `<div class="${cls} noimg"${t}><span>${icon(a.section)}</span></div>`;
 }
 
-function bodyHTML(a) {
-  if (isVerse(a)) return `<div class="poem">${a.body.map(esc).join('<br>')}</div>`;
-  if (isQA(a)) return a.body.map(l => {
-    const s = speakerOf(l);
-    if (!s) return `<p class="intro">${esc(l)}</p>`;
+function textHTML(a, line) {
+  if (isQA(a)) {
+    const s = speakerOf(line);
+    if (!s) return `<p class="intro">${esc(line)}</p>`;
     const q = /borrego|borrega/i.test(s.who);
     return `<div class="bubble ${q ? 'ask' : 'say'}">
               <div class="bubble-who">${esc(s.who)}</div>
               <div class="bubble-txt">${esc(s.text)}</div>
             </div>`;
-  }).join('');
-  return a.body.map(p => `<p>${esc(p)}</p>`).join('');
+  }
+  return `<p>${esc(line)}</p>`;
+}
+
+// Photos run through the story (see layoutBlocks), each tilted a little so the
+// page keeps the scrapbook feel.
+let tiltSeed = 0;
+const inlineFig = src =>
+  `<figure class="inline-fig" style="--tilt:${[-1.2, 1, -.7, 1.4][tiltSeed++ % 4]}deg">
+     <img src="${esc(imageUrl(src))}" alt="" loading="lazy"></figure>`;
+
+function bodyHTML(a) {
+  tiltSeed = 0;
+  if (isVerse(a)) {
+    return `<div class="poem">${a.body.map(esc).join('<br>')}</div>` +
+           (a.images || []).slice(1).map(inlineFig).join('');
+  }
+  return layoutBlocks(a).map(b =>
+    b.type === 'image' ? inlineFig(b.src) : textHTML(a, b.text)).join('');
 }
 
 function facts(a) {
@@ -172,9 +188,6 @@ function renderArticle(slug) {
     ${facts(a)}
     <div class="story-body">${bodyHTML(a)}</div>
 
-    ${a.images && a.images.length > 1 ? `
-      <div class="strip">${a.images.slice(1).map((f, i) =>
-        `<img src="${esc(imageUrl(f))}" alt="" loading="lazy" style="--tilt:${(i % 3) - 1}deg">`).join('')}</div>` : ''}
     <div class="thanks">Thanks for reading! 🐆</div>
   </article>
 

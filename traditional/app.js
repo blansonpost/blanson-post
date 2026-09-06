@@ -28,23 +28,30 @@ function figure(a, cls) {
 }
 
 // Typeset the body according to its shape: verse keeps line breaks, interviews
-// become a Q&A transcript, everything else is prose with a drop cap.
+// become a Q&A transcript, everything else is prose with a drop cap. Photos are
+// interleaved through the text by layoutBlocks().
+function textHTML(a, line) {
+  if (isQA(a)) {
+    const s = speakerOf(line);
+    if (!s) return `<p class="qa-intro">${esc(line)}</p>`;
+    const interviewer = /borrego|borrega/i.test(s.who);
+    return `<div class="qa ${interviewer ? 'q' : 'a'}">
+              <div class="qa-who">${esc(s.who)}</div>
+              <div class="qa-text">${esc(s.text)}</div>
+            </div>`;
+  }
+  return `<p>${esc(line)}</p>`;
+}
+
 function bodyHTML(a) {
   if (isVerse(a)) {
-    return `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
+    const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
+    return verse + (a.images || []).slice(1).map(src =>
+      `<figure class="inline-fig"><img src="${esc(imageUrl(src))}" alt="" loading="lazy"></figure>`).join('');
   }
-  if (isQA(a)) {
-    return a.body.map(l => {
-      const s = speakerOf(l);
-      if (!s) return `<p class="qa-intro">${esc(l)}</p>`;
-      const interviewer = /borrego|borrega/i.test(s.who);
-      return `<div class="qa ${interviewer ? 'q' : 'a'}">
-                <div class="qa-who">${esc(s.who)}</div>
-                <div class="qa-text">${esc(s.text)}</div>
-              </div>`;
-    }).join('');
-  }
-  return a.body.map(p => `<p>${esc(p)}</p>`).join('');
+  return layoutBlocks(a).map(b => b.type === 'image'
+    ? `<figure class="inline-fig"><img src="${esc(imageUrl(b.src))}" alt="" loading="lazy"></figure>`
+    : textHTML(a, b.text)).join('');
 }
 
 function metaRow(a) {
@@ -175,9 +182,6 @@ function renderArticle(slug) {
       ${metaRow(a)}
       <div class="art-body">${bodyHTML(a)}</div>
       <div class="endmark">❖</div>
-      ${a.images && a.images.length > 1 ? `
-        <div class="gallery">${a.images.slice(1).map(f =>
-          `<img src="${esc(imageUrl(f))}" alt="" loading="lazy">`).join('')}</div>` : ''}
     </article>
 
     ${more.length ? `

@@ -224,6 +224,41 @@ const stars = a => {
   const n = Math.round(a.rating / a.ratingMax * 5);
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 };
+
+// ── Body layout ─────────────────────────────────────────────────────────────
+// Spreads an article's remaining photos through the text rather than stacking
+// them at the end. images[0] is the lead and is placed by the design itself.
+// Returns a flat block list: { type:'text', text } | { type:'image', src }.
+function layoutBlocks(a) {
+  const lines  = a.body;
+  const extras = (a.images || []).slice(1);
+  const text   = lines.map(t => ({ type: 'text', text: t }));
+  if (!extras.length) return text;
+
+  // A poem is one visual unit, and a very short piece has nowhere to put them.
+  if (isVerse(a) || lines.length < 4 || extras.length >= lines.length) {
+    return text.concat(extras.map(src => ({ type: 'image', src })));
+  }
+
+  // Space them evenly, keeping clear of the opening and closing paragraphs and
+  // never placing two photos back to back.
+  const used = new Set();
+  const step = lines.length / (extras.length + 1);
+  const slots = extras.map((_, i) => {
+    let at = Math.min(lines.length - 1, Math.max(2, Math.round(step * (i + 1))));
+    while (used.has(at) && at < lines.length - 1) at++;
+    used.add(at);
+    return at;
+  });
+
+  const out = [];
+  lines.forEach((t, i) => {
+    const k = slots.indexOf(i);
+    if (k !== -1) out.push({ type: 'image', src: extras[k] });
+    out.push({ type: 'text', text: t });
+  });
+  return out;
+}
 TAIL
 close $O;
 

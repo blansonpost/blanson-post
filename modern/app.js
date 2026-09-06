@@ -46,18 +46,30 @@ function thumb(a, cls) {
     : `<div class="${cls} ph"><span>${esc(sectionName(a.section))}</span></div>`;
 }
 
-function bodyHTML(a) {
-  if (isVerse(a)) return `<div class="verse">${a.body.map(esc).join('<br>')}</div>`;
-  if (isQA(a)) return a.body.map(l => {
-    const s = speakerOf(l);
-    if (!s) return `<p class="lede">${esc(l)}</p>`;
+function textHTML(a, line) {
+  if (isQA(a)) {
+    const s = speakerOf(line);
+    if (!s) return `<p class="lede">${esc(line)}</p>`;
     const q = /borrego|borrega/i.test(s.who);
     return `<div class="turn ${q ? 'q' : 'a'}">
               <div class="turn-who">${esc(s.who)}</div>
               <div class="turn-txt">${esc(s.text)}</div>
             </div>`;
-  }).join('');
-  return a.body.map(p => `<p>${esc(p)}</p>`).join('');
+  }
+  return `<p>${esc(line)}</p>`;
+}
+
+// Photos run through the article (see layoutBlocks), not stacked at the end.
+const inlineFig = src =>
+  `<figure class="inline-fig"><img src="${esc(imageUrl(src))}" alt="" loading="lazy"></figure>`;
+
+function bodyHTML(a) {
+  if (isVerse(a)) {
+    return `<div class="verse">${a.body.map(esc).join('<br>')}</div>` +
+           (a.images || []).slice(1).map(inlineFig).join('');
+  }
+  return layoutBlocks(a).map(b =>
+    b.type === 'image' ? inlineFig(b.src) : textHTML(a, b.text)).join('');
 }
 
 function facts(a) {
@@ -193,9 +205,6 @@ function renderArticle(slug) {
       ${facts(a)}
       ${bodyHTML(a)}
     </div>
-    ${a.images && a.images.length > 1 ? `
-      <div class="read-gallery">${a.images.slice(1).map(f =>
-        `<img src="${esc(imageUrl(f))}" alt="" loading="lazy">`).join('')}</div>` : ''}
   </article>
 
   ${more.length ? `
