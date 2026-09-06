@@ -12,10 +12,10 @@
 # NOTE: the Wix page "gaming" was a byte-identical duplicate of "blanson-f-c-2-0"
 # (both "Blanson beats Victory 4-0") and is deliberately excluded.
 #
-# slug	section	title	author	rating	featured
+# slug	section	title	author	rating	featured	lead-image
 copy-of-harvatine-interview	campus	Blanson SkillsUSA Champions the Future Through Santa Donations Project	?		yes
 copy-of-blanson-skillsusa-champions	campus	Blanson SkillsUSA Students Return to Grantham	?		no
-jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film	Jason Borrego		yes
+jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film	Jason Borrego		yes	6deed7_84279e32147442ea950945d0b87f16fd.png
 harvatine-interview	interviews	Meet Mr. Harvatine: From the Classroom to the Front Office	Jason Borrego		no
 copy-of-bittersweet	sports	Neymar Jr: The Prince That Never Stood Up	José Manuel González		yes
 copy-of-test-your-limits	sports	The Fall of Manchester United!	José Manuel González		no
@@ -46,7 +46,7 @@ copy-of-as-above-so-below-1	film	Pride & Prejudice	Kelly Martinez	4.6/5	no
 full-metal-alchemist-brotherhood	film	Full Metal Alchemist: Brotherhood	Oliver Romero		no
 a-thief-s-gambit	poetry	A Thief's Gambit #1	Melanie Cardenas		yes
 copy-of-a-thief-s-gambit-1	poetry	A Thief's Gambit #2	Melanie Cardenas		no
-copy-of-jenkins-interview	poetry	Believe	Josue Reyes		no
+copy-of-jenkins-interview	poetry	Believe	Josue Reyes		no	6deed7_acfc48f40ced44d4ade6efe7cc5d8b4d.jpg
 bittersweet	poetry	Bittersweet	Josue Reyes		no
 bittersweet-flame	poetry	Bittersweet Flame	Jason Borrego		no
 phantoms-of-water	poetry	Phantoms of Water	Jason Borrego		no

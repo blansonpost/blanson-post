@@ -25,7 +25,10 @@ my %CHROME = map { lc($_) => 1 } (
     'Log In', 'More', 'Instagram', 'Twitter', 'YouTube', 'Facebook', 'TikTok',
     'Use tab to navigate through the menu items.', '-->', 'VIEW MORE',
     'View More', 'Read More', 'Blanson Career and Technical Education Highschool',
-    'Skip to Main Content', 'Get Started', 'Enter your email here', 'Subscribe', 'Time is TBD', 'Location is TBD',
+    'Skip to Main Content', 'Get Started', 'Enter your email here', 'Subscribe',
+    'Time is TBD', 'Location is TBD',
+    # footer block, repeated on every page
+    '311 West Road', 'Houston, TX 77038', '281.591.4950',
 );
 
 opendir(my $D, $raw) or die "cannot read $raw: $!";

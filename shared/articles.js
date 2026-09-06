@@ -24,10 +24,7 @@ const ARTICLES = [
       "By choosing to give back, Blanson SkillsUSA members demonstrated that championing the future is not only about career preparation but also about character, citizenship, and community responsibility. The Santa Donations project highlights how students are developing the values and skills needed to positively impact others--today and in the future.",
       "Blanson SkillsUSA members prepare wrapped gifts for delivery as part of their Santa Donations project, championing compassion and community support.",
       "Students deliver holiday gifts to a local family, demonstrating the SkillsUSA theme \"Champion Your Future\" through service and leadership.",
-      "Students collaborate to sort and prepare donated items, reinforcing teamwork and responsibility as future-ready leaders.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Students collaborate to sort and prepare donated items, reinforcing teamwork and responsibility as future-ready leaders."
     ]
   },
   {
@@ -45,10 +42,7 @@ const ARTICLES = [
       "The visit held special significance for Raisa, who previously attended Grantham Middle School. Wanting to give back to the campus that helped shape her academic journey, Raisa helped lead the event and even reconnected with one of her former teachers--highlighting the powerful impact of CTE pathways and student leadership.",
       "During the Lunch & Learn, the students shared what future Blanson students can expect when they walk the halls of Blanson CTE High School. They discussed coursework, industry certifications, leadership development through SkillsUSA, and real-world career opportunities within the Distribution and Logistics program. Grantham students were able to ask questions and hear firsthand how CTE prepares students for college, careers, and leadership.",
       "The event aligned with the 2025--2026 SkillsUSA theme, \"Champion Your Future,\" as Raisa, Nalley, and Angie served as ambassadors for both Blanson and Career & Technical Education. Their professionalism and authenticity demonstrated how students can take ownership of their futures while guiding others toward meaningful opportunities.",
-      "Through initiatives like this Lunch & Learn, Blanson SkillsUSA continues to strengthen the pipeline between middle school and high school--ensuring students enter Blanson informed, confident, and ready to succeed.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Through initiatives like this Lunch & Learn, Blanson SkillsUSA continues to strengthen the pipeline between middle school and high school--ensuring students enter Blanson informed, confident, and ready to succeed."
     ]
   },
   {
@@ -58,10 +52,9 @@ const ARTICLES = [
     title: "Meet Mr. Jenkins: A Loud and Proud Passion for Film",
     author: "Jason Borrego",
     featured: true,
-    images: ["6deed7_2c82f11e136b495b97ad8467091ae0d3.jpg", "6deed7_84279e32147442ea950945d0b87f16fd.png"],
-    excerpt: "Ricjuane Jenkins",
+    images: ["6deed7_84279e32147442ea950945d0b87f16fd.png", "6deed7_2c82f11e136b495b97ad8467091ae0d3.jpg"],
+    excerpt: "A man with a loud and proud passion for film, Mr. Jenkins is widely known for being the primary teacher of Audio/Video Production here at Blanson through thick and thin. But where does this passion come from, and how did it land him in the spotlight that we all see him in today? These are just some…",
     body: [
-      "Ricjuane Jenkins",
       "A man with a loud and proud passion for film, Mr. Jenkins is widely known for being the primary teacher of Audio/Video Production here at Blanson through thick and thin. But where does this passion come from, and how did it land him in the spotlight that we all see him in today? These are just some of the questions that I got the chance to sit down and ask him in this exclusive interview.",
       "Borrego: First of all, thank you so much for taking the time to do this interview with me.",
       "Jenkins: You're welcome. Wait, should I show the fact that I'm a black superhero?",
@@ -95,10 +88,7 @@ const ARTICLES = [
       "Borrego: Never heard of him.",
       "Jenkins: Yeah. He's wrote... it's not some self-help books, but some of the books he's written is very interesting. I think that's where that quote comes from. But I mean, that's true. That's really true. Like as a teacher, I'd rather say there are more masters or more teachers that I've taught than just people that have just sat and learned.",
       "Borrego: Do you see yourself continuing to teach at Blanson for the foreseeable future?",
-      "Jenkins: Yes. I'm here till there's either a better opportunity or a better offer. I think schools like this are very important. We shouldn't be one of a few. I think we should be one of many, but I don't think it should stop with CTE. I think the specialty schools in the long run end up helping you guys out. Because one thing I remember in high school was sitting there and like, \"I don't even know what this has to do with what I want to do.\". And at least at a CTE school or a choice school, you're actually working in a field that you're interested in. Whether or not you go into the field when you graduate or anything like that, at least you learned it, right? So you have that in your wheelhouse versus going to a regular high school where you have your general education classes, and then if you ask your average high school student, \"Hey, what do you want to do?\", they don't know cuz it's just been general ed and nothing specific. At least here, you can say, \"I'm in the HVAC program.\", \"What do you want to do?\", \"Well, actually being in the HVAC program helped me focus. I want to actually go do this, that, and the other.\". That has nothing to do with HVAC, but the skills you learn there, you take elsewhere. So, yeah.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Jenkins: Yes. I'm here till there's either a better opportunity or a better offer. I think schools like this are very important. We shouldn't be one of a few. I think we should be one of many, but I don't think it should stop with CTE. I think the specialty schools in the long run end up helping you guys out. Because one thing I remember in high school was sitting there and like, \"I don't even know what this has to do with what I want to do.\". And at least at a CTE school or a choice school, you're actually working in a field that you're interested in. Whether or not you go into the field when you graduate or anything like that, at least you learned it, right? So you have that in your wheelhouse versus going to a regular high school where you have your general education classes, and then if you ask your average high school student, \"Hey, what do you want to do?\", they don't know cuz it's just been general ed and nothing specific. At least here, you can say, \"I'm in the HVAC program.\", \"What do you want to do?\", \"Well, actually being in the HVAC program helped me focus. I want to actually go do this, that, and the other.\". That has nothing to do with HVAC, but the skills you learn there, you take elsewhere. So, yeah."
     ]
   },
   {
@@ -109,10 +99,8 @@ const ARTICLES = [
     author: "Jason Borrego",
     featured: false,
     images: ["6deed7_7f705f22477c429cb219da5d3f527e49.png"],
-    excerpt: "Meet",
+    excerpt: "From teaching in the classroom to monitoring the school as an Assistant Principal, Mr. Harvatine of our Blanson CTE High School seems to have it all. But where did this passion come from, and how did he get to where we all see him now? These are just some of the questions that I got the chance to…",
     body: [
-      "Meet",
-      "Mr. Haventine",
       "From teaching in the classroom to monitoring the school as an Assistant Principal, Mr. Harvatine of our Blanson CTE High School seems to have it all. But where did this passion come from, and how did he get to where we all see him now? These are just some of the questions that I got the chance to sit down and ask him in an exclusive interview.​ ​​​",
       "Borrego:",
       "How did you first get into teaching?",
@@ -142,10 +130,7 @@ const ARTICLES = [
       "Borrego: Do you see yourself teaching again or continuing to move up the ladder?",
       "Harvatine: My personal goal is I'd like to be a building principal like Mr. Van Donsel.",
       "Borrego: Oh, like running the whole school?",
-      "Harvatine: Run the whole school, that was one of my personal goals. So, I think that I want to explore that track more and see what happens with that.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Harvatine: Run the whole school, that was one of my personal goals. So, I think that I want to explore that track more and see what happens with that."
     ]
   },
   {
@@ -186,10 +171,7 @@ const ARTICLES = [
       "Currently, Santos sits 16th in the league, just one spot above relegation. Can Neymar help his boyhood club avoid the drop and bring them back to the glory they enjoyed 12 years ago?",
       "The Aftermath",
       "Neymar Jr. is, without a doubt, one of the greatest players of our generation. He has lit up the field and entertained fans like few others, always playing with the joy and creativity of a kid from the streets of Brazil. Throughout his career, he faced countless ups and downs - from being fouled and injured to enduring criticism in his own country - yet he always found a way to come back and push his team forward.",
-      "Neymar Jr. will forever be remembered as the prince who never became king.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Neymar Jr. will forever be remembered as the prince who never became king."
     ]
   },
   {
@@ -211,10 +193,7 @@ const ARTICLES = [
       "The Cause of the Downfall: Ownership",
       "The Glazer family controls Manchester United as a global financial giant but supporters believe their ownership focuses on financial gains instead of fan passion. The club's increasing ticket costs and corporate influence and questionable player selection have created a growing distance between United supporters and their team. The legendary Old Trafford stadium now produces more angry sounds than triumphant cheers from its fans.The three Manchester clubs along with Arsenal have moved forward through their adoption of contemporary strategies and their strong leadership and organized team structures. United continues to implement short-term solutions by replacing managers and purchasing high-profile players while expecting unexpected success.",
       "The 2025 season has started poorly for Manchester United which has led fans worldwide to wonder if the team will ever regain its former glory. The Red Devils must understand that past achievements do not guarantee future success because they need to develop clear direction and maintain stability and team unity.",
-      "Will Manchester United reclaim their crown as the Kings of England, or crumble under the weight of the Ultras' Expectations?",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Will Manchester United reclaim their crown as the Kings of England, or crumble under the weight of the Ultras' Expectations?"
     ]
   },
   {
@@ -226,7 +205,7 @@ const ARTICLES = [
     featured: false,
     rating: 3,
     ratingMax: 5,
-    excerpt: "What is going on in the NFL?",
+    excerpt: "The NFL is suffering an injury crisis at the BEGINNING of the season. Fans are speculating the injuries are stemming from the type of the grass, cleats, and failed recovery. Regardless of the cause the NFL is in serious trouble if they cannot help prevent injuries at this high rate. We have seen…",
     body: [
       "What is going on in the NFL?",
       "Injuries and Tragedies",
@@ -242,10 +221,7 @@ const ARTICLES = [
       "● James Connor, RB, Cardinals: The RB who was projected to have an amazing season after having one last year suffered a foot injury ultimately sidelining him for the season.",
       "● Nick Bosa, EDGE, 49ers: The defensive beast suffered an ACL tear in week 3 who will not return until next season.",
       "What is going on?",
-      "That's at least 5 superstars out for either half or the whole season. There's an injury crisis that is like no other. This isn't like any other season where there is a mass amount of injuries; this is an entirely different case. Players have been going down like dominoes falling after another. Will the NFL ever fix this problem or is this just a part of the sport of football? A belief that I hold is that games should be held two weeks apart but some may ask how that keeps the sport interesting but the simple answer is spreading games out throughout a week or weekend. The NFL has always stuck to its traditional schedule of all games being held on mondays, thursdays, and sundays. I believe that is time for change in the NFL. At this rate of injuries who knows who will be seeing play for our favorite teams by the end of the season and playoffs.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "That's at least 5 superstars out for either half or the whole season. There's an injury crisis that is like no other. This isn't like any other season where there is a mass amount of injuries; this is an entirely different case. Players have been going down like dominoes falling after another. Will the NFL ever fix this problem or is this just a part of the sport of football? A belief that I hold is that games should be held two weeks apart but some may ask how that keeps the sport interesting but the simple answer is spreading games out throughout a week or weekend. The NFL has always stuck to its traditional schedule of all games being held on mondays, thursdays, and sundays. I believe that is time for change in the NFL. At this rate of injuries who knows who will be seeing play for our favorite teams by the end of the season and playoffs."
     ]
   },
   {
@@ -262,10 +238,7 @@ const ARTICLES = [
       "Break it down!",
       "Diving deeper into habits, you can develop study strategies that actually save you time and stress. For instance, breaking down assignments into smaller portions can help prevent procrastination, as well as creating a consistent study schedule, which can make overwhelming tasks way more digestible. When it comes to challenges, don't be afraid to take on advanced courses such as AP classes or OnRamps programs. These advanced courses will not only prepare you for college-level work but also teach you necessary, valuable skills in time management and resilience. Still, it is important to move forward at your own pace; growth is steady and will accumulate over time, not all at once.",
       "Of course, we will find ourselves momentarily hazed in the fog of rough patches; whether it's a matter that revolves around grades, losing motivation, or dealing with personal challenges, we will all face our own set of struggles and setbacks. However, the key is to remember that your struggles do not define you; each one plays a stepping stone. Growth is not a linear path. What matters is that you get back up, ask for help when you need it, and show yourself grace in the process. Please take care of your mental and physical health, because without them, no grade or achievement will ever feel worth it.",
-      "High school is a journey filled with obstacles, but each of those challenges also creates an opportunity to grow. By valuing the present, building strong habits, and supporting each other through the rough patches, we can all discover our full potential. So, test your limits, and remember to care for yourself along the way.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "High school is a journey filled with obstacles, but each of those challenges also creates an opportunity to grow. By valuing the present, building strong habits, and supporting each other through the rough patches, we can all discover our full potential. So, test your limits, and remember to care for yourself along the way."
     ]
   },
   {
@@ -276,10 +249,8 @@ const ARTICLES = [
     author: "",
     featured: false,
     images: ["6deed7_333cf3bb6d66427aa780d67184c6c2b0.png"],
-    excerpt: "Blanson vs Victory",
+    excerpt: "In Blanson's second-ever soccer game in school history, the team secured a decisive 4--0 victory over Victory ECHS.",
     body: [
-      "Blanson vs Victory",
-      "Blanson F.C beats Victory 4-0!",
       "In Blanson's second-ever soccer game in school history, the team secured a decisive 4--0 victory over Victory ECHS.",
       "Goal 1: Javier Arista",
       "Post Game Interview with team captain, Javier Arista",
@@ -304,10 +275,7 @@ const ARTICLES = [
       "\"I plan to prepare my athletes with more conditioning to help our endurance and give them drills that will help their accuracy. My goal is for every single forward, wing and mid, to score at least two goals this season.\"",
       "How would you describe the team's mentality right now?",
       "\"We are confident because we know we have a strong team. We also know that we could be better so we are ready to keep working hard.\"",
-      "Game Highlight: Nothing But . . . Post!",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Game Highlight: Nothing But . . . Post!"
     ]
   },
   {
@@ -318,10 +286,8 @@ const ARTICLES = [
     author: "",
     featured: false,
     images: ["6deed7_333cf3bb6d66427aa780d67184c6c2b0.png", "6deed7_47c9fed494814d38bb23d8064bc18f3e.jpg"],
-    excerpt: "Blanson vs Avalos",
+    excerpt: "In Blanson's first-ever soccer game in school history, the team secured a decisive 3--0 victory over Avalos P-TECH.",
     body: [
-      "Blanson vs Avalos",
-      "Blanson F.C beats Avalos 3-0!",
       "In Blanson's first-ever soccer game in school history, the team secured a decisive 3--0 victory over Avalos P-TECH.",
       "Goal 1: Mario Flores",
       "Post Game Interview with Mario Flores",
@@ -338,10 +304,7 @@ const ARTICLES = [
       "It seemed pretty good, obviously there's things we can still improve on but pretty good.",
       "\"How do you feel about being one of the players to score on the first ever Blanson soccer game?\"",
       "I felt good, you know, I didn't expect it, but I'll score many more.",
-      "Goal 3: Own Goal",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Goal 3: Own Goal"
     ]
   },
   {
@@ -353,14 +316,9 @@ const ARTICLES = [
     featured: false,
     rating: 4,
     ratingMax: 5,
-    meta: {
-      "game release date": "Dec 13, 2017",
-      "platforms": "PS5, PS4, Android, Switch"
-    },
     images: ["6deed7_78ddff2207c3407791d1a2350a446d9b.jpg"],
-    excerpt: "Overview",
+    excerpt: "Night in the woods is a story driven adventure game that focuses on exploring, growing up, and learning how to deal with change. You play as Mae, a college dropout who returns to her hometown, Possum Spring, hoping everything will be the same as when she left. Instead she's faced with the…",
     body: [
-      "Overview",
       "Night in the woods is a story driven adventure game that focuses on exploring, growing up, and learning how to deal with change. You play as Mae, a college dropout who returns to her hometown, Possum Spring, hoping everything will be the same as when she left. Instead she's faced with the realization that her friends have changed, the town has gotten quieter, and there's a strange mystery hiding underneath all of it. As she reconnects with her friends she starts noticing weird things like missing people, strange figures in the woods, and dreams that feel too real. While the game has a lot of humor and laid back moments it also deals with deeper topics like depression, anxiety, identity, and feeling \"stuck\"",
       "when everyone else is moving forward in life.",
       "Gameplay",
@@ -375,10 +333,7 @@ const ARTICLES = [
       "Before your eyes",
       "Beacon Pines",
       "Gris",
-      "Kentucky Route Zero",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Kentucky Route Zero"
     ]
   },
   {
@@ -390,14 +345,9 @@ const ARTICLES = [
     featured: false,
     rating: 4,
     ratingMax: 5,
-    meta: {
-      "platforms": "Microsoft Windows"
-    },
     images: ["6deed7_2ea8e36b2b704e4292b83bf18055c83e.jpg"],
-    excerpt: "Early Release date: March 28, 2025",
+    excerpt: "Emissary Zero begins with players preparing inside a research facility as they get ready to get deployed on a new mission to a remote planet. Once they arrive the team encounters a bloody scene making it clear that something went wrong. The exploration team discovers abandoned structures, destroyed…",
     body: [
-      "Early Release date: March 28, 2025",
-      "Overview",
       "Emissary Zero begins with players preparing inside a research facility as they get ready to get deployed on a new mission to a remote planet. Once they arrive the team encounters a bloody scene making it clear that something went wrong. The exploration team discovers abandoned structures, destroyed equipment, and strange markings that hint at something non-human. Instead of doing research the players are forced to investigate what happened to the previous team, record, and survive encounters with unknown threats. From there the story slowly builds tension as the mystery deepens making the player feel more isolated with each discovery.",
       "Gameplay",
       "This game is centered around exploration, environmental storytelling, and survival horror mechanics. Players move through the abandoned labs, rocky terrain, and underground tunnels while managing limited resources. In this game decisions matter whether to explore a dangerous room or avoid it to stay safe. This game includes exploration, resource management, environmental puzzles, and stealth for survival. This game uses the standard keyboard and mouse controls for movement, interaction, scanning objects, and flashing management. The slow paced exploration mixed with sudden danger creates a constant feeling of tension.",
@@ -410,10 +360,7 @@ const ARTICLES = [
       "Alien: Isolation",
       "Observation",
       "GTFO",
-      "Prey (2017)",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Prey (2017)"
     ]
   },
   {
@@ -425,14 +372,9 @@ const ARTICLES = [
     featured: false,
     rating: 4,
     ratingMax: 5,
-    meta: {
-      "game release date": "May 31, 2024",
-      "platforms": "GeForceNow, Microsoft Windows"
-    },
     images: ["6deed7_fd0a49046b84456dac912617d2cc54da.jpg"],
-    excerpt: "Overview",
+    excerpt: "This game is a fast paced horror action game that throws players into a chaotic world filled with monstrous creatures and unpredictable dangers. Set in a collapsed industrial facility where experiments have gone horribly wrong. Players take on the role of the lone survivor trapped inside the…",
     body: [
-      "Overview",
       "This game is a fast paced horror action game that throws players into a chaotic world filled with monstrous creatures and unpredictable dangers. Set in a collapsed industrial facility where experiments have gone horribly wrong. Players take on the role of the lone survivor trapped inside the restricted zone filled with mutated beings. This game focuses on escaping the facility while uncovering the cause of the outbreak and what the monsters were originally created for. The environment is dark, cramped, and filled with flickering lights, metal corridors, leaking pipes, and warning alarms. As you progress and unlock logs and notes to reveal the twisted history behind the experiments and the organization responsible for them.The tone of this game is intense, chaotic, and constantly pushing the player forward.",
       "Gameplay",
       "Paincore mixes horror with heavy combat, making it fast, and aggressive but still strategic. The game challenges players to stay alert, manage supplies, health, and defeat the enemies that become stronger and more unpredictable over time. Players must move quickly, collect resources, and fight off aggressive enemies using a mix of weapons and abilities. This game comes with a few mini game features such as combat focused actions, enemy variety, and boss encounters which come with unique mechanics. The keyboard and mouse are used for movement, aiming, interacting, and switching weapons, giving the players tight control during intense moments.The constant action, combined with the horror atmosphere, keeps the gameplay adrenaline filled and intense.",
@@ -446,10 +388,7 @@ const ARTICLES = [
       "Amnesia: The Bunker",
       "Killing Floor 2",
       "Quake (Reboot)",
-      "Metro Exodus",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Metro Exodus"
     ]
   },
   {
@@ -459,9 +398,8 @@ const ARTICLES = [
     title: "Pathologic II",
     author: "Monzerrat Palacios",
     featured: false,
-    excerpt: "Overview",
+    excerpt: "Pathologic 2 is a psychological horror and survivor RPG game set in a mysterious plague ridden town. You play as a healer returning home to find the community consumed by fear, sickness, and chaos. This game challenges players to make difficult choices as time runs out and the plague spreads. It…",
     body: [
-      "Overview",
       "Pathologic 2 is a psychological horror and survivor RPG game set in a mysterious plague ridden town. You play as a healer returning home to find the community consumed by fear, sickness, and chaos. This game challenges players to make difficult choices as time runs out and the plague spreads. It allows you to manage the characters' needs while still trying to uncover the secrets underneath the spread of the plague. You explore the town while talking to locals and make decisions based on the information you have which in turn have lasting consequences in a world that has no easy solutions in your journey.",
       "Gameplay",
       "This game has a 12 day structure that requires careful time management to balance survival mechanisms while also investigating the plague and solving problems. The game focuses on managing hunger, exhaustion, and health while interacting with the townspeople. Players must remember to balance their limited resources while investigating the cause of the plague, and decide who to save or to let die while knowing that every choice you make has a consequence.",
@@ -479,10 +417,7 @@ const ARTICLES = [
       "Prey (2017)",
       "Frostpunk",
       "This war is mine",
-      "Amnesia: Rebirth",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Amnesia: Rebirth"
     ]
   },
   {
@@ -492,9 +427,8 @@ const ARTICLES = [
     title: "YAPYAP",
     author: "Monzerrat Palacios",
     featured: false,
-    excerpt: "Overview",
+    excerpt: "Dive into a world of chaotic spellcasting, funny mishaps, and teamwork driven battles. YAPYAP is a fast paced, co-op game that allows up to six players to team up and face chaotic magical battles with monsters. The design is both hilarious and intense, this game encourages teamwork, strategy in…",
     body: [
-      "Overview",
       "Dive into a world of chaotic spellcasting, funny mishaps, and teamwork driven battles. YAPYAP is a fast paced, co-op game that allows up to six players to team up and face chaotic magical battles with monsters. The design is both hilarious and intense, this game encourages teamwork, strategy in order to meet the quota and win your stay alongside the magician. Whether you are casting spells or dodging enemy attacks, every round offers unpredictable fun with your friends.",
       "Gameplay",
       "This game allows players to take roles of quirky wizards and get wands, each equipped with spells and abilities which can either help your team or backfire spectacularly. Each arena is filled with obstacles, hazards, and opportunities for wild interactions. The goal, outwit your opponents, master your powers, meet the quota, and survive the magical mayhem. The controls are easy to learn but difficult to master, making it accessible for beginners and rewarding for experienced players. For movement you use {W, A, S, D}, for basic attacks and casting spells use left mouse, for special abilities use right mouse. If you want to switch spells use the scroll wheel or use number 1-4 keys, for dash or evade use your shift, and lastly for you to interact or pick up items use your {E} key.",
@@ -510,10 +444,7 @@ const ARTICLES = [
       "BattleBlock Theater",
       "Spellbreak",
       "Move or Die",
-      "These games have a good mechanism that allows you to enjoy the game and makes it easy for you to play. They use cooperative spellcasting, fast combat, teamwork, mayhem combined, they are silly and have wacky physics.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "These games have a good mechanism that allows you to enjoy the game and makes it easy for you to play. They use cooperative spellcasting, fast combat, teamwork, mayhem combined, they are silly and have wacky physics."
     ]
   },
   {
@@ -526,13 +457,9 @@ const ARTICLES = [
     rating: 8,
     ratingMax: 10,
     images: ["6deed7_153fc3f4b1474a9eb4764131429dcc9d.jpg", "6deed7_fe1cead0504c4471ab5b6a35f967912d.jpg"],
-    excerpt: "All the Bright Places by Keydith Manjarres",
+    excerpt: "I would rate this book a 8/10. This book is filled with drama and romance. This book starts off with introducing the main character, Violet Markey. From the beginning, they go into detail about Violet's life and her struggles. We soon that she has a major fear of cars and is severely depressed…",
     body: [
-      "All the Bright Places by Keydith Manjarres",
-      "I would rate this book a 8/10. This book is filled with drama and romance. This book starts off with introducing the main character, Violet Markey. From the beginning, they go into detail about Violet's life and her struggles. We soon that she has a major fear of cars and is severely depressed after the death of her sister. She blames herself for her sister's death because she went to a party and needed a ride back home after she got into a fight with her boyfriend. On the way back home they ended up getting into a car crash which resulted in her sister's death. She falls into a deep depression and finds herself standing at the edge of the bridge where the accident happened. She is stopped by someone who thinks she is trying to jump. This person happens to be Theodore Finch. Theodore is in the same class as Violet. He is known as the weird kid who lashes out in class. After he recognizes her, she is mortified and tries to avoid him the next day at school. Theodore keeps trying to become friends with her. Eventually, she gives in and they become friends. The rest of the story the author takes us through their friendship as they become closer and closer. We see Violet's character change as she is now happier compared to when we first met her character. We get met with an unexpected twist when we go into Theodore's point of view. We get a deeper look into his life and why he is the way that he is. We now understand why he lashes out. Towards the end of the book we witness a very unexpected ending to the book. This book was also adapted into a movie which I watched and even left me devastated. I recommend you to read this book and watch the movie if you love drama and romance series and movies. If you like this book I definitely recommend reading the perks of being a wallflower!",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "I would rate this book a 8/10. This book is filled with drama and romance. This book starts off with introducing the main character, Violet Markey. From the beginning, they go into detail about Violet's life and her struggles. We soon that she has a major fear of cars and is severely depressed after the death of her sister. She blames herself for her sister's death because she went to a party and needed a ride back home after she got into a fight with her boyfriend. On the way back home they ended up getting into a car crash which resulted in her sister's death. She falls into a deep depression and finds herself standing at the edge of the bridge where the accident happened. She is stopped by someone who thinks she is trying to jump. This person happens to be Theodore Finch. Theodore is in the same class as Violet. He is known as the weird kid who lashes out in class. After he recognizes her, she is mortified and tries to avoid him the next day at school. Theodore keeps trying to become friends with her. Eventually, she gives in and they become friends. The rest of the story the author takes us through their friendship as they become closer and closer. We see Violet's character change as she is now happier compared to when we first met her character. We get met with an unexpected twist when we go into Theodore's point of view. We get a deeper look into his life and why he is the way that he is. We now understand why he lashes out. Towards the end of the book we witness a very unexpected ending to the book. This book was also adapted into a movie which I watched and even left me devastated. I recommend you to read this book and watch the movie if you love drama and romance series and movies. If you like this book I definitely recommend reading the perks of being a wallflower!"
     ]
   },
   {
@@ -550,10 +477,7 @@ const ARTICLES = [
       "The lovely bones is a drama book turned into a movie that is full of heartbreak for every character. I rate this movie a good 9/10 and the book a 10/10. Movies that originate from books, most of the time leave out a lot of details. Either way the movie was perfectly executed and although it left out some details from the book it never left out the big details that are important to the story. The lovely bones is about a perfectly happy family set in the 70's.",
       "The story takes a dark and sad turn as the oldest daughter, Susie Salmon was murdered at just 14 years old. The book and movie follows up on the family&acute;s grief process as they try to figure out who is responsible for her death. Although Susie has passed away the story still goes through her point of view. After her passing the story follows her around as she tries to grieve her own death and the fact that she can do nothing but watch as her family is falling apart and her murderer continues to strike. I rate the book a 10/10 as it goes through every single one of the characters that was close to her and how they were affected by her death.",
       "As each chapter was meant for a character and switches to their point of view, it made the story 100 times sadder. The book goes in depth of how her family struggles to cope with her loss and shows how each member griefs differently. We see how her family starts to fall apart as her parents separate due to Susie's mom just wanting to accept that they might never find the person guilty of taking her daughter from her despite Susie's dad fighting to get justice and being overcome by grief that people think he has gone crazy for accusing the neighbor of being the one responsible of their daughters death. Compared to the movie, in the book we get way more details over her death and it lets us go into the minds of other characters besides her family such as her friends and more.",
-      "The ending to both the movie and the book is just heartbreaking. I have watched the movie before reading the book hoping that the ending would have been happier than the movie. You should definitely read this book and watch the movie as it is the perfect watch and read to get you in your feels. If you like this book you should definitely read We Were Liars as it has the same themes of mystery, romance, and drama.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "The ending to both the movie and the book is just heartbreaking. I have watched the movie before reading the book hoping that the ending would have been happier than the movie. You should definitely read this book and watch the movie as it is the perfect watch and read to get you in your feels. If you like this book you should definitely read We Were Liars as it has the same themes of mystery, romance, and drama."
     ]
   },
   {
@@ -570,10 +494,7 @@ const ARTICLES = [
       "The word \"dystopian\" would probably never exist in Jona's community, as everyone seems pleased with being identical and blind to the knowledge of the true freedoms life provides. The members of Jona's dominated community behave in an eerie, robotic way, as if each member has no sense of self, emotion, or knowledge of their existence. Every member has the same specialized replies for every conversation and interaction they have with each other, as every aspect of their lives has been pre-made since the coming of their existence.",
       "For instance, Jonas had been selected to be in the specific family unit, and after every apology, a person is required to respond, \"I accept your apology.\" These repeated and required responses make communication predictable within the community. Nobody knows what's beyond the community. Even death is masked as a \"release\" to control others, although Jonas uncovers the truth of this.",
       "Jonas is unlike the rest; although a victim of dominance, he is given a special occupation--the \"Receiver of Memory\"--during his anticipated ceremony, which he feels very apprehensive about. He is given a mentor to train for this position, known as \"The Giver,\" who shows him feelings no one else had ever felt. He learns unexpected truths about his family and community, and what it means to be individual and imperfect through the memories he's given. It is up to Jonas to act upon this new knowledge he received and memories he encountered of life and choose to be ignorant or explore what it means to be free with all its risks.",
-      "\"The Giver\" clearly and effectively shows what a dystopian community looks like and why individuality is essential for freedom. It depicts a \"perfect community\" ruled by a type of dictatorship and how it can blindly lead people to lose their sense of purpose through lack of memory. I would recommend this book to everyone who enjoys eerie feelings, mysteries, and suspense, and who seeks a more open mind and perspective on the world we live in today, as it reflects many moments throughout history.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "\"The Giver\" clearly and effectively shows what a dystopian community looks like and why individuality is essential for freedom. It depicts a \"perfect community\" ruled by a type of dictatorship and how it can blindly lead people to lose their sense of purpose through lack of memory. I would recommend this book to everyone who enjoys eerie feelings, mysteries, and suspense, and who seeks a more open mind and perspective on the world we live in today, as it reflects many moments throughout history."
     ]
   },
   {
@@ -586,9 +507,8 @@ const ARTICLES = [
     rating: 3,
     ratingMax: 5,
     images: ["2c639b_4a068f8c21ff4eb19b3c821334113d44.jpg"],
-    excerpt: "Plot:",
+    excerpt: "Casey has been fired from her job as a teacher and is now living in a cabin in the woods in New Hampshire. When a storm hits her cabin, she notices a girl outside of her cabin, covered in blood. Casey decides to give her shelter from the storm, but the girl refuses to tell Casey what happened to…",
     body: [
-      "Plot:",
       "Casey has been fired from her job as a teacher and is now living in a cabin in the woods in New Hampshire. When a storm hits her cabin, she notices a girl outside of her cabin, covered in blood. Casey decides to give her shelter from the storm, but the girl refuses to tell Casey what happened to her.",
       "Why you should read it:",
       "There can be a lot of things said about this book, but I believe the first one should be that \"The Intruder\" is not an \"on-the-edge-of-my-seat\" thriller, but it is still a pretty amazing book. It is character driven and overall a simple but hooking story that you are sure to not guess the plot twist of. Believe me, I thought I had it in the bag but turns out I had grabbed the wrong one.",
@@ -596,10 +516,7 @@ const ARTICLES = [
       "I especially enjoyed that one perspective comes from a middle school girl while the other belongs to an adult woman. In most dual-perspective stories, the characters are the same age, so this contrast felt refreshing. It also highlights how the supporting characters evolve over time through different lenses.",
       "Two examples, without giving out spoilers, are Rubin and Lee. Rubin is Casey's landlord and Lee is Casey's neighbor. Even though they appear as one off characters that might not be mentioned again or all that important, we still see how they change in Casey's perspective.",
       "If you like this book, try . . .",
-      "If you like this book, I recommend giving Freida McFadden's other works a try. More specifically, \"The Housemaid.\" \"The Housemaid\" is a thriller about a woman who becomes the housemaid of a wealthy, perfect family. However, she soon discovers that the family isn't as perfect as they present themselves.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "If you like this book, I recommend giving Freida McFadden's other works a try. More specifically, \"The Housemaid.\" \"The Housemaid\" is a thriller about a woman who becomes the housemaid of a wealthy, perfect family. However, she soon discovers that the family isn't as perfect as they present themselves."
     ]
   },
   {
@@ -611,13 +528,9 @@ const ARTICLES = [
     featured: false,
     rating: 5,
     ratingMax: 5,
-    meta: {
-      "genre": "Psychological Thriller"
-    },
     images: ["154bbc_60bf1d5f2513456593e43fc561990fdc.jpg"],
-    excerpt: "Plot:",
+    excerpt: "Adam, a workaholic and famous screenwriter with faceblindness, and his wife, Amelia, a worker at a dog shelter, have been experiencing marital problems. Adam seems only to be focused on his work nowadays, and Amelia is tired of not being seen by her husband. When Amelia wins a free weekend away to…",
     body: [
-      "Plot:",
       "Adam, a workaholic and famous screenwriter with faceblindness, and his wife, Amelia, a worker at a dog shelter, have been experiencing marital problems. Adam seems only to be focused on his work nowadays, and Amelia is tired of not being seen by her husband. When Amelia wins a free weekend away to a chapel-turned-home in Scotland, she decides it might just help them fix their marriage. However, fixing a relationship is harder when no one is telling the truth.",
       "Review:",
       "I would love to give kudos to this book and the author for the way the characters were written. Right off the bat, it is obvious that they aren't perfect. They have many flaws, and at times, it is very difficult to choose who to root for. Characters like these should be more common, even if they aren't the best of people.",
@@ -626,10 +539,7 @@ const ARTICLES = [
       "I remember that before finding out the full story and the plot twists, I started to think that the book was probably written all in one go without much editing for the plot. Having your reader in the dark for the whole book might just do that. Besides these plot twists, there are also quite a handful of loose threads. I will not get into them due to spoilers, but it is still important to note if you want to read the book.",
       "The beginning was great, and getting to know the characters was amazing because there wasn't one truly bad character and one truly good one, but the second half was just tiring and unsatisfying to read.",
       "If you like this book, try . . .",
-      "You should give this book a try if you like thrillers (of course) and if you like books where you won't know what will happen next, aka aren't easy to solve.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "You should give this book a try if you like thrillers (of course) and if you like books where you won't know what will happen next, aka aren't easy to solve."
     ]
   },
   {
@@ -640,10 +550,8 @@ const ARTICLES = [
     author: "Josue Reyes",
     featured: true,
     images: ["6deed7_9a5eae16bb034a3ca463b6e99353bae4.jpg"],
-    excerpt: "Mid90s Review by Josue Reyes",
+    excerpt: "\"A 13-year-old in the 1990s LA grapples with a turbulent home life during summer. Meanwhile, he finds solace in newfound friends at a Motor Avenue skateboard shop.\" Mid90s is a coming-of-age and drama film both written and directed by Jonah Hill. It follows it's main character, Stevie, as he goes…",
     body: [
-      "Mid90s Review by Josue Reyes",
-      "Coming-of-age",
       "Movie Length:",
       "1 hr 25 min",
       "\"A 13-year-old in the 1990s LA grapples with a turbulent home life during summer. Meanwhile, he finds solace in newfound friends at a Motor Avenue skateboard shop.\" Mid90s is a coming-of-age and drama film both written and directed by Jonah Hill. It follows it's main character, Stevie, as he goes through life with his newfound friendgroup, consisting of Ray, Ruben, F*cksh*t (Yes, that is his actual name in the movie), and Fourth Grade. This movie perfectly encapsulates the feeling of growing up in the 90s, mostly thanks to Jonah Hill basing it on his life and growing up around skate culture.",
@@ -659,10 +567,7 @@ const ARTICLES = [
       "The main characters that we follow (Stevie and the rest of the skate group) are all originally skaters that Jonah Hill found while scouting for actors. He found it easier to teach skaters how to act rather than teach actors how to skate",
       "In one of the scenes, group leader Ray talks to a homeless man played by \"Del the Funky Homosapien\", who's music is featured in the film",
       "This movie was shot entirely on 16mm film",
-      "To help the young actors get a better feel for the 1990s, Jonah Hill gave castmembers iPods with a playlist of his favorite 90s songs, and there were movie nights of films from the era.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "To help the young actors get a better feel for the 1990s, Jonah Hill gave castmembers iPods with a playlist of his favorite 90s songs, and there were movie nights of films from the era."
     ]
   },
   {
@@ -674,14 +579,12 @@ const ARTICLES = [
     featured: false,
     meta: {
       "director": "Daniel Chazelle",
-      "genre": "Drama/Psychological drama",
       "platform": "Tubi, Prime Video, Amazon",
       "writer": "Daniel Chazelle"
     },
     images: ["154bbc_88ce18b59d0f4e5682755e20af065fba.webp"],
-    excerpt: "Movie Review - Whiplash",
+    excerpt: "The moment you sit down and watch this movie, you begin to feel chills run down your spine. From the opening scene to the final scene, there is this tension and on edge feeling that is very easily caught and thrown to the audience. Everything in this film is captivating; there are scenes where it…",
     body: [
-      "Movie Review - Whiplash",
       "Movie length: 1hr 47min",
       "What's Captiving About The Movie:",
       "The moment you sit down and watch this movie, you begin to feel chills run down your spine. From the opening scene to the final scene, there is this tension and on edge feeling that is very easily caught and thrown to the audience. Everything in this film is captivating; there are scenes where it feels as if the audience is there in the movie. Everything in this film is captivating; there are scenes where it feels as if you could be there in the room with the characters, feeling exactly what they feel and experiencing what they experience. Through its use of body language, color, and music, Whiplash becomes a genuine masterpiece that ties every element of the film together. It gives the movie, its characters, and its scenes an emotional depth that the audience can truly feel and connect with through the screen.",
@@ -693,10 +596,7 @@ const ARTICLES = [
       "If You Like This, You Should Try:",
       "If \"Whiplash\" catches your attention, there are many other films that leave the audience with a similar feeling, such as: \"Sound of Metal\", \"Good Will Hunting\" or \"Dead Poets Society.\"",
       "Cast & Crew:",
-      "Staring: Miles Teller, J. K. Simmons & Paul Reiser",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Staring: Miles Teller, J. K. Simmons & Paul Reiser"
     ]
   },
   {
@@ -707,7 +607,7 @@ const ARTICLES = [
     author: "Oliver Romero",
     featured: false,
     images: ["ad9c70_3e8630edfdc649deb0daa2fc550c503c.jpg"],
-    excerpt: "A Superhero Movie For Our Generation!",
+    excerpt: "Superman is a movie that explores the themes of responsibility, morality, identity and humanity, idealism vs. realism. Superman faces the question of how to do the right thing in a complex, politically divided world. But the cost of solving world threatening problems is the world threatening…",
     body: [
       "A Superhero Movie For Our Generation!",
       "Plot:",
@@ -720,10 +620,7 @@ const ARTICLES = [
       "This film also marks the start of a new era for Superman. After the darker tone of the Zack Snyder films, James Gunn's take feels like a breath of fresh air -- hopeful, bright, and emotionally resonant. The worldbuilding is another standout with the inclusion of heroes like Green Lantern and Mr. Terrific hints at a rich universe with endless potential.",
       "At its core, the movie is about holding onto hope when the world tests your faith in humanity. Superman's greatest power isn't his strength but his belief in the good of the people.",
       "Final Verdict:",
-      "Superman (2025) is a film filled with ambition, heart, and the promise of something greater. While it may not appeal to every viewer, fans of superhero stories will find themselves inspired by its optimism and emotional depth. It's a movie that reminds us why Superman has endured for generations -- not just because of his strength, but because of his humanity. The movie is about holding onto hope when the world tests your faith in humanity. Superman's greatest power isn't his strength but his belief in the good of the people. If you have a soft spot for comic book heroes, this is one movie you'll be thinking about long after the credits roll.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Superman (2025) is a film filled with ambition, heart, and the promise of something greater. While it may not appeal to every viewer, fans of superhero stories will find themselves inspired by its optimism and emotional depth. It's a movie that reminds us why Superman has endured for generations -- not just because of his strength, but because of his humanity. The movie is about holding onto hope when the world tests your faith in humanity. Superman's greatest power isn't his strength but his belief in the good of the people. If you have a soft spot for comic book heroes, this is one movie you'll be thinking about long after the credits roll."
     ]
   },
   {
@@ -742,10 +639,7 @@ const ARTICLES = [
       "The acting also makes the movie stand out. Jim Carrey, who is usually known for his comedic acting roles, plays Joel in a quiet, serious way that feels very real. Kate Winslet's character, Clementine, is the opposite; she's energetic, bold, and unpredictable. Their personalities clash, but that's what makes their relationship all the more believable. The supporting cast, including Kirsten Dunst and Mark Ruffalo, adds even more to the story.",
       "Visually, the film is creative and memorable. Instead of using special effects, Gondry relies on clever camera tricks and dreamlike scenes to show Joel's memories being erased. Rooms disappear, people fade away, and familiar places break apart. These moments make you feel like you're actually inside his mind, losing pieces of your life.",
       "What makes this movie powerful, though, is its message. It shows that love is not always easy or perfect, but it's still worth experiencing. Even though Joel and Clementine hurt each other, their memories also hold joy, laughter, and connection. The movie suggests that pain is part of what makes love meaningful, and trying to erase it might also erase the good.",
-      "Overall, Eternal Sunshine of the Spotless Mind is worth watching because it's emotional, creative, and it makes you think. It makes you reflect on your own relationships and memories, leaving you with the idea that even heartbreak has value.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Overall, Eternal Sunshine of the Spotless Mind is worth watching because it's emotional, creative, and it makes you think. It makes you reflect on your own relationships and memories, leaving you with the idea that even heartbreak has value."
     ]
   },
   {
@@ -762,11 +656,8 @@ const ARTICLES = [
       "genre": "Romantic Comedy (Rom-Com)"
     },
     images: ["6deed7_abd6754ee91148cf924e6bd5050314d5.jpg"],
-    excerpt: "13 Going on 30: Movie Review",
+    excerpt: "Do you remember when you were in middle school and all you wished for was to be a grown-up already? To mature faster and become the adult version of yourself you always aspired to be? Or as Jenna, the main character of this movie, would put it, \"Thirty, flirty, and thriving.\"",
     body: [
-      "13 Going on 30: Movie Review",
-      "Button",
-      "Length of Movie: 1h 38min",
       "Rated: PG-13",
       "Intro:",
       "Do you remember when you were in middle school and all you wished for was to be a grown-up already? To mature faster and become the adult version of yourself you always aspired to be? Or as Jenna, the main character of this movie, would put it, \"Thirty, flirty, and thriving.\"",
@@ -786,10 +677,7 @@ const ARTICLES = [
       "Since the movie is rated as PG-13 they are a couple of scenes most parents wouldn't want their young children to watch. If a child is 13 or younger it is recommended that they watch it with parental guidance.",
       "If you like this you should also watch...:",
       "-Romcoms- 27 dresses (2008), How to Lose a Guy in 10 Days (2003)",
-      "-Body switching- Big (1988), Freaky Friday (2003), 17 Again (2009)",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "-Body switching- Big (1988), Freaky Friday (2003), 17 Again (2009)"
     ]
   },
   {
@@ -800,16 +688,11 @@ const ARTICLES = [
     author: "Ashley Choudja",
     featured: false,
     images: ["ad9c70_0c6bb9ddec9e485a9d729e32d2ab8bf2.jpg", "ad9c70_29d731709ceb4a8d8e99483983538653.jpg", "ad9c70_ba56bc3e2caa4d88b1d4dc2bea40a7b1.jpg"],
-    excerpt: "Dazed &",
+    excerpt: "This one is for all my nostalgia movie watchers. Based in the 70's of Austin, Texas, this beloved comedy coming of age film follows a group of rowdy high school teenagers and their last day of school all taking place in one day. It explores adolescent freedom and rebellion while also giving us a…",
     body: [
-      "Dazed &",
-      "Confused",
       "This one is for all my nostalgia movie watchers. Based in the 70's of Austin, Texas, this beloved comedy coming of age film follows a group of rowdy high school teenagers and their last day of school all taking place in one day. It explores adolescent freedom and rebellion while also giving us a look back at the past. Every character is distinct and different from one another from potheads to football players and all the way down to incoming freshmen about to enter high school.",
       "We are given a roughly accurate depiction of what it was like to be in Texas high school in the 70s as all the characters face their own dilemmas but are able to blend well with one another making us feel familiar with them. This movie works because it looks upon its characters with understanding that all their disobedience comes from the fact that they are in a stage of their life where they are still figuring everything out. Transitioning from child to adult they are stuck with the choice of choosing freedom or sticking to the strict rules society is held by. Each character faces this question in their own different ways and metaphors when looking deeper into the film.",
-      "Full of unforgettable dialogue, soundtrack, visuals, and well known cast \"Dazed and Confused\" is an amazing 'hangout' movie, it lacks plot and a strong narrative giving you a \"just vibe\" feeling when watching. It's not a movie that serves as a lesson or looking for, so if you are into movies with a suspenseful story line then this might not be the film for you but don't knock it until you give it a shot. It's a fun lovingly made time capsule of the American youth from the 70's that everyone should give a watch to.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Full of unforgettable dialogue, soundtrack, visuals, and well known cast \"Dazed and Confused\" is an amazing 'hangout' movie, it lacks plot and a strong narrative giving you a \"just vibe\" feeling when watching. It's not a movie that serves as a lesson or looking for, so if you are into movies with a suspenseful story line then this might not be the film for you but don't knock it until you give it a shot. It's a fun lovingly made time capsule of the American youth from the 70's that everyone should give a watch to."
     ]
   },
   {
@@ -820,17 +703,13 @@ const ARTICLES = [
     author: "Keydith Manjarres",
     featured: false,
     images: ["ad9c70_7316b2f9fe554254a54020a5ad4aaa77.jpg", "ad9c70_d7a1e8bb7e1142d3b397d52abadc3175.jpg", "ad9c70_f01dfe0b951d4b9b924609a0fbd4de44.jpg"],
-    excerpt: "SO BELOW",
+    excerpt: "The real history of the Paris catacombs dates back to 1809, as the catacombs are a series of tunnels that run under the city of Paris that were used to combat the overcrowding of cemeteries by moving the bodies into these tunnels. Eventually overtime, the catacombs became an underground place full…",
     body: [
-      "SO BELOW",
       "The real history of the Paris catacombs dates back to 1809, as the catacombs are a series of tunnels that run under the city of Paris that were used to combat the overcrowding of cemeteries by moving the bodies into these tunnels. Eventually overtime, the catacombs became an underground place full of skulls and bones and is now a popular tourist attraction that offers guides through these eerie tunnels.",
       "This movie is directed by John Erick Dowdle, who is also famously known for the horror movie, \"The Poughkeepsie Tapes\" released in 2007. It is a perfect blend of horror and thriller. It follows through with a group of explorers that decide to investigate and explore the Paris catacombs to find and uncover the legendary Philosopher's Stone that is rumored to lie beneath Paris in the catacombs, when their investigation takes a sudden turn of horrific events.",
       "This movie makes a clever reference to \"Dante's Inferno\" and the nine levels of hell. It takes the viewers along with the characters as they go further and further into the catacombs, unknowingly going through each of the nine levels as strange things start to appear and happen to the group.",
       "This movie is a \"Found Footage\" type of movie that leaves the viewers scared and questioning if the events in the movie happened in real life. Each character cleverly represents each level of \"Dante's Inferno\" as each character has their own moment with the viewers. This movie leaves viewers with a feeling of claustrophobia as we watch the group go into the tunnels and tight spaces. This movie perfectly shows the emotions of each character as they are trying to survive.",
-      "This is a definite watch if you like \"Paranormal Activity\" and \"The Blair Witch Project!\"",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "This is a definite watch if you like \"Paranormal Activity\" and \"The Blair Witch Project!\""
     ]
   },
   {
@@ -841,11 +720,8 @@ const ARTICLES = [
     author: "Josue Reyes",
     featured: false,
     images: ["154bbc_8bbeca6e74e344ccbb15b605967e415e.jpg"],
-    excerpt: "Sixteen years,",
+    excerpt: "Synopsis: I decided on a theme of social alienation for this poem while listening to the Radiohead song \"Subterranean Homesick Alien\". For my whole life, I haven't felt that I belonged anywhere, and I've only made a handful of close friends. This poem is definitely more emotional and vulnerable…",
     body: [
-      "Sixteen years,",
-      "Four months,",
-      "And four days ago,",
       "An alien crash landed on Earth.",
       "Its whole life it's been trying to figure out how to live.",
       "Everything is unfamiliar to it,",
@@ -882,10 +758,7 @@ const ARTICLES = [
       "Then maybe,",
       "And just maybe,",
       "It could finally be understood by the people around it.",
-      "Synopsis: I decided on a theme of social alienation for this poem while listening to the Radiohead song \"Subterranean Homesick Alien\". For my whole life, I haven't felt that I belonged anywhere, and I've only made a handful of close friends. This poem is definitely more emotional and vulnerable from my last one, and I'm sure a lot of people could relate to this of alienation, or the feeling of not belonging anywhere.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Synopsis: I decided on a theme of social alienation for this poem while listening to the Radiohead song \"Subterranean Homesick Alien\". For my whole life, I haven't felt that I belonged anywhere, and I've only made a handful of close friends. This poem is definitely more emotional and vulnerable from my last one, and I'm sure a lot of people could relate to this of alienation, or the feeling of not belonging anywhere."
     ]
   },
   {
@@ -898,13 +771,9 @@ const ARTICLES = [
     rating: 9,
     ratingMax: 10,
     images: ["6deed7_630906d12f3e4f0b956f7b5e3a7dc93e.jpg"],
-    excerpt: "Malignant Review",
+    excerpt: "Malignant is a 2021 horror film directed by James Wan. I would rate this film a solid 9/10 as the plot twist was eerily cool and unexpected. The movie starts off with introducing the main character, Madison Mitchell. The opening scene starts off with Madison arguing and getting into a fight with…",
     body: [
-      "Malignant Review",
-      "Malignant is a 2021 horror film directed by James Wan. I would rate this film a solid 9/10 as the plot twist was eerily cool and unexpected. The movie starts off with introducing the main character, Madison Mitchell. The opening scene starts off with Madison arguing and getting into a fight with her abusive partner. She is pushed into a wall and injures her head. Ever since that day, she has been experiencing headaches and along with that she is also experiencing horrific nightmares. Throughout the movie strange things are happening to Madison and we learn that her nightmares are visions of murders that are actually happening across town. We also get an insight into Madison's childhood. We find out that when she was born she actually had a twin and lost her twin brother. She finds herself still connected to her twin brother 'Literally' and that is the cause of the nightmares and visions that she has been having. Throughout the movie Madison is questioning if her nightmares and visions were just that and what if they were her real memories. This leads the audience to ask themselves this question too. Towards the end of the movie we are met with an eerie and terrifying plot twist that even left me shocked and left me with nightmares after watching the movie. This movie has a running time of 1hr and 51minutes. This movie can be found on streaming services such as YouTube, Amazon Prime, and Apple TV. I recommend watching this movie because it is honestly really good and the plot along with the story telling is just amazing within itself. If you like this, then I recommend you to watch more movies from this director such as Insidious and the Conjuring series!!!",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Malignant is a 2021 horror film directed by James Wan. I would rate this film a solid 9/10 as the plot twist was eerily cool and unexpected. The movie starts off with introducing the main character, Madison Mitchell. The opening scene starts off with Madison arguing and getting into a fight with her abusive partner. She is pushed into a wall and injures her head. Ever since that day, she has been experiencing headaches and along with that she is also experiencing horrific nightmares. Throughout the movie strange things are happening to Madison and we learn that her nightmares are visions of murders that are actually happening across town. We also get an insight into Madison's childhood. We find out that when she was born she actually had a twin and lost her twin brother. She finds herself still connected to her twin brother 'Literally' and that is the cause of the nightmares and visions that she has been having. Throughout the movie Madison is questioning if her nightmares and visions were just that and what if they were her real memories. This leads the audience to ask themselves this question too. Towards the end of the movie we are met with an eerie and terrifying plot twist that even left me shocked and left me with nightmares after watching the movie. This movie has a running time of 1hr and 51minutes. This movie can be found on streaming services such as YouTube, Amazon Prime, and Apple TV. I recommend watching this movie because it is honestly really good and the plot along with the story telling is just amazing within itself. If you like this, then I recommend you to watch more movies from this director such as Insidious and the Conjuring series!!!"
     ]
   },
   {
@@ -933,10 +802,7 @@ const ARTICLES = [
       "What I loved most about this film was the body language, facial expressions and chemistry that the characters had. Even if I didn't quite understand what was happening, I could look at their body language and movement and it would clear up the confusion I had. The background, music and movement of the characters made it feel so alive yet so unreal.",
       "Recommendation:",
       "I rate this movie a 4.6/5 due to very old fashioned language and old traditions that don't translate well into modern times. Besides that, this film is very solid and alluring with its story and characters.",
-      "If you like this movie, I recommend you watch \"Little Women,\" \"Sense and Sensibility,\" or \"The Notebook.\"",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "If you like this movie, I recommend you watch \"Little Women,\" \"Sense and Sensibility,\" or \"The Notebook.\""
     ]
   },
   {
@@ -959,10 +825,7 @@ const ARTICLES = [
       "Without any personal bias, Fullmetal Alchemist Brotherhood is objectively one of the best anime ever made. The pacing is perfect, the animation is phenomenal, and the soundtrack will be one you will remember long after your first watch through of the show. The characters are unforgettable. Edward is one of the best anime protagonists that exude determination. Alphonse kindness, and even the villains make every single storybeat hit harder because of the way theories were written.",
       "Moreover, this is an anime that tells the story it wants to tell and doesn't overstay its welcome. At 64 episodes, it tells a compelling story with a powerful message and ending that ties up all loose ends together beautifully.",
       "Final Thoughts:",
-      "Fullmetal Alchemist:Brotherhood is more than just a great anime - it is a masterpiece of storytelling. Words like \"thrilling,\" \"thought provoking,\" and \"emotional\" come to mind. Whether you're a longtime anime fan or you're new to anime all around, this is one of the best shows you could start with. It offers a timeless story about the cost of one's ambition, the power of brotherhood, and the value of being a human.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Fullmetal Alchemist:Brotherhood is more than just a great anime - it is a masterpiece of storytelling. Words like \"thrilling,\" \"thought provoking,\" and \"emotional\" come to mind. Whether you're a longtime anime fan or you're new to anime all around, this is one of the best shows you could start with. It offers a timeless story about the cost of one's ambition, the power of brotherhood, and the value of being a human."
     ]
   },
   {
@@ -973,7 +836,7 @@ const ARTICLES = [
     author: "Melanie Cardenas",
     featured: true,
     images: ["ad9c70_76d613a33618483da874efbc3c1ca8e8.jpeg", "ad9c70_817839ef0ced4a0fb536f11a932650e3.jpeg", "ad9c70_8c56ba5cb3844c78b9b2979e338da173.jpeg", "ad9c70_ade58f3d9c5f4b2892be6ccd5d2d3240.jpeg", "ad9c70_bf7b139f23294027bcd0892690a07f9b.jpeg", "ad9c70_f6acdff361c94df7bd881c86d02c734f.jpeg", "ad9c70_f88807363d304d4a87b417a186a88fab.jpeg"],
-    excerpt: "Tick.",
+    excerpt: "The clock's ticking was the only sound within the eerie silence of the Grand Library tonight. An extravagant place, both in size and the knowledge it contained within its walls. From curses to powerful spells left behind, It was no wonder why anyone would want to barge in and seize the knowledge…",
     body: [
       "Tick.",
       "Tock.",
@@ -1050,10 +913,7 @@ const ARTICLES = [
       "\"Alrighty, back the way we came..\" Demetrius sneered. With his right hand, the thief would bring it over his heart, pulling out the threads of his very soul out of the flesh of his core. These threads would begin to quickly wrap around his entire frame, shrinking his form rapidly until the threads eventually fell back, revealing his avian form.",
       "The bird stood at the height of a pigeon, a small stature that allowed it to venture out relatively undetected...At least, it would have been the case, had it not been for the elongated green horn that stuck out from its head. It added unnecessary weight, which was not ideal for flying. It's feathers within were adorned with a gradient of a lighter green that covered the corners, before fading out into a much darker blue, then back into a gradient of a light blue near the base of its body.",
       "It wasted no time, stretching out its long wings and taking flight and snatching the book within its claws and flying out, cawing along the way as Demetrius thought about the poem, and its message.",
-      "Grant all that I seek, huh...",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Grant all that I seek, huh..."
     ]
   },
   {
@@ -1064,7 +924,7 @@ const ARTICLES = [
     author: "Melanie Cardenas",
     featured: false,
     images: ["ad9c70_76d613a33618483da874efbc3c1ca8e8.jpeg", "ad9c70_817839ef0ced4a0fb536f11a932650e3.jpeg", "ad9c70_8c56ba5cb3844c78b9b2979e338da173.jpeg", "ad9c70_ade58f3d9c5f4b2892be6ccd5d2d3240.jpeg", "ad9c70_bf7b139f23294027bcd0892690a07f9b.jpeg", "ad9c70_f6acdff361c94df7bd881c86d02c734f.jpeg", "ad9c70_f88807363d304d4a87b417a186a88fab.jpeg"],
-    excerpt: "A Thief's Gambit Part 2",
+    excerpt: "\"...Based on the other clues, the caverns should be about...here.\"",
     body: [
       "A Thief's Gambit Part 2",
       "\"...Based on the other clues, the caverns should be about...here.\"",
@@ -1151,10 +1011,7 @@ const ARTICLES = [
       "\"Alrighty, back the way we came..\" Demetrius sneered. With his right hand, the thief would bring it over his heart, pulling out the threads of his very soul out of the flesh of his core. These threads would begin to quickly wrap around his entire frame, shrinking his form rapidly until the threads eventually fell back, revealing his avian form.",
       "The bird stood at the height of a pigeon, a small stature that allowed it to venture out relatively undetected...At least, it would have been the case, had it not been for the elongated green horn that stuck out from its head. It added unnecessary weight, which was not ideal for flying. It's feathers within were adorned with a gradient of a lighter green that covered the corners, before fading out into a much darker blue, then back into a gradient of a light blue near the base of its body.",
       "It wasted no time, stretching out its long wings and taking flight and snatching the book within its claws and flying out, cawing along the way as Demetrius thought about the poem, and its message.",
-      "Grant all that I seek, huh...",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Grant all that I seek, huh..."
     ]
   },
   {
@@ -1164,8 +1021,8 @@ const ARTICLES = [
     title: "Believe",
     author: "Josue Reyes",
     featured: false,
-    images: ["6deed7_2c82f11e136b495b97ad8467091ae0d3.jpg", "6deed7_acfc48f40ced44d4ade6efe7cc5d8b4d.jpg"],
-    excerpt: "Everyday is a struggle,",
+    images: ["6deed7_acfc48f40ced44d4ade6efe7cc5d8b4d.jpg", "6deed7_2c82f11e136b495b97ad8467091ae0d3.jpg"],
+    excerpt: "Everyday is a struggle, / A struggle to keep going / When everything seems dark.",
     body: [
       "Everyday is a struggle,",
       "A struggle to keep going",
@@ -1194,10 +1051,7 @@ const ARTICLES = [
       "If you let it just pass by.",
       "To truly be free from all the negativity,",
       "And all the torment from your brain,",
-      "You have to grow your wings and fly.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "You have to grow your wings and fly."
     ]
   },
   {
@@ -1208,7 +1062,7 @@ const ARTICLES = [
     author: "Josue Reyes",
     featured: false,
     images: ["ad9c70_34b3585e6a5c427a8b6c218766b358e0.png"],
-    excerpt: "This tree stood tall behind my backyard.",
+    excerpt: "This tree stood tall behind my backyard. / As if my own personal stopwatch, / It has timed my growth.",
     body: [
       "This tree stood tall behind my backyard.",
       "As if my own personal stopwatch,",
@@ -1237,10 +1091,7 @@ const ARTICLES = [
       "I'll reminisce about my childhood,",
       "But I don't wish to live through it again.",
       "The magic of nostalgia is that you only experience it once,",
-      "And nothing else can change that.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "And nothing else can change that."
     ]
   },
   {
@@ -1250,7 +1101,7 @@ const ARTICLES = [
     title: "Bittersweet Flame",
     author: "Jason Borrego",
     featured: false,
-    excerpt: "One ordinary Thursday,",
+    excerpt: "One ordinary Thursday, / Crisp orange leaves hovered about; / Squirrels are gathering food in array.",
     body: [
       "One ordinary Thursday,",
       "Crisp orange leaves hovered about;",
@@ -1287,10 +1138,7 @@ const ARTICLES = [
       "I watch its last moments, with a strange sense of glee.",
       "Soon,",
       "The flame finally extinguishes,",
-      "And I exit my room.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "And I exit my room."
     ]
   },
   {
@@ -1301,7 +1149,7 @@ const ARTICLES = [
     author: "Jason Borrego",
     featured: false,
     images: ["ad9c70_fd1c45b42ebb4f10851ff7eb8ad650db.jpg"],
-    excerpt: "Phantoms Of Water written by Jason Borrego",
+    excerpt: "Phantoms Of Water written by Jason Borrego / Drip, Drip, Drip... / I lay in my room listening to the sound,",
     body: [
       "Phantoms Of Water written by Jason Borrego",
       "Drip, Drip, Drip...",
@@ -1331,10 +1179,7 @@ const ARTICLES = [
       "And search...and search...",
       "But once again, my hopeful elation, only turns to frustration.",
       "All I can hear is that ringing as it becomes louder in my mind, clinging.",
-      "Drip, Drip Drip...",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Drip, Drip Drip..."
     ]
   },
   {
@@ -1345,7 +1190,7 @@ const ARTICLES = [
     author: "Jason Borrego",
     featured: false,
     images: ["154bbc_61058637986e46e0863bf168a11e960b.jpg"],
-    excerpt: "There floats the shiny green balloon,",
+    excerpt: "There floats the shiny green balloon, / Like a leaf off a tree, / Hovering above the room.",
     body: [
       "There floats the shiny green balloon,",
       "Like a leaf off a tree,",
@@ -1379,10 +1224,7 @@ const ARTICLES = [
       "Now stabilized,",
       "It is released, allowed to levitate once again.",
       "Once again free, once again at ease.",
-      "There again, floats the shiny green balloon.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "There again, floats the shiny green balloon."
     ]
   },
   {
@@ -1393,17 +1235,13 @@ const ARTICLES = [
     author: "Samuel Solis",
     featured: false,
     images: ["ad9c70_30838874ef044f38932befcc63da996f.jpg", "ad9c70_5c37482111104120a60bc38325343376.jpg", "ad9c70_9e1dca0b48ba48ce8f3ba7fcb2d45f85.jpg"],
-    excerpt: "The Oil Fields in North Dakota",
+    excerpt: "After graduating from Blanson, I started working in the oilfield as a fracture equipment/diesel mechanic thanks to my brother, who helped me get the job at Liberty Energy. My time at Blanson definitely helped having shop experience and gave me a good foundation for hands-on work and understanding…",
     body: [
-      "The Oil Fields in North Dakota",
       "After graduating from Blanson, I started working in the oilfield as a fracture equipment/diesel mechanic thanks to my brother, who helped me get the job at Liberty Energy. My time at Blanson definitely helped having shop experience and gave me a good foundation for hands-on work and understanding how to use and stay safe around tools and equipment.",
       "I can honestly say I love what I do. It is not easy, though the job is both physically and emotionally demanding. I work 12-hour shifts for 14 straight days, handling heavy equipment and dealing with the constant pressure that comes with operating frac pumps. Being away from home for two weeks at a time can be tough, but having my brother on the same rotation makes it easier.",
       "Leaving Houston",
       "Leaving Houston was bittersweet. I miss my family and friends (and definitely the food), but I don't miss the traffic! I still keep up with my friends, mostly by sending each other TikToks when we can.",
-      "I would not say I live in North Dakota, it is more like staying in a \"man camp\" where everyone working away from home stays. Williston is significantly smaller than Houston, and since most people work in the oilfield, prices are higher, and life feels more focused on work. Houston's definitely more diverse and fast-paced.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "I would not say I live in North Dakota, it is more like staying in a \"man camp\" where everyone working away from home stays. Williston is significantly smaller than Houston, and since most people work in the oilfield, prices are higher, and life feels more focused on work. Houston's definitely more diverse and fast-paced."
     ]
   },
   {
@@ -1423,10 +1261,7 @@ const ARTICLES = [
       "Some ways you can make sure you can make sure you stay on top of your grades is by discipline. Discipline is super duper important, because without it you're not gonna be able to accomplish the things you want. It's really easy to say \"oh trust next report card im gonna lock in\" but the hard part is actually implementing ways to actually see a difference. Everybody has to set up their own system that works for them. But something that would be a great way to start is to stop procrastinating. Procrastination WILL be your biggest enemy. It will always be better to do your homework or finish any school work you have while you're in school. Procrastination feels harmless at first. You tell yourself, \"I'll do it later,\" and you go watch a video or scroll on your phone. It feels good in the moment like you're giving yourself a break. But what actually happens afterward? The work doesn't disappear, it just sits there in the back of your mind, building stress. You try to chill, but your brain keeps reminding you of that unfinished task.",
       "Suddenly, relaxing isn't relaxing anymore.",
       "One other thing to help is not comparing yourself to others. School isn't a competition, you should solely focus on yourself and your goals. Looking and comparing yourself to the people around you isn't going to help you, if anything it's gonna make you feel bad or worse about yourself. Comparing yourself to others is a great way to lose your confidence and make you insecure. You're always going to see somebody who is getting perfect grades, understand things faster, or just do better in school without trying. But you aren't there when they aren't in school. You don't see their background, study habits, or personal struggle. You only see the results. Instead of comparing yourself to them, use them as an example or motivation.",
-      "Having good grades isn't about being perfect, it's about being consistent. Stay organized, find what schedule or system works best for you, and stick to it. You don't have to change overnight, just try to implement little things into your everyday life little by little and see the progress. Build the right habits, work hard and the hard work will show in your grades.",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "Having good grades isn't about being perfect, it's about being consistent. Stay organized, find what schedule or system works best for you, and stick to it. You don't have to change overnight, just try to implement little things into your everyday life little by little and see the progress. Build the right habits, work hard and the hard work will show in your grades."
     ]
   },
   {
@@ -1445,10 +1280,7 @@ const ARTICLES = [
       "The delightfulness doesn't stop here, however; Fogo de Chão provides cultural traditional dessert options, including the popular guest favorites Cheesecake Br&ucirc;lée, Tres Leches Cake, Papaya Cream, Molten Chocolate Cake, Key Lime, and Chocolate Brigadeiro.",
       "Fogo de Chão also includes dishes with gluten-free and vegan options. Now, don't close your circle with only the steakhouse experience, as the experience doesn't stop there but continues with seafood options. Such as jumbo shrimp cocktails, seafood towers, and chilled lobster and shrimp.",
       "If you are looking for an indulgent, authentic, and classy restaurant with a variety of options and experiences available, I will highly recommend Fogo de Chão as your primary choice above all the options in your list. It doesn't matter if it's a casual gathering, event, or simply just a casual dinner, Fogo de Chão provides the experience everyone deserves and must be a part of.",
-      "​- Written By Melanie Tamez",
-      "311 West Road",
-      "Houston, TX 77038",
-      "281.591.4950"
+      "​- Written By Melanie Tamez"
     ]
   },
 ];
@@ -1466,6 +1298,9 @@ const SECTIONS = [
   { slug: 'houston',    name: 'Houston'    }
 ];
 
+// Each page sets MEDIA_PATH before loading this file; default suits /<design>/.
+const MEDIA_BASE = (typeof MEDIA_PATH !== 'undefined') ? MEDIA_PATH : '../assets/media/';
+
 const bySection  = s  => ARTICLES.filter(a => a.section === s);
 const byId       = id => ARTICLES.find(a => a.id === Number(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
@@ -1473,4 +1308,24 @@ const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
 const byline     = a  => a.author || 'The Blanson Post';
 const readingTime= a  => Math.max(1, Math.round(a.body.join(' ').split(/\s+/).length / 200));
-const leadImage  = a  => (a.images && a.images.length ? 'assets/media/' + a.images[0] : null);
+const imageUrl   = f  => MEDIA_BASE + f;
+const leadImage  = a  => (a.images && a.images.length ? MEDIA_BASE + a.images[0] : null);
+
+// ── Content shapes ──────────────────────────────────────────────────────────
+// Poems keep their line breaks; interviews are speaker-prefixed transcripts.
+// Both need different typesetting from ordinary prose, in every design.
+const isVerse = a => a.section === 'poetry' && !/^A Thief/.test(a.title);
+
+const SPEAKER_RE = /^([A-Z][A-Za-z.'-]{1,24}):\s*(.*)$/;
+const speakerOf  = line => { const m = line.match(SPEAKER_RE); return m ? { who: m[1], text: m[2] } : null; };
+const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
+
+// Escape untrusted-ish strings before injecting into innerHTML.
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const stars = a => {
+  if (a.rating == null) return '';
+  const n = Math.round(a.rating / a.ratingMax * 5);
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+};

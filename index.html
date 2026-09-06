@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Blanson Post — Pick a Design</title>
+<meta name="description" content="Three design directions for the new Blanson Post website. Same articles, three different presentations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1014; --panel:#171a20; --panel-2:#1e222a;
+  --fg:#f1f3f7; --fg-2:#a4acba; --fg-3:#6d7686;
+  --line:#282d37; --accent:#F4C300; --blue:#4d8bff;
+  --sans:"Inter",system-ui,sans-serif; --display:"Fraunces",Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1220px;margin:0 auto;padding:0 24px}
+
+header{padding:60px 0 40px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(32px,5vw,52px);
+  line-height:1.08;letter-spacing:-.02em;margin:0 0 16px}
+.sub{font-size:18px;color:var(--fg-2);max-width:62ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
+.facts div{font-size:13.5px;color:var(--fg-3)}
+.facts b{display:block;font-family:var(--display);font-size:26px;font-weight:900;color:var(--fg)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:44px 0 20px}
+.opt{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  display:flex;flex-direction:column;transition:transform .18s ease,border-color .18s ease}
+.opt:hover{transform:translateY(-4px);border-color:var(--fg-3)}
+.frame{position:relative;height:290px;overflow:hidden;background:#fff;border-bottom:1px solid var(--line)}
+.frame iframe{position:absolute;top:0;left:0;width:1280px;height:1000px;border:0;
+  transform:scale(.33);transform-origin:0 0;pointer-events:none}
+.opt-body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1}
+.num{font-family:var(--display);font-size:13px;font-weight:900;color:var(--accent);
+  letter-spacing:.1em;margin-bottom:8px}
+.opt h2{font-family:var(--display);font-weight:900;font-size:25px;margin:0 0 10px;letter-spacing:-.015em}
+.opt p{margin:0 0 16px;font-size:14.5px;color:var(--fg-2);line-height:1.6}
+ul{margin:0 0 20px;padding-left:18px;font-size:13.5px;color:var(--fg-3)}
+li{margin-bottom:5px}
+.go{margin-top:auto;display:inline-block;text-align:center;background:var(--fg);color:var(--bg);
+  font-weight:700;font-size:15px;padding:12px 18px;border-radius:9px}
+.go:hover{background:var(--accent)}
+
+.note{margin:26px 0 70px;padding:22px 26px;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:14px}
+.note h3{font-family:var(--display);font-size:18px;margin:0 0 10px}
+.note p{margin:0 0 10px;font-size:14.5px;color:var(--fg-2)}
+.note p:last-child{margin-bottom:0}
+.note b{color:var(--fg)}
+
+footer{border-top:1px solid var(--line);padding:24px 0 50px;font-size:13px;color:var(--fg-3)}
+
+@media(max-width:960px){
+  .grid{grid-template-columns:1fr;gap:20px}
+  .frame{height:330px}
+  .frame iframe{transform:scale(.55)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">The Blanson Post · New Website</div>
+    <h1>Three designs. Same paper.<br>Which one feels like us?</h1>
+    <p class="sub">Every option below is a real, working website with all of our articles in it —
+    click around, read a story, check it on your phone. The writing is identical in all three;
+    only the design changes.</p>
+    <div class="facts">
+      <div><b id="n-articles">—</b> articles</div>
+      <div><b id="n-writers">—</b> student writers</div>
+      <div><b id="n-sections">—</b> sections</div>
+      <div><b id="n-words">—</b> words</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <a class="opt" href="traditional/">
+      <div class="frame"><iframe src="traditional/" title="Traditional design preview" loading="lazy" scrolling="no"></iframe></div>
+      <div class="opt-body">
+        <div class="num">OPTION 01</div>
+        <h2>Traditional</h2>
+        <p>Looks like a real newspaper. Serif type, thin rules, columns, drop caps —
+        the front page of a broadsheet.</p>
+        <ul>
+          <li>Most serious and journalistic</li>
+          <li>Reads well with few photos</li>
+          <li>Interviews print as transcripts</li>
+        </ul>
+        <span class="go">Open Traditional →</span>
+      </div>
+    </a>
+
+    <a class="opt" href="modern/">
+      <div class="frame"><iframe src="modern/" title="Modern design preview" loading="lazy" scrolling="no"></iframe></div>
+      <div class="opt-body">
+        <div class="num">OPTION 02</div>
+        <h2>Modern</h2>
+        <p>Like the news sites students actually read. Big headlines, photo cards,
+        lots of space, and a dark mode.</p>
+        <ul>
+          <li>Best on phones</li>
+          <li>Photos do the heavy lifting</li>
+          <li>Light &amp; dark themes</li>
+        </ul>
+        <span class="go">Open Modern →</span>
+      </div>
+    </a>
+
+    <a class="opt" href="personal/">
+      <div class="frame"><iframe src="personal/" title="Personal design preview" loading="lazy" scrolling="no"></iframe></div>
+      <div class="opt-body">
+        <div class="num">OPTION 03</div>
+        <h2>Personal</h2>
+        <p>School colours, warm and friendly — closest in spirit to our Wix site,
+        but built properly.</p>
+        <ul>
+          <li>Blanson blue &amp; gold throughout</li>
+          <li>Feels like a student paper, not a news corp</li>
+          <li>Credits every writer by name</li>
+        </ul>
+        <span class="go">Open Personal →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="note">
+    <h3>A few things worth knowing</h3>
+    <p>All three pull from <b>one shared set of articles</b>. Whichever gets picked, adding a story
+    later means writing it once — it does not have to be re-done per design.</p>
+    <p>The text is <b>copied exactly</b> from what students wrote on the old site, typos and all,
+    so nothing has been reworded on anyone's behalf. Four pieces have no byline anywhere on
+    the old site; those show as “The Blanson Post” until someone can tell us who wrote them.</p>
+    <p>Once a design is chosen, the other two get deleted and the winner gets the part that
+    actually matters: <b>a login so students can publish their own articles</b> without anyone
+    touching the code.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">The Blanson Post · Blanson CTE High School · Aldine ISD</div>
+</footer>
+
+<script>const MEDIA_PATH = 'assets/media/';</script>
+<script src="shared/articles.js"></script>
+<script>
+  document.getElementById('n-articles').textContent = ARTICLES.length;
+  document.getElementById('n-writers').textContent =
+    new Set(ARTICLES.map(a => a.author).filter(Boolean)).size;
+  document.getElementById('n-sections').textContent = SECTIONS.length;
+  document.getElementById('n-words').textContent =
+    ARTICLES.reduce((n, a) => n + a.body.join(' ').split(/\s+/).length, 0).toLocaleString();
+</script>
+</body>
+</html>

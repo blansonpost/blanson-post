@@ -54,12 +54,13 @@ open my $T, '<:encoding(UTF-8)', $tsv or die "no tsv: $!";
 while (my $line = <$T>) {
     chomp $line;
     next if $line =~ /^\s*#/ || $line !~ /\S/;
-    my ($slug, $section, $title, $author, $rating, $featured) = split /\t/, $line, 6;
+    my ($slug, $section, $title, $author, $rating, $featured, $lead) = split /\t/, $line, 7;
     next unless $slug && $section;
-    $_ //= '' for ($author, $rating, $featured);
+    $_ //= '' for ($author, $rating, $featured, $lead);
+    s/^\s+|\s+$//g for ($lead);
 
     open my $B, '<:encoding(UTF-8)', "$txt/$slug.txt" or do { warn "MISSING body: $slug\n"; next; };
-    my @body; my %meta;
+    my @body; my %meta; my $dropped = 0;
     while (my $l = <$B>) {
         chomp $l;
         $l =~ s/^\s+|\s+$//g;
@@ -67,11 +68,23 @@ while (my $line = <$T>) {
         next if $l =~ /\|\s*blansonpost\s*$/;          # page-title line
         next if $l =~ $BYLINE_RE;                       # byline, captured in tsv
         next if $l =~ /^\s*by\s*:?\s+[A-Z\x{00c0}-\x{00ff}]/i && length($l) < 60;  # bare "By Name"
-        # the headline often repeats as the first body line
+        # The headline usually repeats as the first body line — sometimes split
+        # across several elements ("Meet" / "Mr. Haventine"). Drop those, but
+        # only before any real prose has started, and never in verse.
         if (!@body) {
             (my $a = lc $l)     =~ s/[^a-z0-9]//g;
             (my $b = lc $title) =~ s/[^a-z0-9]//g;
-            next if $a eq $b || ($a && index($b, $a) == 0 && length($a) > 6);
+            # Only a *short* line can be a repeated headline. Without this guard,
+            # an article whose opening sentence starts with its own title (e.g.
+            # "Malignant is a 2021 horror film…") loses its entire body.
+            my $headline_len = length($l) <= length($title) + 20;
+            if ($a && $b && $headline_len && (   $a eq $b
+                                              || (length($a) > 6 && index($b, $a) == 0)
+                                              || (length($b) > 6 && index($a, $b) == 0))) {
+                next;
+            }
+            # short, unpunctuated leading fragment = part of a split headline
+            next if $section ne 'poetry' && length($l) < 45 && $l !~ /[.!?"]$/ && $dropped++ < 3;
         }
         next if $l =~ $DROP_RE;
         if ($l =~ $META_RE) {                           # keep as structured meta
@@ -85,7 +98,15 @@ while (my $line = <$T>) {
     close $B;
     next unless @body;
 
-    my $excerpt = $body[0];
+    # Lead with the first line that's actually a sentence, not a stray fragment.
+    # Verse is the exception: a poem's opening line is the opening line.
+    my $excerpt;
+    if ($section eq 'poetry' && $title !~ /^A Thief/) {
+        $excerpt = join(' / ', grep { length } @body[0 .. ($#body < 2 ? $#body : 2)]);
+    } else {
+        ($excerpt) = grep { length($_) >= 60 } @body;
+        $excerpt //= $body[0];
+    }
     if (length($excerpt) > 300) {
         $excerpt = substr($excerpt, 0, 300);
         $excerpt =~ s/\s+\S*$//;
@@ -96,6 +117,12 @@ while (my $line = <$T>) {
     for my $f (@{ $images{$slug} || [] }) {
         my $stem = $f; $stem =~ s/\.[^.]+$//;
         push @imgs, $ondisk{$stem} if $ondisk{$stem};
+    }
+    # A page's images come out in DOM order, which is often decorative-first.
+    # The `lead` column promotes the one that should head the article.
+    if ($lead) {
+        @imgs = ((grep { $_ eq $lead } @imgs), (grep { $_ ne $lead } @imgs));
+        unshift @imgs, $lead unless grep { $_ eq $lead } @imgs;
     }
 
     my ($rv, $rmax) = $rating =~ m{^\s*([\d.]+)\s*/\s*(\d+)\s*$} ? ($1, $2) : (undef, undef);
@@ -166,6 +193,9 @@ const SECTIONS = [
   { slug: 'houston',    name: 'Houston'    }
 ];
 
+// Each page sets MEDIA_PATH before loading this file; default suits /<design>/.
+const MEDIA_BASE = (typeof MEDIA_PATH !== 'undefined') ? MEDIA_PATH : '../assets/media/';
+
 const bySection  = s  => ARTICLES.filter(a => a.section === s);
 const byId       = id => ARTICLES.find(a => a.id === Number(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
@@ -173,7 +203,27 @@ const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
 const byline     = a  => a.author || 'The Blanson Post';
 const readingTime= a  => Math.max(1, Math.round(a.body.join(' ').split(/\s+/).length / 200));
-const leadImage  = a  => (a.images && a.images.length ? 'assets/media/' + a.images[0] : null);
+const imageUrl   = f  => MEDIA_BASE + f;
+const leadImage  = a  => (a.images && a.images.length ? MEDIA_BASE + a.images[0] : null);
+
+// ── Content shapes ──────────────────────────────────────────────────────────
+// Poems keep their line breaks; interviews are speaker-prefixed transcripts.
+// Both need different typesetting from ordinary prose, in every design.
+const isVerse = a => a.section === 'poetry' && !/^A Thief/.test(a.title);
+
+const SPEAKER_RE = /^([A-Z][A-Za-z.'-]{1,24}):\s*(.*)$/;
+const speakerOf  = line => { const m = line.match(SPEAKER_RE); return m ? { who: m[1], text: m[2] } : null; };
+const isQA       = a => a.body.filter(l => SPEAKER_RE.test(l)).length >= 4;
+
+// Escape untrusted-ish strings before injecting into innerHTML.
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const stars = a => {
+  if (a.rating == null) return '';
+  const n = Math.round(a.rating / a.ratingMax * 5);
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+};
 TAIL
 close $O;
 
