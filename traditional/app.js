@@ -339,30 +339,58 @@ function byAuthor(name) { return ARTICLES.find(a => a.author === name) || null; 
 function renderScholarships() {
   const list = Paper.scholarships();
   const open = Paper.openCount();
+  const live = list.filter(s => !s.archived);
+  const old  = list.filter(s => s.archived);
+
+  const row = s => `
+    <tr class="is-${esc(s.due.state)}">
+      <td class="sch-name">
+        ${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`
+                : esc(s.name)}
+        ${s.org ? `<span>${esc(s.org)}</span>` : ''}
+        ${s.who ? `<span class="sch-who">${esc(s.who)}</span>` : ''}
+        ${s.note ? `<span class="sch-note">${esc(s.note)}</span>` : ''}
+      </td>
+      <td class="sch-amt">${esc(s.amount || '—')}</td>
+      <td>${s.awards ? esc(String(s.awards)) : '—'}</td>
+      <td class="sch-when">${esc(s.due.when || s.window || '—')}</td>
+      <td class="sch-state"><span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span></td>
+    </tr>`;
+
   return `
   <div class="wrap">
     <div class="page-head">
       <h1>Scholarships</h1>
-      <p>${open ? open + ' still open' : 'None open right now'}</p>
+      <p>${open} open or opening soon · checked ${esc(Paper.dateChecked())}</p>
     </div>
-    ${open ? '' : `<p class="sch-stale">Every deadline below has passed. These are
-      the ones the paper listed last year, kept here so the list is not lost &mdash;
-      a club member can put this year&rsquo;s dates in and they will show as open
-      again on their own.</p>`}
+
+    <div class="sch-warn">
+      <b>Before you apply</b>
+      <ul>${Paper.warnings().map(w => `<li>${esc(w)}</li>`).join('')}</ul>
+    </div>
+
     <table class="sch">
       <thead><tr><th>Scholarship</th><th>Award</th><th>Given</th><th>Deadline</th><th></th></tr></thead>
-      <tbody>
-        ${list.map(s => `
-        <tr class="is-${esc(s.due.state)}">
-          <td class="sch-name">${esc(s.name)}${s.provider ? ` <span>${esc(s.provider)}</span>` : ''}</td>
-          <td class="sch-amt">${esc(s.amount || '\u2014')}</td>
-          <td>${esc(String(s.awards))}</td>
-          <td>${esc(s.due.when)}</td>
-          <td class="sch-state"><span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span>
-            ${s.url ? ` <a class="sch-apply" href="${esc(s.url)}" rel="noopener">Apply</a>` : ''}</td>
-        </tr>`).join('')}
-      </tbody>
+      <tbody>${live.map(row).join('')}</tbody>
     </table>
+
+    <div class="page-head sub-head"><h2>Finding more</h2>
+      <p>No page can hold every scholarship. These do the searching for you</p></div>
+    <div class="finders">
+      ${Paper.finders().map(f => `
+        <a class="finder" href="${esc(f.url)}" target="_blank" rel="noopener">
+          <b>${esc(f.name)} ↗</b>
+          ${f.by ? `<i>${esc(f.by)}</i>` : ''}
+          <span>${esc(f.note)}</span>
+        </a>`).join('')}
+    </div>
+
+    ${old.length ? `
+      <div class="page-head sub-head"><h2>From the old site</h2>
+        <p>Carried over with no links, never checked, all long closed</p></div>
+      <table class="sch is-old">
+        <tbody>${old.map(row).join('')}</tbody>
+      </table>` : ''}
   </div>`;
 }
 

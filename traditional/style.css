@@ -308,3 +308,24 @@ mark{background:#f6e6a8;color:inherit;padding:0 1px}
 .fc-badge{font-size:26px;flex:none}
 .fc-card b{display:block;font-family:var(--display,Georgia,serif);font-size:17px}
 .fc-card span{display:block;margin-top:4px;font-size:14px;color:var(--ink-2);line-height:1.5}
+
+/* ── Scholarships: eligibility, warnings, finders ───────────────────────── */
+.sch-who,.sch-note{display:block;font-size:12.5px;line-height:1.45;margin-top:3px}
+.sch-who{color:var(--ink-2)}
+.sch-note{color:var(--ink-3);font-style:italic}
+.sch-name a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+.sch-name a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.sch-when{white-space:normal;min-width:150px}
+.p-window{color:var(--ink-3)}
+table.sch.is-old{opacity:.6;margin-top:4px}
+.sch-warn{border:1px solid var(--rule);padding:14px 18px;margin:0 0 24px}
+.sch-warn b{font-family:var(--cond);font-size:11.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--accent)}
+.sch-warn ul{margin:8px 0 0;padding-left:18px}
+.sch-warn li{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.finders{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.finder{border:1px solid var(--rule-soft);padding:15px;text-decoration:none;color:var(--ink)}
+.finder:hover{border-color:var(--accent)}
+.finder b{display:block;font-family:var(--display,Georgia,serif);font-size:16px}
+.finder i{display:block;font-size:12px;color:var(--ink-3);margin-top:2px}
+.finder span{display:block;margin-top:7px;font-size:13.5px;line-height:1.5;color:var(--ink-2)}

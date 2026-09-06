@@ -285,3 +285,24 @@ mark{background:rgba(77,139,255,.3);color:inherit;border-radius:3px;padding:0 2p
 .fc-badge{font-size:28px;flex:none}
 .fc-card b{display:block;font-size:16px}
 .fc-card span{display:block;margin-top:4px;font-size:13.5px;color:var(--fg-2,#a3abbb);line-height:1.5}
+
+/* ── Scholarships: eligibility, warnings, finders ───────────────────────── */
+.sch-who{margin:2px 0 0;font-size:13px;line-height:1.5;color:var(--fg-2,#a3abbb)}
+.sch-note{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--fg-3,#8b94a5);font-style:italic}
+.sch-card h3 a{color:inherit;text-decoration:none}
+.sch-card h3 a:hover{color:var(--blue,#4d8bff)}
+.sch-card.is-window{opacity:.9}
+.p-window{color:var(--fg-3,#8b94a5)}
+.sch-warn{background:rgba(240,168,60,.09);border:1px solid rgba(240,168,60,.32);
+  border-radius:12px;padding:14px 18px;margin-bottom:18px}
+.sch-warn b{display:block;font-size:12px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:#f0a83c}
+.sch-warn ul{margin:8px 0 0;padding-left:18px}
+.sch-warn li{font-size:13.5px;line-height:1.65;color:#f7d6a0}
+.finders{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.finder{background:var(--panel,#151922);border:1px solid var(--line,#262d3a);border-radius:14px;
+  padding:16px;text-decoration:none;color:var(--fg,#eef1f6)}
+.finder:hover{border-color:var(--blue,#4d8bff)}
+.finder b{display:block;font-size:15.5px}
+.finder i{display:block;font-size:12px;color:var(--fg-3,#8b94a5);margin-top:2px;font-style:normal}
+.finder span{display:block;margin-top:7px;font-size:13.5px;line-height:1.5;color:var(--fg-2,#a3abbb)}

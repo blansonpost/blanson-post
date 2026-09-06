@@ -341,30 +341,55 @@ function renderStaff() {
 function renderScholarships() {
   const list = Paper.scholarships();
   const open = Paper.openCount();
+  const live = list.filter(s => !s.archived);
+  const old  = list.filter(s => s.archived);
+
+  const row = (s, i) => `
+    <div class="sch is-${esc(s.due.state)}" style="--tilt:${[-.7, .6, -.4, .8][i % 4]}deg">
+      <div class="sch-amt">${esc(s.amount || '—')}</div>
+      <div class="sch-mid">
+        <b>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)} \u2197</a>`
+                   : esc(s.name)}</b>
+        ${s.org ? `<i>${esc(s.org)}</i>` : ''}
+        ${s.who ? `<span class="sch-who">${esc(s.who)}</span>` : ''}
+        ${s.note ? `<span class="sch-note">${esc(s.note)}</span>` : ''}
+        <span>${s.awards ? esc(String(s.awards)) + ' awarded · ' : ''}${
+          esc(s.due.when || s.window || '')}</span>
+      </div>
+      <span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span>
+    </div>`;
+
   return `
   <section class="sechead">
     <div class="sechead-icon">\u{1F393}</div>
     <h1>Scholarships</h1>
-    <p>${open ? open + ' still open' : 'None open right now'}</p>
+    <p>${open} open or opening soon · checked ${esc(Paper.dateChecked())}</p>
   </section>
   <section class="shelf">
-    ${open ? '' : `<div class="stale">All of these closed a while back. They are the
-      ones the paper listed last year, kept so the list isn&rsquo;t lost &mdash; add
-      this year&rsquo;s dates and they&rsquo;ll light up again by themselves.</div>`}
-    <div class="schs">
-      ${list.map((s, i) => `
-        <div class="sch is-${esc(s.due.state)}" style="--tilt:${[-.8, .7, -.5, 1][i % 4]}deg">
-          <div class="sch-amt">${esc(s.amount || '\u2014')}</div>
-          <div class="sch-mid">
-            <b>${esc(s.name)}</b>
-            ${s.provider ? `<i>${esc(s.provider)}</i>` : ''}
-            <span>${esc(String(s.awards))} awarded &middot; ${esc(s.due.when)}</span>
-          </div>
-          <span class="pill p-${esc(s.due.state)}">${esc(s.due.label)}</span>
-          ${s.url ? `<a class="sch-apply" href="${esc(s.url)}" rel="noopener">Apply</a>` : ''}
-        </div>`).join('')}
+    <div class="sch-warn">
+      <b>Before you apply</b>
+      <ul>${Paper.warnings().map(w => `<li>${esc(w)}</li>`).join('')}</ul>
     </div>
-  </section>`;
+    <div class="schs">${live.map(row).join('')}</div>
+  </section>
+  <section class="sechead"><div class="sechead-icon">\u{1F50D}</div>
+    <h1>Finding more</h1>
+    <p>No page can hold every scholarship — these do the searching for you</p></section>
+  <section class="shelf">
+    <div class="finders">
+      ${Paper.finders().map(f => `
+        <a class="finder" href="${esc(f.url)}" target="_blank" rel="noopener">
+          <b>${esc(f.name)} \u2197</b>
+          ${f.by ? `<i>${esc(f.by)}</i>` : ''}
+          <span>${esc(f.note)}</span>
+        </a>`).join('')}
+    </div>
+  </section>
+  ${old.length ? `
+  <section class="sechead"><div class="sechead-icon">\u{1F4E6}</div>
+    <h1>From the old site</h1>
+    <p>Carried over with no links, never checked, all long closed</p></section>
+  <section class="shelf"><div class="schs">${old.map(row).join('')}</div></section>` : ''}`;
 }
 
 // ── Alumni directory, shown on the Alumni section page ───────────────────────

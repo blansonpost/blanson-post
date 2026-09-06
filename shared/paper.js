@@ -73,22 +73,145 @@ const Paper = (() => {
   ];
 
   // ── Scholarships ────────────────────────────────────────────────────────
-  // Every deadline here is from the old site and has already gone by, so the
-  // page marks them closed rather than sending anyone to a dead form. Put the
-  // new year's dates in and they light up again on their own.
+  // CHECKED ON 6 SEPTEMBER 2026, each one on the organisation's own site.
   //
-  // `url` is empty because the old page's APPLY buttons were images — the link
-  // addresses were not in the archive. Paste them in as you find them.
+  // Two kinds of entry, and the difference matters:
+  //
+  //   `deadline`  a firm date published for the CURRENT cycle. Trustworthy.
+  //   `window`    no date out yet, so this is the month range the programme has
+  //               run to before. A guide for planning, NOT a date to rely on.
+  //
+  // Never turn a `window` into a `deadline` because it looks tidier. A wrong
+  // date here costs somebody a scholarship.
+  //
+  // `verified` is the day a person last opened the official page and checked.
+  // The page shows it, so a reader can see how stale the list is.
+  const CHECKED = '2026-09-06';
+
   const SCHOLARSHIPS = [
-    { name: 'Be Bold Scholarship',                     amount: '$25,000', awards: 1,   deadline: '2026-03-01', url: '' },
-    { name: 'Hunt Heroes Foundation Scholarship Program', amount: '$5,000', awards: 26, deadline: '2026-03-04', url: '' },
-    { name: 'FEEA',                                    amount: '',        awards: 200, deadline: '2026-03-12', url: '' },
-    { name: 'NLHA Education Fund',                     amount: '$3,500',  awards: 4,   deadline: '2026-03-13', url: '' },
-    { name: 'IMANA',                                   amount: '',        awards: 12,  deadline: '2026-03-15', url: '' },
-    // The old page listed "Dolphin" and "Niche" on two lines under one deadline.
-    // Recorded exactly as it appeared; check which is the scholarship and which
-    // is the provider before anyone relies on it.
-    { name: 'Dolphin',                                 amount: '$4,000',  awards: 113, deadline: '2026-03-31', url: '', provider: 'Niche' }
+    // ── open now, firm dates ────────────────────────────────────────────
+    { name: 'The Gates Scholarship', org: 'Bill & Melinda Gates Foundation',
+      amount: 'Full cost of attendance', awards: 300, deadline: '2026-09-15',
+      who: 'Seniors who are Pell-eligible, US citizens or permanent residents, minimum 3.3 GPA',
+      url: 'https://www.thegatesscholarship.org/scholarship', verified: CHECKED },
+
+    { name: 'Coca-Cola Scholars', org: 'Coca-Cola Scholars Foundation',
+      amount: '$20,000', awards: 150, deadline: '2026-09-30',
+      who: 'Seniors graduating in 2026–27. Judged on leadership and service',
+      note: 'Closes 5 p.m. Eastern — that is 4 p.m. here.',
+      url: 'https://www.coca-colascholarsfoundation.org/apply/', verified: CHECKED },
+
+    { name: 'QuestBridge National College Match', org: 'QuestBridge',
+      amount: 'Full four-year scholarship, over $360,000', awards: null, deadline: '2026-10-01',
+      who: 'High-achieving seniors from low-income households, matched with 55 top colleges',
+      url: 'https://www.questbridge.org/high-school-students/national-college-match', verified: CHECKED },
+
+    { name: 'Work Ethic Scholarship', org: 'mikeroweWORKS Foundation',
+      amount: 'Varies', awards: null, deadline: '2026-10-31',
+      who: 'Anyone training for a skilled trade — welding, plumbing, electrical, HVAC, construction and more',
+      note: 'Awarded four times a year, so missing one round is not the end of it.',
+      url: 'https://www.mikeroweworks.org/scholarship/', verified: CHECKED },
+
+    { name: 'Cooke College Scholarship', org: 'Jack Kent Cooke Foundation',
+      amount: 'Up to $55,000 a year', awards: null, deadline: '2026-11-11',
+      who: 'Seniors with financial need and strong grades, heading to a four-year college',
+      url: 'https://www.jkcf.org/our-scholarships/college-scholarship-program/', verified: CHECKED },
+
+    { name: 'Most Valuable Student', org: 'Elks National Foundation',
+      amount: '$4,000 – $30,000', awards: 500, deadline: '2026-11-12',
+      who: 'Seniors who are US citizens, heading to a four-year degree. No need to know an Elks member',
+      note: 'Closes 11:59 p.m. Pacific.',
+      url: 'https://www.elks.org/scholars/scholarships/mvs.cfm', verified: CHECKED },
+
+    { name: 'Burger King Scholars', org: 'Burger King Foundation',
+      amount: '$1,000 – $60,000', awards: null, deadline: '2026-12-15', opens: '2026-10-15',
+      who: 'Seniors heading to college OR to a vocational/technical school',
+      note: 'Closes at 30,000 applications or 15 December, whichever comes first — apply early.',
+      url: 'https://www.burgerkingfoundation.org/programs/burger-king-sm-scholars', verified: CHECKED },
+
+    // ── dates for this cycle not published yet ───────────────────────────
+    { name: 'Houston-Area Rodeo Scholars', org: 'Houston Livestock Show and Rodeo',
+      amount: '$20,000 over four years', awards: 350, window: 'Usually opens 1 December, closes early February',
+      who: 'Texas residents graduating from a Houston-area school, going to a Texas university. FAFSA and SAT/ACT required',
+      note: 'One of the biggest scholarship providers in the country — 350 Houston-area awards alone. The Rodeo said 2027 dates arrive in autumn 2026, so check now.',
+      url: 'https://www.rodeohouston.com/scholarships-and-grants/how-to-apply/', verified: CHECKED },
+
+    { name: 'Dell Scholars', org: 'Michael & Susan Dell Foundation',
+      amount: '$20,000 plus a laptop and ongoing support', awards: 500,
+      window: 'Usually opens 15 December, closes 15 February',
+      who: 'Seniors with financial need who have shown determination through hardship',
+      url: 'https://www.dellscholars.org/scholarship/', verified: CHECKED },
+
+    { name: 'Horatio Alger National Scholarship', org: 'Horatio Alger Association',
+      amount: 'Varies', awards: null, window: '1 December – 15 February for seniors',
+      who: 'Seniors who have overcome real adversity and have critical financial need',
+      url: 'https://horatioalger.org/scholarships/', verified: CHECKED },
+
+    { name: 'Horatio Alger Career & Technical Scholarship', org: 'Horatio Alger Association',
+      amount: 'Varies', awards: null, window: '15 March – 15 June',
+      who: 'Seniors heading for an associate degree or a certificate — not a four-year degree',
+      note: 'Built for exactly the path a lot of Blanson students take.',
+      url: 'https://horatioalger.org/scholarships/', verified: CHECKED },
+
+    { name: 'HSF Scholar Program', org: 'Hispanic Scholarship Fund',
+      amount: 'Varies, plus mentoring and career support', awards: 10000,
+      window: 'Usually opens early January, closes mid-February',
+      who: 'Students of Hispanic heritage, 3.0 GPA, must complete FAFSA or TASFA',
+      url: 'https://www.hsf.net/scholarship', verified: CHECKED },
+
+    { name: 'Terry Foundation Traditional Scholarship', status: 'Ask the university', org: 'The Terry Foundation',
+      amount: 'Full ride, up to eight semesters', awards: null,
+      window: 'Deadlines are set by each university, not the Foundation',
+      who: 'Texas seniors admitted to a Terry-affiliated Texas public university, with financial need',
+      note: 'Houston-based, and the largest private scholarship provider in Texas. You apply through the university, so check that university’s page.',
+      url: 'https://terryfoundation.org/apply/', verified: CHECKED },
+
+    { name: 'FAFSA — Free Application for Federal Student Aid', status: 'Opens in autumn', org: 'U.S. Department of Education',
+      amount: 'Grants, work-study and loans', awards: null,
+      window: 'Opens in the autumn for the next school year',
+      who: 'Everyone. It is free, and half the scholarships on this page require it',
+      note: 'Not a scholarship, the gateway to most of them. If you cannot file a FAFSA, ask your counsellor about the TASFA instead.',
+      url: 'https://studentaid.gov/h/apply-for-aid/fafsa', verified: CHECKED },
+
+    // ── from the old Wix page, kept but never verified ───────────────────
+    // These came across from the old site with no links and no way to check
+    // them. They are marked so nobody mistakes them for a checked entry.
+    { name: 'Be Bold Scholarship', amount: '$25,000', awards: 1, deadline: '2026-03-01', archived: true },
+    { name: 'Hunt Heroes Foundation Scholarship Program', amount: '$5,000', awards: 26,
+      deadline: '2026-03-04', archived: true },
+    { name: 'FEEA', amount: '', awards: 200, deadline: '2026-03-12', archived: true },
+    { name: 'NLHA Education Fund', amount: '$3,500', awards: 4, deadline: '2026-03-13', archived: true },
+    { name: 'IMANA', amount: '', awards: 12, deadline: '2026-03-15', archived: true },
+    { name: 'Dolphin', org: 'Niche', amount: '$4,000', awards: 113, deadline: '2026-03-31', archived: true }
+  ];
+
+  // ── Where to look for more ──────────────────────────────────────────────
+  // No page can list every scholarship — there are thousands, and hundreds are
+  // local to one city or one trade. These are the free searches that do the
+  // finding, so the paper points at them instead of pretending to be one.
+  const FINDERS = [
+    { name: 'BigFuture Scholarship Search', by: 'College Board',
+      url: 'https://bigfuture.collegeboard.org/scholarship-search',
+      note: 'Free, no account needed to browse.' },
+    { name: 'Federal Student Aid', by: 'U.S. Department of Education',
+      url: 'https://studentaid.gov/',
+      note: 'FAFSA, grants and the official word on federal aid.' },
+    { name: 'College for All Texans', by: 'Texas Higher Education Coordinating Board',
+      url: 'https://www.collegeforalltexans.com/',
+      note: 'Texas-only grants and aid, including the TASFA.' },
+    { name: 'Fastweb', by: '', url: 'https://www.fastweb.com/',
+      note: 'Long-running free search; matches you against your profile.' },
+    { name: 'Scholarships.com', by: '', url: 'https://www.scholarships.com/',
+      note: 'Large free database you can filter by state and field of study.' }
+  ];
+
+  // Worth saying out loud on a page like this. Scholarship scams target
+  // students who are already worried about paying for college.
+  const WARNINGS = [
+    'A real scholarship never charges a fee to apply. If a site wants money, close it.',
+    'Nobody can guarantee you will win one. Anyone who promises that is selling something.',
+    'Never give a bank account or card number to a scholarship application.',
+    'Check the deadline on the official site before you rely on it — including this page.'
   ];
 
   // ── Alumni ──────────────────────────────────────────────────────────────
@@ -328,11 +451,47 @@ const Paper = (() => {
     return { state: 'open', label: 'Open', when, days };
   }
 
-  const scholarships = () => SCHOLARSHIPS
-    .map(s => ({ ...s, ...{ due: deadline(s.deadline) } }))
-    .sort((a, b) => String(a.deadline).localeCompare(String(b.deadline)));
+  // An entry with no firm date for this cycle gets its own state rather than
+  // being squeezed into the open/closed ones — "we do not know yet" is a real
+  // answer and pretending otherwise is how a student misses a deadline.
+  function statusOf(row) {
+    // Most undated rows are waiting on next year's dates, but not all — the
+    // Terry deadlines exist, they are just set by each university. A row can
+    // set `status` to say which it is rather than being labelled wrongly.
+    if (!row.deadline) return { state: 'window', label: row.status || 'Dates not out yet',
+                                when: row.window || '', days: null };
+    const due = deadline(row.deadline);
+    // Published, but not open for applications quite yet.
+    if (due.state !== 'closed' && row.opens) {
+      const from = Blocks.parseDate(row.opens);
+      if (from && midnight(from) > midnight(new Date())) {
+        return { state: 'soon', label: 'Opens ' + Blocks.dateText({ date: row.opens }),
+                 when: due.when, days: due.days, notYet: true };
+      }
+    }
+    return due;
+  }
 
-  const openCount = () => scholarships().filter(s => s.due.state !== 'closed').length;
+  // Soonest first among the ones you can actually act on; everything without a
+  // date next; last year's unverified leftovers at the bottom where they cannot
+  // be mistaken for something current.
+  // 'open' and 'soon' share a rank on purpose: both are things a student can
+  // act on, so they belong in one run sorted by date. Ranking "opens in
+  // October" above "closes in three weeks" would bury the urgent one.
+  const RANK = { open: 0, soon: 0, window: 1, closed: 2, unknown: 3 };
+  const scholarships = () => SCHOLARSHIPS
+    .map(r => ({ ...r, due: statusOf(r) }))
+    .sort((a, b) => {
+      if (!!a.archived !== !!b.archived) return a.archived ? 1 : -1;
+      const ra = RANK[a.due.state] ?? 9, rb = RANK[b.due.state] ?? 9;
+      if (ra !== rb) return ra - rb;
+      return String(a.deadline || '9999').localeCompare(String(b.deadline || '9999'));
+    });
+
+  // Counts only what a student could act on today — an unverified leftover from
+  // last year is not an opportunity.
+  const openCount = () => scholarships()
+    .filter(s => !s.archived && (s.due.state === 'open' || s.due.state === 'soon')).length;
 
   // Their own stories, so the team page is not just a list of names. Matched on
   // the byline exactly — see the note on STAFF.
@@ -362,6 +521,10 @@ const Paper = (() => {
     staff: () => STAFF.slice(),
     alumni: () => ALUMNI.slice(),
     alumniStory: () => ALUMNI_STORY,
+    finders: () => FINDERS.slice(),
+    warnings: () => WARNINGS.slice(),
+    // Shown on the page, so a reader can judge how stale the list is.
+    dateChecked: () => Blocks.dateText({ date: CHECKED }),
     galleries: () => GALLERIES.slice(),
     artwork: () => ARTWORK.slice(),
     fc: () => FC,
