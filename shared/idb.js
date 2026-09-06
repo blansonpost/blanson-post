@@ -48,12 +48,34 @@ const IDB = (() => {
         }
       };
       // Private browsing and "block site data" surface here rather than throwing.
-      req.onerror   = () => reject(fail('BLOCKED',
-        'This browser will not let the newsroom save anything. It may be in private mode.',
-        req.error));
+      req.onerror   = () => {
+        // A database newer than this code is a different problem entirely, and
+        // blaming the browser for it sends people looking in the wrong place.
+        // It means one tab is running a newer copy of the site than this one —
+        // usually a cached page after an update.
+        if (req.error && req.error.name === 'VersionError') {
+          return reject(fail('BLOCKED',
+            'This browser has a newer version of the newsroom’s data than the page ' +
+            'you just loaded. Reload holding Shift to fetch the newer version of the site.',
+            req.error));
+        }
+        reject(fail('BLOCKED',
+          'This browser will not let the newsroom save anything. It may be in private mode.',
+          req.error));
+      };
       req.onblocked = () => reject(fail('BLOCKED',
         'Another tab is holding the newsroom open. Close it and reload.'));
-      req.onsuccess = () => resolve(req.result);
+      req.onsuccess = () => {
+        const db = req.result;
+        // If another tab later opens a newer version, this connection has to get
+        // out of the way. Without this the newer tab sits on `blocked` until the
+        // older one is closed by hand — and since the site and the newsroom both
+        // open this database, having two tabs open is the normal case, not an
+        // edge case. Raising VERSION without this is what makes an upgrade look
+        // like the newsroom is broken.
+        db.onversionchange = () => { db.close(); dbPromise = null; };
+        resolve(db);
+      };
     });
     return dbPromise;
   }

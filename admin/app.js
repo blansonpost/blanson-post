@@ -122,7 +122,8 @@ async function showShell() {
   $('tabs').querySelector('[data-tab="staff"]').hidden = false;
   // Anyone can write a story; the calendar speaks for the whole school, so it
   // is kept to the people who already decide what gets published.
-  $('tabs').querySelector('[data-tab="events"]').hidden = !can('publish');
+  const evTab = $('tabs').querySelector('[data-tab="events"]');
+  if (evTab) evTab.hidden = !can('publish');
   buildSelects();
   buildFilters();
   await refresh();
@@ -164,9 +165,13 @@ function showTab(name) {
     t.classList.toggle('on', on);
     on ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current');
   });
-  $('view-write').hidden = name !== 'write';
-  $('view-staff').hidden = name !== 'staff';
-  $('view-events').hidden = name !== 'events';
+  // Guarded: a missing panel should hide a tab, not throw partway through and
+  // leave the whole newsroom blank. This bites when a browser is holding a
+  // cached copy of index.html from before a panel was added.
+  const panel = (id, on) => { const el = $(id); if (el) el.hidden = !on; };
+  panel('view-write', name === 'write');
+  panel('view-staff', name === 'staff');
+  panel('view-events', name === 'events');
   if (name === 'staff') renderStaff();
   if (name === 'events') renderEvents();
 }
@@ -1330,4 +1335,15 @@ async function renderStaff() {
   };
 }
 
-boot();
+// Anything boot() throws used to land nowhere: both the sign-in card and the
+// newsroom start hidden, so a failure left a blank page with no clue what went
+// wrong. Say what happened instead, and say what usually fixes it.
+boot().catch(err => {
+  console.error('[Newsroom] could not start:', err);
+  document.body.innerHTML =
+    `<div class="fatal"><h1>The newsroom didn't start</h1>
+     <p>${esc(err && err.message ? err.message : String(err))}</p>
+     <p>Reload the page while holding <b>Shift</b> — that fetches a fresh copy
+        rather than the one this browser saved. If it keeps happening, close any
+        other tabs with the paper open and try again.</p></div>`;
+});
