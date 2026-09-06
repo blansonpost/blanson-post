@@ -730,7 +730,10 @@ async function fillPhotoBlock(b, file) {
     b.src = meta.src; b.assetId = meta.id;
     b.w = meta.w; b.h = meta.h; b.bytes = meta.bytes; b.name = meta.name;
     Ed.doc.assets = Ed.doc.assets.filter(a => a.id !== meta.id).concat([meta]);
-    if (!Ed.doc.cover) Ed.doc.cover = { src: meta.src, assetId: meta.id, alt: '', caption: '', credit: '' };
+    // Deliberately does NOT set the cover. Adding a picture to the story is not
+    // the same decision as choosing the one that headlines the page — and doing
+    // it automatically made the photo appear twice: once at the top and once
+    // where it was actually placed. Use the cover slot, or "★ Use as cover".
     touched(); renderBlocks(); renderCover(); renderSpace();
   } catch (err) {
     explain(err);
