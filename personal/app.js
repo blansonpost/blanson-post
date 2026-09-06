@@ -52,11 +52,19 @@ function textHTML(a, line) {
 // Photos run through the story (see layoutBlocks), each tilted a little so the
 // page keeps the scrapbook feel.
 let tiltSeed = 0;
-const inlineFig = b => `<figure class="inline-fig" style="--tilt:${[-1.2, 1, -.7, 1.4][tiltSeed++ % 4]}deg">
-     <img src="${esc(imageUrl(b.src))}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
+// A photo that can no longer be found renders as nothing at all. The tilt
+// counter advances only for a picture actually drawn, so a missing one does
+// not change the angle of every photo after it.
+const inlineFig = b => {
+  const src = imageUrl(b.src);
+  if (!src) return '';
+  const tilt = [-1.2, 1, -.7, 1.4][tiltSeed++ % 4];
+  return `<figure class="inline-fig" style="--tilt:${tilt}deg">
+     <img src="${esc(src)}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
      ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
        b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
    </figure>`;
+};
 
 function bodyHTML(a) {
   tiltSeed = 0;
@@ -109,7 +117,7 @@ function renderHome() {
       <a class="btn" href="#/s/campus">Start reading →</a>
     </div>
     <div class="welcome-collage">
-      ${ARTICLES.filter(a => a.images && a.images.length).slice(0, 4)
+      ${ARTICLES.filter(a => leadImage(a)).slice(0, 4)
         .map((a, i) => pic(a, 'collage-pic', [-4, 3, -2, 5][i])).join('')}
     </div>
   </section>

@@ -64,11 +64,17 @@ function textHTML(a, line) {
 }
 
 // Photos run through the article (see layoutBlocks), not stacked at the end.
-const inlineFig = b => `<figure class="inline-fig">
-    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
+// A photo that can no longer be found renders as nothing at all, rather than a
+// broken image sitting in the middle of the story.
+const inlineFig = b => {
+  const src = imageUrl(b.src);
+  if (!src) return '';
+  return `<figure class="inline-fig">
+    <img src="${esc(src)}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
     ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
       b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
   </figure>`;
+};
 
 function bodyHTML(a) {
   if (isVerse(a)) {

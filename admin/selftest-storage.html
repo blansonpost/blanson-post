@@ -91,6 +91,37 @@ function png(px, transparent) {
   Photos.releaseScope('test');
   check('object URLs revoked on scope release', true, 'released');
 
+  // 7b. a reference whose file is gone must not become a broken image.
+  // This is the regression guard for a bug that put "/assets/media/idb:p_xxxxx"
+  // in front of readers: unresolved references were handed back unchanged, then
+  // pasted onto the media path, requested from the server, and 404d.
+  const goneRef = 'idb:p_definitely_not_stored';
+  const goneArt = { blocks: [{ type: 'photo', src: goneRef }],
+                    images: [goneRef, meta.src], cover: { src: goneRef } };
+  const goneRes = await Store.resolvePhotos(goneArt, 'test2');
+  check('a missing photo resolves to null, not a reference',
+        goneRes.blocks[0].src === null && goneRes.cover.src === null,
+        'block=' + goneRes.blocks[0].src + ' cover=' + goneRes.cover.src);
+  // The survivor is a blob: URL by now, not the reference it went in as — that
+  // is the resolving working, so match on the shape rather than the raw string.
+  check('dead references dropped from the image list',
+        goneRes.images.length === 1 && /^blob:/.test(goneRes.images[0]),
+        goneRes.images.length + ' left of 2, survivor=' + String(goneRes.images[0]).slice(0, 14));
+  // The choke point: even if a raw reference reaches the renderer some other
+  // way, it must never be turned into a URL the browser will go and fetch.
+  check('an idb: reference never becomes a media URL',
+        Blocks.imageUrl(goneRef) === null && Blocks.imageUrl('') === null,
+        'imageUrl(idb:…)=' + Blocks.imageUrl(goneRef));
+  check('an article whose only photo is gone has no lead image',
+        Blocks.leadImage({ cover: { src: goneRef }, images: [goneRef] }) === null,
+        'leadImage=' + Blocks.leadImage({ cover: { src: goneRef }, images: [goneRef] }));
+  // A surviving photo still has to be found when the cover is the missing one.
+  check('lead image falls back past a missing cover',
+        Blocks.leadImage({ cover: { src: goneRef }, images: [goneRef, 'real.jpg'] })
+          === Blocks.imageUrl('real.jpg'),
+        String(Blocks.leadImage({ cover: { src: goneRef }, images: [goneRef, 'real.jpg'] })));
+  Photos.releaseScope('test2');
+
   // 8. many photos — the case that jammed localStorage after about a dozen
   const small = await png(400, false);
   let stored = 0;

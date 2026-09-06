@@ -800,7 +800,8 @@ async function renderPhotoBlock(body, b) {
     body.dataset.kind = 'photo'; body.dataset.for = b.id;
     body.innerHTML = `
       <div class="ph">
-        <div class="ph-thumb"><img alt="" ${b.src ? '' : 'hidden'}></div>
+        <div class="ph-thumb"><img alt="" ${b.src ? '' : 'hidden'}
+          ><span class="ph-gone" data-role="gone" hidden>Photo missing</span></div>
         <div class="ph-fields">
           <label class="ph-lab">Describe this photo
             <span class="hint">Someone using a screen reader hears this instead of the picture.
@@ -838,12 +839,18 @@ async function renderPhotoBlock(body, b) {
     };
   }
 
-  const img = body.querySelector('img');
+  const img  = body.querySelector('img');
+  const gone = body.querySelector('[data-role=gone]');
   if (b.src) {
-    img.hidden = false;
     const url = Store.isIdbRef(b.src) ? await Photos.url(b.src.slice(4), 'editor', 'thumb') : b.src;
+    // A reference with no file behind it any more. The newsroom says so out
+    // loud — unlike the public site, which simply leaves the photo out — because
+    // the writer is the only person who can put it back, and an empty frame
+    // reads as a slow load rather than a problem.
+    img.hidden = !url;
+    if (gone) gone.hidden = !!url;
     if (url && img.getAttribute('src') !== url) img.src = url;
-  } else { img.hidden = true; }
+  } else { img.hidden = true; if (gone) gone.hidden = true; }
 
   const active = document.activeElement;
   const set = (sel, v) => { const el = body.querySelector(sel); if (el && el !== active) el.value = v || ''; };
@@ -872,8 +879,11 @@ async function renderCover() {
   const src = Store.isIdbRef(Ed.doc.cover.src)
     ? await Photos.url(Ed.doc.cover.src.slice(4), 'editor', 'thumb') : Ed.doc.cover.src;
   c.innerHTML = `<div class="cover-set">
-      <img src="${esc(src || '')}" alt="">
-      <div><b>Cover photo</b><span>Shown big at the top of the article.</span></div>
+      ${src ? `<img src="${esc(src)}" alt="">` : '<span class="cover-gone">!</span>'}
+      <div><b>Cover photo</b><span>${src
+        ? 'Shown big at the top of the article.'
+        : 'This photo is not saved on this computer any more, so it will not ' +
+          'appear on the site. Choose it again.'}</span></div>
       <button type="button" class="btn small" id="change-cover">Change</button>
       <button type="button" class="btn small ghost" id="clear-cover">Remove</button></div>`;
   $('change-cover').onclick = pickCover;
@@ -889,7 +899,9 @@ async function renderPreview() {
   for (const b of Blocks.of(doc)) {
     switch (b.type) {
       case 'photo':
-        parts.push(`<figure><img src="${esc(b.src || '')}" alt="${esc(b.alt || '')}">${
+        // Matches the site: no picture, no figure, no orphaned caption.
+        if (!b.src) break;
+        parts.push(`<figure><img src="${esc(b.src)}" alt="${esc(b.alt || '')}">${
           b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
             b.credit ? ` <i>${esc(b.credit)}</i>` : ''}</figcaption>` : ''}</figure>`);
         break;

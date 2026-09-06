@@ -259,8 +259,12 @@ const Store = (() => {
   // Article documents hold `idb:<id>`; the browser needs a blob: URL. Resolved
   // per page load into a named scope so they can all be revoked together.
   async function resolvePhotos(article, scope) {
+    // null, not the reference itself, when the photo cannot be found. Handing
+    // back the raw `idb:` reference used to send it downstream to be rendered
+    // as a URL, which 404d and showed the reader a broken image. null tells
+    // every renderer there is no picture here.
     const swap = async ref => (isIdbRef(ref)
-      ? (await Photos.url(ref.slice(4), scope)) || ref
+      ? (await Photos.url(ref.slice(4), scope)) || null
       : ref);
 
     const out = { ...article };
@@ -269,7 +273,12 @@ const Store = (() => {
       out.blocks = await Promise.all(out.blocks.map(async b =>
         b.type === 'photo' && b.src ? { ...b, src: await swap(b.src) } : b));
     }
-    if (Array.isArray(out.images)) out.images = await Promise.all(out.images.map(swap));
+    // Dead references are dropped from the list entirely, so anything counting
+    // or picking from `images` sees only photos that actually exist. (The list
+    // is rebuilt from the blocks on every save, so nothing is lost by this.)
+    if (Array.isArray(out.images)) {
+      out.images = (await Promise.all(out.images.map(swap))).filter(Boolean);
+    }
     return out;
   }
 

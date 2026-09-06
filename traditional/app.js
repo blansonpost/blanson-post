@@ -52,11 +52,17 @@ function textHTML(a, line) {
   return `<p>${esc(line)}</p>`;
 }
 
-const inlineFig = b => `<figure class="inline-fig">
-    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
+// A photo that can no longer be found renders as nothing at all — no caption
+// stranded under a broken image, no request for a file that isn't there.
+const inlineFig = b => {
+  const src = imageUrl(b.src);
+  if (!src) return '';
+  return `<figure class="inline-fig">
+    <img src="${esc(src)}" alt="${esc(b.decorative ? '' : (b.alt || ''))}" loading="lazy">
     ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
       b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
   </figure>`;
+};
 
 function bodyHTML(a) {
   if (isVerse(a)) {

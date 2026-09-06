@@ -25,10 +25,37 @@ const Blocks = (() => {
   // URL (or an object URL). Pass anything already absolute straight through.
   const isAbsolute = s => /^(https?:|data:|blob:|\/)/i.test(String(s));
   const mediaBase  = () => (typeof MEDIA_PATH !== 'undefined' ? MEDIA_PATH : '../assets/media/');
-  const imageUrl   = f => (isAbsolute(f) ? String(f) : mediaBase() + f);
+
+  // `idb:<id>` is how a newsroom photo is stored at rest. Store.resolvePhotos()
+  // swaps those for blob: URLs before anything renders, so one arriving here
+  // means the photo is no longer in this browser — swept, deleted, or the
+  // article was opened somewhere it was never uploaded.
+  const isStoredRef = s => /^idb:/i.test(String(s ?? ''));
+
+  // Returns null when there is no usable picture, and every caller treats null
+  // as "render no image at all". This is the choke point: previously an
+  // unresolved reference was pasted onto the media path, so the page asked the
+  // server for "/assets/media/idb:p_xxxxx", got a 404, and left a broken image
+  // icon in the middle of a story someone was reading. A missing photo must
+  // never be able to do that, so it is refused here rather than in each design.
+  const imageUrl   = f => {
+    const s = String(f ?? '').trim();
+    if (!s || isStoredRef(s)) return null;
+    return isAbsolute(s) ? s : mediaBase() + s;
+  };
+
+  // Falls through rather than giving up: if the cover has gone missing but a
+  // photo further down the article survives, the story still gets a picture.
   const leadImage  = a => {
-    if (a.cover && a.cover.src) return imageUrl(a.cover.src);
-    return (a.images && a.images.length) ? imageUrl(a.images[0]) : null;
+    if (a.cover && a.cover.src) {
+      const u = imageUrl(a.cover.src);
+      if (u) return u;
+    }
+    for (const f of (a.images || [])) {
+      const u = imageUrl(f);
+      if (u) return u;
+    }
+    return null;
   };
 
   // ── article-level facts ─────────────────────────────────────────────────
@@ -288,7 +315,7 @@ const Blocks = (() => {
 
   return {
     esc, newId,
-    isAbsolute, imageUrl, leadImage,
+    isAbsolute, isStoredRef, imageUrl, leadImage,
     byline, readingTime, stars,
     parseDate, publishedOn, updatedOn, dateText, dateShort, updatedText, dateTag,
     isVerse, isQA, speakerOf, interviewerOf, isQuestion, SPEAKER_RE,
