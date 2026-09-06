@@ -60,16 +60,20 @@ function textHTML(a, line) {
 }
 
 // Photos run through the article (see layoutBlocks), not stacked at the end.
-const inlineFig = src =>
-  `<figure class="inline-fig"><img src="${esc(imageUrl(src))}" alt="" loading="lazy"></figure>`;
+const inlineFig = b => `<figure class="inline-fig">
+    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+    ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
+      b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
+  </figure>`;
 
 function bodyHTML(a) {
   if (isVerse(a)) {
     return `<div class="verse">${a.body.map(esc).join('<br>')}</div>` +
-           (a.images || []).slice(1).map(inlineFig).join('');
+           (a.images || []).slice(1)
+             .map(src => inlineFig({ src, ...(a.photoMeta || {})[src] })).join('');
   }
   return layoutBlocks(a).map(b =>
-    b.type === 'image' ? inlineFig(b.src) : textHTML(a, b.text)).join('');
+    b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
 }
 
 function facts(a) {
@@ -235,4 +239,6 @@ function route() {
   scrollTo(0, 0);
 }
 addEventListener('hashchange', route);
-route();
+
+// Merge in anything published from the newsroom, then draw.
+Store.hydrate().catch(() => {}).then(route);

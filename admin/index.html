@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Newsroom — The Blanson Post</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<!-- ── Sign in ────────────────────────────────────────────────────────────── -->
+<section id="gate" class="gate" hidden>
+  <form class="gate-card" id="login-form">
+    <div class="gate-brand">The Blanson <span>Post</span></div>
+    <div class="gate-sub">Newsroom sign-in</div>
+
+    <label for="email">School email</label>
+    <input id="email" type="email" autocomplete="username" required>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+
+    <button class="btn primary wide" type="submit" id="login-btn">Sign in</button>
+    <p class="gate-error" id="login-error" hidden></p>
+    <p class="gate-note" id="gate-note"></p>
+  </form>
+</section>
+
+<!-- ── Newsroom ───────────────────────────────────────────────────────────── -->
+<div id="shell" hidden>
+  <header class="bar">
+    <div class="bar-brand">The Blanson <span>Post</span> <em>Newsroom</em></div>
+    <div class="bar-right">
+      <span class="badge" id="mode-badge"></span>
+      <span class="me" id="me"></span>
+      <button class="btn ghost" id="signout">Sign out</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="side">
+      <button class="btn primary wide" id="new-article">＋ New article</button>
+      <div class="filters" id="filters"></div>
+      <div class="list" id="list"></div>
+    </aside>
+
+    <section class="editor" id="editor">
+      <div class="empty" id="empty">
+        <h2>Nothing open</h2>
+        <p>Pick an article on the left, or start a new one.</p>
+      </div>
+
+      <form id="form" hidden>
+        <div class="form-head">
+          <input class="title-input" id="f-title" placeholder="Headline" required>
+          <div class="form-actions">
+            <span class="status-pill" id="f-status-pill"></span>
+            <button class="btn ghost" type="button" id="btn-delete">Delete</button>
+            <button class="btn" type="button" id="btn-save">Save draft</button>
+            <button class="btn primary" type="button" id="btn-submit">Submit for review</button>
+            <button class="btn publish" type="button" id="btn-publish" hidden>Publish</button>
+            <button class="btn ghost" type="button" id="btn-unpublish" hidden>Unpublish</button>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div class="col-main">
+            <div class="row">
+              <label>Section
+                <select id="f-section"></select>
+              </label>
+              <label>Written by
+                <input id="f-author" placeholder="e.g. Melanie Cardenas">
+              </label>
+              <label>Rating <span class="hint">optional</span>
+                <span class="rating-row">
+                  <input id="f-rating" type="number" step="0.1" min="0" placeholder="—">
+                  <span>/</span>
+                  <select id="f-rating-max"><option value="5">5</option><option value="10">10</option></select>
+                </span>
+              </label>
+            </div>
+
+            <label class="body-label" for="f-body">
+              Article
+              <span class="hint">Blank line between paragraphs. Put your cursor where you want a
+              photo, then press <b>Insert here</b> on it.</span>
+            </label>
+            <textarea id="f-body" rows="24" placeholder="Start writing…"></textarea>
+          </div>
+
+          <div class="col-side">
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Photos</h3>
+                <label class="btn small" for="f-photo">＋ Add</label>
+                <input id="f-photo" type="file" accept="image/*" multiple hidden>
+              </div>
+              <p class="panel-note">The first photo is the cover, shown at the top of the
+              article. Others appear where you insert them.</p>
+              <div id="photos" class="photos"></div>
+              <p class="panel-empty" id="photos-empty">No photos yet.</p>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><h3>Preview</h3></div>
+              <div id="preview" class="preview"></div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="../shared/config.js?v=1"></script>
+<script src="../shared/store.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>

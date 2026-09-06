@@ -1311,8 +1311,11 @@ const sectionName= s  => (SECTIONS.find(x => x.slug === s) || {}).name || s;
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
 const byline     = a  => a.author || 'The Blanson Post';
 const readingTime= a  => Math.max(1, Math.round(a.body.join(' ').split(/\s+/).length / 200));
-const imageUrl   = f  => MEDIA_BASE + f;
-const leadImage  = a  => (a.images && a.images.length ? MEDIA_BASE + a.images[0] : null);
+// Built-in articles store a bare filename; ones published from the newsroom
+// store a full URL (or a data: URL in local mode). Pass those through as-is.
+const isAbsolute = s => /^(https?:|data:|blob:|\/)/i.test(s);
+const imageUrl   = f  => (isAbsolute(f) ? f : MEDIA_BASE + f);
+const leadImage  = a  => (a.images && a.images.length ? imageUrl(a.images[0]) : null);
 
 // ── Content shapes ──────────────────────────────────────────────────────────
 // Poems keep their line breaks; interviews are speaker-prefixed transcripts.
@@ -1337,10 +1340,38 @@ const stars = a => {
 // Spreads an article's remaining photos through the text rather than stacking
 // them at the end. images[0] is the lead and is placed by the design itself.
 // Returns a flat block list: { type:'text', text } | { type:'image', src }.
+const PHOTO_MARKER = /\[\[photo:(\d+)\]\]/;
+
+// Photos carry a caption and credit when the admin panel supplied them.
+const photoOf = (a, i) => {
+  const src = (a.images || [])[i];
+  if (!src) return null;
+  const m = (a.photoMeta || {})[src] || {};
+  return { src, caption: m.caption || '', credit: m.credit || '' };
+};
+
 function layoutBlocks(a) {
   const lines  = a.body;
   const extras = (a.images || []).slice(1);
-  const text   = lines.map(t => ({ type: 'text', text: t }));
+
+  // If the writer placed photos by hand in the editor, honour them exactly and
+  // do not second-guess the placement.
+  if (lines.some(l => PHOTO_MARKER.test(l))) {
+    const out = [];
+    lines.forEach(line => {
+      const m = line.match(new RegExp('^\\s*' + PHOTO_MARKER.source + '\\s*$'));
+      if (m) {
+        const p = photoOf(a, Number(m[1]) - 1);
+        if (p) out.push({ type: 'image', ...p });
+        return;
+      }
+      const text = line.replace(new RegExp(PHOTO_MARKER.source, 'g'), '').trim();
+      if (text) out.push({ type: 'text', text });
+    });
+    return out;
+  }
+
+  const text = lines.map(t => ({ type: 'text', text: t }));
   if (!extras.length) return text;
 
   // A poem is one visual unit, and a very short piece has nowhere to put them.
@@ -1362,7 +1393,7 @@ function layoutBlocks(a) {
   const out = [];
   lines.forEach((t, i) => {
     const k = slots.indexOf(i);
-    if (k !== -1) out.push({ type: 'image', src: extras[k] });
+    if (k !== -1) out.push({ type: 'image', ...photoOf(a, k + 1) });
     out.push({ type: 'text', text: t });
   });
   return out;

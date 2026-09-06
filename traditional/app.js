@@ -43,15 +43,20 @@ function textHTML(a, line) {
   return `<p>${esc(line)}</p>`;
 }
 
+const inlineFig = b => `<figure class="inline-fig">
+    <img src="${esc(imageUrl(b.src))}" alt="${esc(b.caption || '')}" loading="lazy">
+    ${b.caption || b.credit ? `<figcaption>${esc(b.caption || '')}${
+      b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}
+  </figure>`;
+
 function bodyHTML(a) {
   if (isVerse(a)) {
     const verse = `<div class="verse">${a.body.map(l => esc(l)).join('<br>')}</div>`;
-    return verse + (a.images || []).slice(1).map(src =>
-      `<figure class="inline-fig"><img src="${esc(imageUrl(src))}" alt="" loading="lazy"></figure>`).join('');
+    return verse + (a.images || []).slice(1)
+      .map((src, i) => inlineFig({ src, ...(a.photoMeta || {})[src] })).join('');
   }
-  return layoutBlocks(a).map(b => b.type === 'image'
-    ? `<figure class="inline-fig"><img src="${esc(imageUrl(b.src))}" alt="" loading="lazy"></figure>`
-    : textHTML(a, b.text)).join('');
+  return layoutBlocks(a).map(b =>
+    b.type === 'image' ? inlineFig(b) : textHTML(a, b.text)).join('');
 }
 
 function metaRow(a) {
@@ -216,4 +221,6 @@ function route() {
 }
 
 addEventListener('hashchange', route);
-route();
+
+// Merge in anything published from the newsroom, then draw.
+Store.hydrate().catch(() => {}).then(route);

@@ -199,3 +199,7 @@ footer{max-width:var(--measure);margin:0 auto;padding:0 24px 50px}
   .qa-who{padding-top:0}
   .art-body p{font-size:17px}
 }
+
+.inline-fig figcaption{font-family:var(--cond);font-size:12.5px;letter-spacing:.04em;
+  color:var(--ink-3);padding:8px 12px;border-top:1px solid var(--rule-soft);background:var(--paper)}
+.inline-fig figcaption span{color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:11px}

@@ -193,3 +193,7 @@ footer{background:var(--blue);color:#fff;margin-top:40px}
   .story-body p{font-size:17px}
   .poem{font-size:22px;padding:22px}
 }
+
+.inline-fig figcaption{font-size:13.5px;color:var(--ink-2);padding:9px 13px;background:var(--paper-2);
+  font-weight:600;line-height:1.5}
+.inline-fig figcaption span{color:var(--blue-2)}
