@@ -40,6 +40,18 @@ const can = what => {
   return true;
 };
 
+// Once a story is live it belongs to the paper, not to whoever typed it. A
+// writer can still read their published work — they just can't change what the
+// public is seeing without an editor. This is the one rule the whole review
+// step exists to protect, so it is checked in three places: the buttons, the
+// fields, and save() itself.
+const canEditDoc = d => {
+  if (!d) return false;
+  if (can('publish')) return true;                 // editors and advisors
+  if (d.authorId && d.authorId !== Ed.user.id) return false;
+  return d.status !== 'published';
+};
+
 // ── toast ────────────────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg, kind) {
@@ -270,6 +282,8 @@ function closeEditor() {
   $('warnings').innerHTML = '';
   $('warnings-panel').hidden = true;
   $('saved').textContent = '';
+  $('locked').hidden = true;
+  setReadOnly(false);          // don't leave the lock on for the next article
   nodes.clear(); adders.clear();
   renderList();
 }
@@ -870,6 +884,7 @@ const LABEL = { draft: 'Draft', review: 'With an editor', published: 'Published'
 function renderChrome() {
   if (!Ed.doc) return;
   const s = Ed.doc.status;
+  const editable = canEditDoc(Ed.doc);
   $('f-status').textContent = LABEL[s] || s;
   $('f-status').className = 'status-pill s-' + s;
 
@@ -878,14 +893,42 @@ function renderChrome() {
   // story cannot silently drop out of the review queue.
   const pub = can('publish');
   $('btn-save').textContent = s === 'published' ? 'Update the live story' : 'Save';
-  $('btn-submit').hidden    = !(s === 'draft');
+  $('btn-save').hidden      = !editable;
+  $('btn-submit').hidden    = !(editable && s === 'draft');
   $('btn-publish').hidden   = !(pub && s !== 'published');
   $('btn-unpublish').hidden = !(pub && s === 'published');
   $('btn-sendback').hidden  = !(pub && s === 'review');
-  $('btn-delete').hidden    = !(can('publish') || (s === 'draft' && Ed.doc.authorId === Ed.user.id));
+  $('btn-delete').hidden    = !(pub || (s === 'draft' && Ed.doc.authorId === Ed.user.id));
   $('btn-save').disabled = $('btn-publish').disabled = Ed.saving;
-  $('saved').textContent = Ed.saving ? 'Saving…' : (isDirty() ? 'Unsaved changes' : '');
+  $('saved').textContent = Ed.saving ? 'Saving…' : (editable && isDirty() ? 'Unsaved changes' : '');
+
+  setReadOnly(!editable);
+  $('locked').hidden = editable;
+  if (!editable) {
+    $('locked').innerHTML = s === 'published'
+      ? `<b>This story is live, so it can’t be edited here.</b>
+         Ask an editor to take it down first if something needs changing —
+         that way nothing on the public site changes without a second person seeing it.`
+      : `<b>This is someone else’s article.</b> You can read it, but only its
+         writer or an editor can change it.`;
+  }
   renderWarnings();
+}
+
+// Read-only means read-only: fields, the block controls, and the buttons that
+// add or remove blocks. Leaving the inputs live and only hiding Save would let
+// a writer type into a published story and lose the work when they navigated
+// away, which is worse than refusing the edit.
+function setReadOnly(on) {
+  $('editor').classList.toggle('readonly', on);
+  ['f-title','f-author','f-rating'].forEach(id => { $(id).readOnly = on; });
+  ['f-section','f-form','f-ratingmax'].forEach(id => { $(id).disabled = on; });
+  $('blocks').querySelectorAll('textarea, input').forEach(el => {
+    if (el.type === 'checkbox' || el.type === 'radio') el.disabled = on;
+    else el.readOnly = on;
+  });
+  $('blocks').querySelectorAll('button').forEach(b => { b.disabled = on; });
+  $('cover').querySelectorAll('button').forEach(b => { b.disabled = on; });
 }
 
 function problems() {
@@ -931,6 +974,16 @@ function scheduleCrashDraft() {
 
 async function save(nextStatus, quiet) {
   if (!Ed.doc || Ed.saving) return false;
+
+  // The buttons are hidden and the fields are read-only, but neither is a rule.
+  // A writer must not be able to change a live story by any route — including
+  // autosave firing on a stale timer, or the console.
+  const changingStatus = nextStatus && nextStatus !== Ed.doc.status;
+  if (!canEditDoc(Ed.doc) && !(can('publish') && changingStatus)) {
+    if (!quiet) toast('This story is live — an editor has to take it down before it can be changed.', 'bad');
+    return false;
+  }
+
   if (nextStatus && nextStatus !== 'draft') {
     const missing = problems();
     if (missing.length) { toast('Still needs ' + missing.join(' and ') + '.', 'bad'); return false; }

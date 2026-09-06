@@ -258,3 +258,12 @@ table.staff select{background:var(--panel);border:1px solid var(--line);border-r
   .title-input{font-size:22px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* a published story a writer may read but not change */
+.locked{background:rgba(77,139,255,.1);border:1px solid rgba(77,139,255,.4);color:#c3d6ff;
+  border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.55;margin:0 0 16px}
+.locked b{display:block;color:#e6efff;margin-bottom:2px}
+.readonly .adder{display:none}
+.readonly .block{opacity:.75;border-style:dashed}
+.readonly .b-side{visibility:hidden}
+.readonly textarea,.readonly .title-input{cursor:default}
