@@ -31,7 +31,22 @@ const Ed = {
 };
 
 const clone = o => JSON.parse(JSON.stringify(o));
-const isDirty = () => Ed.doc !== null && JSON.stringify(Ed.doc) !== Ed.baseline;
+
+// Fields the save derives from the blocks, or that the store stamps on the way
+// past. They are not things a student typed, so they must not count as unsaved
+// work — comparing them made every article look dirty the instant it was saved,
+// and "you have unsaved changes" fired on every article switch afterwards.
+const DERIVED = ['body', 'images', 'excerpt', 'slug', 'status',
+                 'createdAt', 'updatedAt', 'publishedAt'];
+const editablePart = d => {
+  if (!d) return null;
+  const out = {};
+  Object.keys(d).sort().forEach(k => { if (!DERIVED.includes(k)) out[k] = d[k]; });
+  return out;
+};
+const snapshot = d => JSON.stringify(editablePart(d));
+
+const isDirty = () => Ed.doc !== null && snapshot(Ed.doc) !== Ed.baseline;
 const can = what => {
   const r = Ed.user ? Ed.user.role : 'writer';
   if (what === 'publish') return r === 'editor' || r === 'advisor';
@@ -231,7 +246,8 @@ function blankDoc() {
 $('new-article').onclick = async () => {
   if (!(await confirmDiscard())) return;
   Ed.doc = blankDoc();
-  Ed.baseline = null;              // never saved yet
+  // A brand-new empty article isn't "unsaved work" until something is typed.
+  Ed.baseline = snapshot(Ed.doc);
   mount();
   focusBlock(Ed.doc.blocks[0].id);
 };
@@ -254,7 +270,7 @@ async function open(id) {
     }
   }
   Ed.doc = doc;
-  Ed.baseline = JSON.stringify(clone(found));
+  Ed.baseline = snapshot(found);
   mount();
 }
 
@@ -1016,9 +1032,9 @@ async function save(nextStatus, quiet, message) {
     Ed.doc.status = saved.status;
     Ed.doc.updatedAt = saved.updatedAt;
     if (saved.publishedAt) Ed.doc.publishedAt = saved.publishedAt;
-    // baseline is what was SENT: anything typed during the save stays dirty and
-    // is picked up by the next one, instead of being silently discarded.
-    Ed.baseline = JSON.stringify(snap);
+    // The baseline is what was SENT, so anything typed during a slow save stays
+    // dirty and gets picked up by the next one instead of being discarded.
+    Ed.baseline = snapshot(snap);
     await IDB.kvDel('autosave:' + Ed.doc.id).catch(() => {});
     await Photos.markOrphans(liveAssetIds()).catch(() => {});
     await refresh();
