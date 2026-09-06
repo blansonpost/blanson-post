@@ -1357,3 +1357,9 @@ const isVerse    = Blocks.isVerse;
 const isQA       = Blocks.isQA;
 const speakerOf  = Blocks.speakerOf;
 const layoutBlocks = Blocks.of;
+// Dates. `dateTag(a)` gives a relative <time> for cards ("Yesterday",
+// "3 days ago", "Mar 12"); pass true for the full date on an article page.
+// All of them return '' for the archived 41, which have no known date.
+const dateTag     = Blocks.dateTag;
+const dateText    = Blocks.dateText;
+const updatedText = Blocks.updatedText;

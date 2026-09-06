@@ -203,3 +203,9 @@ footer{border-top:1px solid var(--line);background:var(--bg-2)}
   border-radius:var(--r);font-family:var(--display);font-size:22px;line-height:1.4;font-weight:500}
 .pullquote cite{display:block;margin-top:10px;font-family:var(--sans);font-style:normal;
   font-size:13px;font-weight:600;color:var(--fg-3)}
+
+/* ── Publication dates ──────────────────────────────────────────────────────
+   Nothing renders when an article has no date, so the archive is unaffected.
+   Tabular figures stop a grid of cards shifting as the day changes. */
+.pubdate{font-variant-numeric:tabular-nums;white-space:nowrap}
+.read-meta .sub.upd{font-style:italic;opacity:.85;margin-top:2px}

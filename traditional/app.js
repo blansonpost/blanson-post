@@ -19,8 +19,17 @@ const kicker = a => `<div class="kicker">${esc(sectionName(a.section))}</div>`;
 const rated = a => a.rating == null ? ''
   : `<span class="rating" title="${esc(a.rating)} out of ${esc(a.ratingMax)}">${stars(a)}</span>`;
 
-const bylineOf = a => `<div class="byline">By <b>${esc(byline(a))}</b>${
-  a.rating != null ? ' &nbsp;·&nbsp; ' + rated(a) : ''}</div>`;
+// An archived article has no date, so `when()` is '' and the byline closes up
+// around it instead of leaving a stray separator hanging.
+const when = (a, full) => dateTag(a, 'pubdate', full);
+
+const bylineOf = a => {
+  const bits = [`By <b>${esc(byline(a))}</b>`];
+  const d = when(a);
+  if (d) bits.push(d);
+  if (a.rating != null) bits.push(rated(a));
+  return `<div class="byline">${bits.join(' &nbsp;·&nbsp; ')}</div>`;
+};
 
 function figure(a, cls) {
   const src = leadImage(a);
@@ -128,7 +137,7 @@ function renderHome() {
           <a class="brief" href="#/a/${esc(a.slug)}">
             <h3 class="brief-hed">${esc(a.title)}</h3>
             <p class="brief-dek">${esc(a.excerpt.slice(0, 120))}…</p>
-            <div class="brief-by">${esc(byline(a))}</div>
+            <div class="brief-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
       </aside>
 
@@ -148,7 +157,7 @@ function renderHome() {
           <a class="brief" href="#/a/${esc(a.slug)}">
             <div class="kicker">${esc(sectionName(a.section))}</div>
             <h3 class="brief-hed">${esc(a.title)}</h3>
-            <div class="brief-by">${esc(byline(a))}</div>
+            <div class="brief-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
         <div class="col-head" style="margin-top:22px">By the Numbers</div>
         <div class="stat"><b>${ARTICLES.length}</b> articles published</div>
@@ -196,9 +205,11 @@ function renderArticle(slug) {
       ${isVerse(a) ? '' : `<p class="standfirst">${esc(a.excerpt)}</p>`}
       <div class="art-meta">
         <span>By <b>${esc(byline(a))}</b></span>
+        ${when(a, true) ? `<span>Published ${when(a, true)}</span>` : ''}
         <span>${readingTime(a)} min read</span>
         ${a.rating != null ? `<span>${rated(a)} <b>${a.rating}/${a.ratingMax}</b></span>` : ''}
       </div>
+      ${updatedText(a) ? `<div class="art-updated">${esc(updatedText(a))}</div>` : ''}
       ${figure(a, 'art-fig')}
       ${metaRow(a)}
       <div class="art-body">${bodyHTML(a)}</div>
@@ -213,7 +224,7 @@ function renderArticle(slug) {
             <article class="story"><a href="#/a/${esc(x.slug)}">
               <h3 class="story-hed">${esc(x.title)}</h3>
               <p class="story-dek">${esc(x.excerpt.slice(0, 130))}…</p>
-              <div class="brief-by">${esc(byline(x))}</div>
+              <div class="brief-by">${esc(byline(x))}${when(x) ? ' · ' + when(x) : ''}</div>
             </a></article>`).join('')}
         </div>
       </section>` : ''}

@@ -216,3 +216,13 @@ footer{max-width:var(--measure);margin:0 auto;padding:0 24px 50px}
   font-family:var(--display);font-size:23px;line-height:1.4;font-style:italic;color:var(--ink)}
 .pullquote cite{display:block;margin-top:10px;font-family:var(--cond);font-style:normal;
   font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ── Publication dates ──────────────────────────────────────────────────────
+   A <time> element, so the date is machine-readable as well as visible.
+   Articles with no known date render nothing at all, so none of this shows on
+   the archived 41. `font-variant-numeric` keeps "Mar 3" and "Mar 12" the same
+   width, which stops a column of cards jittering. */
+.pubdate{font-variant-numeric:tabular-nums;white-space:nowrap}
+.art-meta .pubdate{color:var(--ink-2)}
+.art-updated{font-family:var(--cond);font-size:12.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);font-style:italic;margin:-4px 0 14px}

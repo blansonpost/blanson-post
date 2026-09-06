@@ -54,11 +54,30 @@ open my $T, '<:encoding(UTF-8)', $tsv or die "no tsv: $!";
 while (my $line = <$T>) {
     chomp $line;
     next if $line =~ /^\s*#/ || $line !~ /\S/;
-    my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer)
-        = split /\t/, $line, 9;
+    my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer, $date)
+        = split /\t/, $line, 10;
     next unless $slug && $section;
-    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer);
-    s/^\s+|\s+$//g for ($lead, $form, $interviewer);
+    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer, $date);
+    s/^\s+|\s+$//g for ($lead, $form, $interviewer, $date);
+
+    # The old Wix site never recorded publication dates, so this column is blank
+    # for all 41 archived articles. Blank stays blank: the site prints no date
+    # rather than inventing one. Fill a row in as the club remembers it.
+    # Checked for a real calendar day, not just the shape: "2025-13-45" and a
+    # day/month swap both match the pattern, and JavaScript would silently roll
+    # them over into a wrong date months away rather than reject them.
+    if ($date) {
+        my $ok = 0;
+        if (my ($y, $m, $d) = $date =~ /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/) {
+            my @len = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+            $len[1] = 29 if $y % 4 == 0 && ($y % 100 != 0 || $y % 400 == 0);
+            $ok = $m >= 1 && $m <= 12 && $d >= 1 && $d <= $len[$m - 1];
+        }
+        unless ($ok) {
+            warn "  bad date for '$slug': '$date' - want a real YYYY-MM-DD. Ignored.\n";
+            $date = '';
+        }
+    }
 
     # `form` replaces two pieces of guesswork: a title-prefix regex for poems
     # and a count of "Word:" lines for interviews. Warn rather than fail, so an
@@ -140,6 +159,7 @@ while (my $line = <$T>) {
         id => $id++, slug => $slug, section => $section, title => $title,
         form => $form, interviewer => $interviewer,
         author => ($author eq '?' ? '' : $author),
+        date => $date,
         rating => $rv, ratingMax => $rmax,
         featured => ($featured =~ /^y/i ? 1 : 0),
         excerpt => $excerpt, body => \@body, meta => \%meta, images => \@imgs,
@@ -172,6 +192,7 @@ for my $a (@rows) {
     print $O "    interviewer: " . jstr($a->{interviewer}) . ",\n" if $a->{interviewer};
     print $O "    title: " . jstr($a->{title}) . ",\n";
     print $O "    author: " . jstr($a->{author}) . ",\n";
+    print $O "    date: " . jstr($a->{date}) . ",\n" if $a->{date};
     print $O "    featured: " . ($a->{featured} ? 'true' : 'false') . ",\n";
     if (defined $a->{rating}) {
         print $O "    rating: $a->{rating},\n    ratingMax: $a->{ratingMax},\n";
@@ -218,6 +239,12 @@ const isVerse    = Blocks.isVerse;
 const isQA       = Blocks.isQA;
 const speakerOf  = Blocks.speakerOf;
 const layoutBlocks = Blocks.of;
+// Dates. `dateTag(a)` gives a relative <time> for cards ("Yesterday",
+// "3 days ago", "Mar 12"); pass true for the full date on an article page.
+// All of them return '' for the archived 41, which have no known date.
+const dateTag     = Blocks.dateTag;
+const dateText    = Blocks.dateText;
+const updatedText = Blocks.updatedText;
 TAIL
 close $O;
 

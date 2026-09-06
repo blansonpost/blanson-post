@@ -12,7 +12,11 @@
 # NOTE: the Wix page "gaming" was a byte-identical duplicate of "blanson-f-c-2-0"
 # (both "Blanson beats Victory 4-0") and is deliberately excluded.
 #
-# slug	section	title	author	rating	featured	lead-image	form	interviewer
+# date: the day it ran, as YYYY-MM-DD. Blank for all 41 archived articles -
+# the old Wix site never recorded one. Do NOT guess; fill a row in only when
+# the club actually knows the date. A blank date simply prints no date.
+#
+# slug	section	title	author	rating	featured	lead-image	form	interviewer	date
 copy-of-harvatine-interview	campus	Blanson SkillsUSA Champions the Future Through Santa Donations Project	?		yes		story	
 copy-of-blanson-skillsusa-champions	campus	Blanson SkillsUSA Students Return to Grantham	?		no		story	
 jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film	Jason Borrego		yes	6deed7_84279e32147442ea950945d0b87f16fd.png	qa	Borrego

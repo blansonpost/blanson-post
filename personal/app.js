@@ -22,7 +22,11 @@ const tag = a => `<span class="tag">${icon(a.section)} ${esc(sectionName(a.secti
 const hearts = a => a.rating == null ? '' :
   `<span class="stars" title="${esc(a.rating)} out of ${esc(a.ratingMax)}">${stars(a)}</span>`;
 
-const who = a => `<span class="who"><span class="dot"></span>${esc(byline(a))}</span>`;
+const who = a => `<span class="who"><span class="dot"></span>${esc(byline(a))}${
+  when(a) ? `<span class="when">${when(a)}</span>` : ''}</span>`;
+
+// '' for the archived 41 — nobody wrote the dates down on the old site.
+const when = (a, full) => dateTag(a, 'pubdate', full);
 
 function pic(a, cls, tilt) {
   const src = leadImage(a);
@@ -198,7 +202,8 @@ function renderArticle(slug) {
       <div class="face">${esc((byline(a).match(/\b[A-Za-z]/g) || ['B']).slice(0, 2).join('').toUpperCase())}</div>
       <div>
         <b>${esc(byline(a))}</b>
-        <i>${readingTime(a)} min read</i>
+        <i>${when(a, true) ? when(a, true) + ' · ' : ''}${readingTime(a)} min read${
+          updatedText(a) ? ' · ' + esc(updatedText(a)) : ''}</i>
       </div>
       ${a.rating != null ? `<div class="ratebox">${stars(a)}<b>${a.rating}/${a.ratingMax}</b></div>` : ''}
     </div>

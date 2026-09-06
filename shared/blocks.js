@@ -54,6 +54,84 @@ const Blocks = (() => {
     return '★'.repeat(n) + '☆'.repeat(5 - n);
   };
 
+  // ── dates ───────────────────────────────────────────────────────────────
+  // Two shapes arrive here: a full ISO timestamp stamped by the newsroom the
+  // moment an article is published, and a plain "2025-03-12" typed into
+  // articles.tsv for an archived piece. They cannot be parsed the same way.
+  //
+  // `new Date('2025-03-12')` is specified as UTC midnight, which in Houston is
+  // 7pm on the 11th — so a date-only string run through the usual formatting
+  // prints the day *before* the one that was typed. Building it from its parts
+  // keeps it local, and so keeps it the date the club actually meant.
+  const parseDate = v => {
+    if (!v) return null;
+    const s = String(v).trim();
+    if (!s) return null;
+    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymd) {
+      // A rolled-over date is worse than no date. new Date(2025, 12, 45) is a
+      // perfectly valid Date reading February 2026, so a typo like
+      // "2025-13-45" — or a day and month swapped round — would print a
+      // confident, wrong day rather than failing. Reject anything the
+      // constructor had to normalise to make sense of.
+      const y = +ymd[1], m = +ymd[2], day = +ymd[3];
+      const dt = new Date(y, m - 1, day);
+      return (dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === day)
+        ? dt : null;
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  // The old Wix site never recorded a publication date, so the 41 archived
+  // articles have none until someone fills in the `date` column. Everything
+  // below returns '' in that case: an article whose date nobody knows says
+  // nothing, rather than quietly claiming today.
+  const publishedOn = a => parseDate(a && (a.publishedAt || a.date));
+
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                  'August', 'September', 'October', 'November', 'December'];
+  // Spelled out rather than toLocaleDateString() so the paper reads the same on
+  // a school Chromebook that someone has set to another language.
+  const longDate  = d => MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  const shortDate = d => MONTHS[d.getMonth()].slice(0, 3) + ' ' + d.getDate();
+
+  const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+  // Counted in calendar days, not elapsed hours: a story filed at 11pm reads
+  // "Yesterday" at 1am, not "2 hours ago".
+  const relative = d => {
+    const n = Math.round((midnight(new Date()) - midnight(d)) / 86400000);
+    if (n < 0)   return longDate(d);   // a mistyped or clock-skewed future date
+    if (n === 0) return 'Today';
+    if (n === 1) return 'Yesterday';
+    if (n < 7)   return n + ' days ago';
+    return d.getFullYear() === new Date().getFullYear() ? shortDate(d) : longDate(d);
+  };
+
+  // Every save touches updatedAt, so an "Updated" line is only worth printing
+  // when the story changed on a later day than it ran — otherwise fixing one
+  // typo brands the article as revised.
+  const updatedOn = a => {
+    const p = publishedOn(a), u = parseDate(a && a.updatedAt);
+    return (p && u && midnight(u) > midnight(p)) ? u : null;
+  };
+
+  const dateText    = a => { const d = publishedOn(a); return d ? longDate(d) : ''; };
+  const dateShort   = a => { const d = publishedOn(a); return d ? relative(d) : ''; };
+  const updatedText = a => { const d = updatedOn(a);   return d ? 'Updated ' + longDate(d) : ''; };
+
+  // A <time> element, so the date is machine-readable even when the visible
+  // text is relative — and the exact date stays reachable in the tooltip.
+  const dateTag = (a, cls, full) => {
+    const d = publishedOn(a);
+    if (!d) return '';
+    const shown = full ? longDate(d) : relative(d);
+    const exact = longDate(d);
+    return '<time class="' + esc(cls || 'pubdate') + '" datetime="' + d.toISOString() + '"' +
+           (shown === exact ? '' : ' title="' + exact + '"') + '>' + esc(shown) + '</time>';
+  };
+
   // ── shape ───────────────────────────────────────────────────────────────
   // `form` is explicit on anything the build or the newsroom produces. The
   // fallbacks reproduce the old guesswork exactly, so an article that predates
@@ -212,6 +290,7 @@ const Blocks = (() => {
     esc, newId,
     isAbsolute, imageUrl, leadImage,
     byline, readingTime, stars,
+    parseDate, publishedOn, updatedOn, dateText, dateShort, updatedText, dateTag,
     isVerse, isQA, speakerOf, interviewerOf, isQuestion, SPEAKER_RE,
     photoOf, of, fromLegacy, normalise, toPlainText, imageList
   };

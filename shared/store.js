@@ -316,6 +316,10 @@ const Store = (() => {
           rating: r.rating == null ? undefined : r.rating,
           ratingMax: r.ratingMax == null ? undefined : r.ratingMax,
           meta: r.meta || {}, cover: r.cover || null,
+          // Carried through so the site can print "Published March 12, 2025".
+          // Dropping these here was why the newsroom stamped a publish date
+          // that no reader ever saw.
+          publishedAt: r.publishedAt || '', updatedAt: r.updatedAt || '',
           blocks: r.blocks || [], images: r.images || [],
           excerpt: r.excerpt || '',
           body: (r.body || []).filter(l => String(l).trim().length)

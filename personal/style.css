@@ -209,3 +209,10 @@ footer{background:var(--blue);color:#fff;margin-top:40px}
   font-family:var(--hand);font-size:26px;line-height:1.45;color:var(--blue)}
 .pullquote cite{display:block;margin-top:8px;font-family:var(--sans);font-style:normal;
   font-size:13.5px;font-weight:700;color:var(--ink-2)}
+
+/* ── Publication dates ──────────────────────────────────────────────────────
+   Empty for the archived 41 — the old site never recorded when they ran — so
+   `.who .when` only ever appears on stories written in the newsroom. */
+.pubdate{font-variant-numeric:tabular-nums;white-space:nowrap}
+.who .when{margin-left:7px;opacity:.72}
+.who .when::before{content:"·";margin-right:7px;opacity:.6}

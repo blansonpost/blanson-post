@@ -33,8 +33,12 @@ const chip = a => `<span class="chip">${esc(sectionName(a.section))}</span>`;
 const score = a => a.rating == null ? '' :
   `<span class="score"><b>${a.rating}</b><i>/${a.ratingMax}</i></span>`;
 
+// '' for the archived 41, which carry no date — the separator goes with it.
+const when = (a, full) => dateTag(a, 'pubdate', full);
+
 const meta = a => `<div class="meta">
     <span class="who">${esc(byline(a))}</span>
+    ${when(a) ? `<span class="dot">·</span>${when(a)}` : ''}
     <span class="dot">·</span><span>${readingTime(a)} min</span>
     ${a.rating != null ? `<span class="dot">·</span>${score(a)}` : ''}
   </div>`;
@@ -167,7 +171,7 @@ function renderHome() {
           <a class="mini" href="#/a/${esc(a.slug)}">
             ${thumb(a, 'mini-img')}
             <h4>${esc(a.title)}</h4>
-            <div class="mini-by">${esc(byline(a))}</div>
+            <div class="mini-by">${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</div>
           </a>`).join('')}
       </div>
     </section>`;
@@ -215,7 +219,9 @@ function renderArticle(slug) {
         <div class="avatar">${esc((byline(a).match(/\b[A-Za-z]/g) || ['B']).slice(0, 2).join('').toUpperCase())}</div>
         <div>
           <div class="who">${esc(byline(a))}</div>
-          <div class="sub">${esc(sectionName(a.section))} · ${readingTime(a)} min read</div>
+          <div class="sub">${esc(sectionName(a.section))} · ${readingTime(a)} min read${
+            when(a, true) ? ' · ' + when(a, true) : ''}</div>
+          ${updatedText(a) ? `<div class="sub upd">${esc(updatedText(a))}</div>` : ''}
         </div>
         ${a.rating != null ? `<div class="big-score">${stars(a)}<b>${a.rating}/${a.ratingMax}</b></div>` : ''}
       </div>
@@ -235,7 +241,7 @@ function renderArticle(slug) {
         <a class="mini" href="#/a/${esc(x.slug)}">
           ${thumb(x, 'mini-img')}
           <h4>${esc(x.title)}</h4>
-          <div class="mini-by">${esc(byline(x))}</div>
+          <div class="mini-by">${esc(byline(x))}${when(x) ? ' · ' + when(x) : ''}</div>
         </a>`).join('')}
     </div>
   </section>` : ''}`;

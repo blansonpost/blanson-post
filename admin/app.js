@@ -213,7 +213,8 @@ function renderList() {
       <span class="item-status s-${esc(a.status)}" title="${esc(a.status)}"></span>
       <span class="item-txt">
         <b>${esc(a.title || 'Untitled')}</b>
-        <i>${esc(Sections.name(a.section))}${a.author ? ' · ' + esc(a.author) : ''}</i>
+        <i>${esc(Sections.name(a.section))}${a.author ? ' · ' + esc(a.author) : ''}${
+          Blocks.dateShort(a) ? ' · ' + esc(Blocks.dateShort(a)) : ''}</i>
       </span>
     </button>`).join('');
   $('list').querySelectorAll('.item').forEach(b => b.onclick = () => open(b.dataset.id));
@@ -319,6 +320,10 @@ function mount() {
   renderCover();
   renderChrome();
   renderPreview();
+  // Opening an article showed a blank slugline until you typed a character.
+  // That was already odd for the web address, and it hid the run date entirely
+  // on a published story, which is the one place you would go looking for it.
+  updateSlugline();
   renderList();
 }
 
@@ -387,8 +392,16 @@ function updateSlugline() {
   const base = Store.slugify(Ed.doc.title) || Ed.doc.id;
   const clash = slug !== base;
   const owner = clash ? (Ed.articles.find(a => a.slug === base) || {}).title : null;
+  // A story keeps its run date after it is taken down, so the label has to
+  // follow the status: saying "Published" next to something that is currently
+  // off the site would be plainly untrue.
+  const ran = Blocks.dateText(Ed.doc);
+  const ranLabel = Ed.doc.status === 'published' ? 'Published' : 'Last ran';
+  const upd = Blocks.updatedText(Ed.doc);
   $('slugline').innerHTML =
     `<span class="slug">Web address: <code>#/a/${esc(slug)}</code></span>` +
+    (ran ? `<span class="slug-date">${ranLabel} ${esc(ran)}${
+       upd ? ' · ' + esc(upd) : ''}</span>` : '') +
     (clash ? `<span class="slug-note">There is already an article at
        <code>${esc(base)}</code>${owner ? ' — “' + esc(owner) + '”' : ''}, so this one
        will live at <code>${esc(slug)}</code>.</span>` : '');
@@ -890,7 +903,8 @@ async function renderPreview() {
   }
   $('preview').innerHTML =
     `<h3>${esc(Ed.doc.title || 'Untitled')}</h3>
-     <div class="pv-by">${esc(Ed.doc.author || 'no byline yet')}</div>` +
+     <div class="pv-by">${esc(Ed.doc.author || 'no byline yet')}${
+       Blocks.dateText(Ed.doc) ? ' · ' + esc(Blocks.dateText(Ed.doc)) : ''}</div>` +
     (parts.join('') || '<p class="pv-empty">Nothing written yet.</p>');
 }
 
@@ -1023,6 +1037,10 @@ async function save(nextStatus, quiet, message) {
   snap.images = Blocks.imageList(snap);
   snap.excerpt = (snap.body.find(l => l.length > 40) || snap.body[0] || '');
   if (snap.status === 'published' && !snap.publishedAt) snap.publishedAt = new Date().toISOString();
+  // Deliberately NOT cleared when a story is taken down. Taking down is the
+  // normal way to fix a live story — a writer cannot edit one in place — so
+  // clearing it here would re-date every corrected article to the day of the
+  // correction. The original run date stands; "Updated ..." carries the revision.
 
   Ed.saving = true; renderChrome();
   try {
@@ -1031,19 +1049,22 @@ async function save(nextStatus, quiet, message) {
     Ed.doc.slug = saved.slug;
     Ed.doc.status = saved.status;
     Ed.doc.updatedAt = saved.updatedAt;
-    if (saved.publishedAt) Ed.doc.publishedAt = saved.publishedAt;
+    Ed.doc.publishedAt = saved.publishedAt || '';
     // The baseline is what was SENT, so anything typed during a slow save stays
     // dirty and gets picked up by the next one instead of being discarded.
     Ed.baseline = snapshot(snap);
     await IDB.kvDel('autosave:' + Ed.doc.id).catch(() => {});
     await Photos.markOrphans(liveAssetIds()).catch(() => {});
     await refresh();
-    renderChrome(); updateSlugline();
+    // renderPreview too: the preview carries the run date, so publishing
+    // changes it even though not a word of the story moved.
+    renderChrome(); updateSlugline(); renderPreview();
     // Three different actions land on 'draft' — taking a live story down,
     // sending one back, and a writer withdrawing their own — so the caller says
     // which one it was rather than everyone reading "Saved".
     if (!quiet) toast(message
-                    || (nextStatus === 'published' ? 'Published — it is on the site now'
+                    || (nextStatus === 'published'
+                        ? 'Published ' + Blocks.dateText(snap) + ' — it is on the site now'
                       : nextStatus === 'review'    ? 'Sent to an editor'
                       : 'Saved'), 'good');
     else $('saved').textContent = 'Saved ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });

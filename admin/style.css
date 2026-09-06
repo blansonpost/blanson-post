@@ -267,3 +267,6 @@ table.staff select{background:var(--panel);border:1px solid var(--line);border-r
 .readonly .block{opacity:.75;border-style:dashed}
 .readonly .b-side{visibility:hidden}
 .readonly textarea,.readonly .title-input{cursor:default}
+
+/* The run date, next to the web address. Present only once a story is live. */
+.slug-date{margin-left:14px;font-variant-numeric:tabular-nums}
