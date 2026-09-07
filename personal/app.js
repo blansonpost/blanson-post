@@ -303,21 +303,33 @@ async function loadEvents() {
   return eventsCache;
 }
 
+// A strip, not a section. This used the same header as a section page — a 54px
+// display heading with 70px of padding around it — for a five-item list sitting
+// above the lead story, so the front page opened on the calendar instead of on
+// the news. The date badge sat above each title too, which cost another 56px a
+// card for no information.
+//
+// The heading is an h2 and the card titles are h3: the h1 on this page belongs
+// to the lead story, not to the calendar. Styling hangs off .ev-hed rather than
+// the tag, so the level stays free to be whatever the outline needs.
 function eventsHTML(list) {
   return `
-    <section class="sechead"><div class="sechead-icon">\u{1F4C5}</div>
-      <h1>What&rsquo;s On</h1>
-      <p>Coming up at Blanson</p></section>
-    <section class="shelf">
+    <section class="ev-block">
+      <div class="ev-head-row">
+        <h2><span aria-hidden="true">\u{1F4C5}</span> What&rsquo;s On</h2>
+        <span class="ev-head-note">Coming up at Blanson</span>
+      </div>
       <div class="ev-strip">
         ${list.map((e, i) => {
           const b = Paper.dayBadge(e);
-          return `<div class="ev-card" style="--tilt:${[-1, .8, -.6, 1][i % 4]}deg">
+          return `<div class="ev-card" style="--tilt:${[-.6, .5, -.4, .7][i % 4]}deg">
             <div class="ev-cal"><span>${esc(b.top)}</span><b>${esc(b.bottom)}</b></div>
-            <h2 class="ev-hed">${esc(e.title)}</h2>
-            <div class="ev-meta">${esc(Paper.whenText(e))}${
-              e.place ? ' · ' + esc(e.place) : ''}</div>
-            ${e.note ? `<p>${esc(e.note)}</p>` : ''}
+            <div class="ev-txt">
+              <h3 class="ev-hed">${esc(e.title)}</h3>
+              <div class="ev-meta">${esc(Paper.whenText(e))}${
+                e.place ? ' · ' + esc(e.place) : ''}</div>
+              ${e.note ? `<p>${esc(e.note)}</p>` : ''}
+            </div>
           </div>`; }).join('')}
       </div>
     </section>`;

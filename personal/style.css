@@ -346,18 +346,39 @@ mark{background:#ffe9a8;color:inherit;border-radius:4px;padding:0 2px}
 }
 
 /* ── What's On ──────────────────────────────────────────────────────────── */
-.ev-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:16px}
-.ev-card{background:var(--paper-2);border:2px solid var(--line);
-  border-radius:16px;padding:16px;transform:rotate(var(--tilt,0deg));
-  box-shadow:0 6px 18px rgba(0,0,0,.06)}
-.ev-cal{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  width:48px;height:48px;border-radius:12px;background:var(--paper);
-  border:2px solid var(--line);margin-bottom:10px}
-.ev-cal span{font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--blue)}
-.ev-cal b{font-size:19px;line-height:1.05}
-.ev-card h2{margin:0;font-size:16px;line-height:1.3}
-.ev-card .ev-meta{margin-top:5px;font-size:13px;font-weight:700;color:var(--blue)}
-.ev-card p{margin:7px 0 0;font-size:13.5px;line-height:1.5}
+/* A strip above the welcome, so it is sized like furniture rather than like a
+   page of its own. The badge sits beside the title, not above it. */
+.ev-block{margin:22px 0 28px}
+.ev-head-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  margin-bottom:12px}
+.ev-head-row h2{margin:0;font-family:var(--slab);font-size:19px;color:var(--blue)}
+.ev-head-note{font-family:var(--hand);font-size:17px;color:var(--ink-3)}
+/* Flex, not grid: with five events and four columns, a grid leaves the fifth
+   sitting alone beside three empty tracks. Letting the cards grow means the
+   last row fills the width instead, so a wrap reads as deliberate. */
+.ev-strip{display:flex;flex-wrap:wrap;gap:11px}
+.ev-card{flex:1 1 232px}
+.ev-card{display:flex;gap:11px;background:var(--paper-2);border:2px solid var(--line);
+  border-radius:14px;padding:11px 13px;transform:rotate(var(--tilt,0deg));
+  box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.ev-cal{flex:none;display:inline-flex;flex-direction:column;align-items:center;
+  justify-content:center;width:40px;height:40px;border-radius:11px;background:var(--paper);
+  border:2px solid var(--line)}
+.ev-cal span{font-size:8.5px;font-weight:800;letter-spacing:.07em;color:var(--blue)}
+.ev-cal b{font-size:16px;line-height:1.05}
+.ev-txt{min-width:0}
+.ev-hed{margin:0;font-size:14.5px;line-height:1.3;font-weight:800}
+.ev-card .ev-meta{margin-top:2px;font-size:12px;font-weight:700;color:var(--blue)}
+/* The note is the first thing to give up room: two lines, then it stops. */
+.ev-card p{margin:4px 0 0;font-size:12.5px;line-height:1.45;color:var(--ink-2);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* On a phone the strip is the whole first screen before a single headline, so
+   it shows the next three and stops. The ones dropped are the furthest away —
+   what is on this week is the part worth the space. */
+@media(max-width:700px){
+  .ev-card:nth-child(n+4){display:none}
+}
 
 /* ── Video, and corrections ─────────────────────────────────────────────── */
 .embed{margin:26px 0}
