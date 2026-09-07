@@ -384,6 +384,9 @@ const Store = (() => {
           id: 'db-' + r.id, slug: r.slug, section: r.section, title: r.title,
           form: r.form || 'story', interviewer: r.interviewer || '',
           author: r.author || '', featured: !!r.featured,
+          // Topics cut across sections, so they have to survive the trip to the
+          // public site or a newsroom story simply never joins one.
+          topics: Array.isArray(r.topics) ? r.topics : [],
           rating: r.rating == null ? undefined : r.rating,
           ratingMax: r.ratingMax == null ? undefined : r.ratingMax,
           meta: r.meta || {}, cover: r.cover || null,

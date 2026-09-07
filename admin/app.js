@@ -187,6 +187,25 @@ function buildSelects() {
   ].map(([v, n]) => `<option value="${v}">${esc(n)}</option>`).join('');
 }
 
+// Every topic anyone has used, from the archive and from the newsroom, offered
+// as you type. Near-miss spellings are the way a topic quietly splits in two —
+// "Sci-Fi" and "Sci Fi" would end up as one address with one of the two labels,
+// and neither writer would ever see it happen.
+function buildTopicList() {
+  const list = $('topic-list');
+  if (!list) return;
+  const seen = new Map();
+  const add = name => {
+    const t = String(name || '').trim();
+    const key = Paper.topicSlug(t);
+    if (key && !seen.has(key)) seen.set(key, t);
+  };
+  Paper.allTopics().forEach(t => add(t.name));
+  Ed.articles.forEach(a => (a.topics || []).forEach(add));
+  list.innerHTML = [...seen.values()].sort((a, b) => a.localeCompare(b))
+    .map(t => `<option value="${esc(t)}">`).join('');
+}
+
 function buildFilters() {
   $('filters').innerHTML = STATUSES.map(([v, n]) =>
     `<button class="chip${v === Ed.filter ? ' on' : ''}" data-f="${v}"
@@ -199,6 +218,7 @@ function buildFilters() {
 async function refresh() {
   try { Ed.articles = await Store.listArticles(); }
   catch (e) { Ed.articles = []; explain(e); }
+  buildTopicList();
   renderList();
   renderSpace();
 }
@@ -251,6 +271,7 @@ function blankDoc() {
     slug: '', title: '', section: 'campus', form: 'story',
     author: Ed.user.name, authorId: Ed.user.id, interviewer: '',
     rating: null, ratingMax: 5, status: 'draft', featured: false,
+    topics: [],
     cover: null, blocks: [{ id: Blocks.newId(), type: 'para', text: '' }],
     assets: [], meta: {}, body: [], images: []
   };
@@ -300,7 +321,7 @@ function closeEditor() {
   $('empty').hidden = false;
   // Every field, not just the block list. On a shared school laptop the next
   // student must not find the previous one's headline sitting in the box.
-  ['f-title', 'f-author', 'f-rating'].forEach(id => { $(id).value = ''; });
+  ['f-title', 'f-author', 'f-rating', 'f-topics'].forEach(id => { $(id).value = ''; });
   $('f-section').selectedIndex = 0;
   $('f-form').selectedIndex = 0;
   $('f-ratingmax').value = '5';
@@ -325,6 +346,7 @@ function mount() {
   $('f-section').value = Ed.doc.section;
   $('f-author').value = Ed.doc.author || '';
   $('f-form').value = Ed.doc.form || 'story';
+  $('f-topics').value = (Ed.doc.topics || []).join(', ');
   $('f-rating').value = Ed.doc.rating == null ? '' : Ed.doc.rating;
   $('f-ratingmax').value = Ed.doc.ratingMax || 5;
   syncRatingMax();
@@ -352,6 +374,19 @@ bindField('f-title', 'title');
 bindField('f-author', 'author');
 bindField('f-section', 'section');
 bindField('f-form', 'form');
+// Stored as a list, typed as one line. Split, trimmed and de-duplicated on the
+// way in, so "Horror, horror" and a stray trailing comma cannot become two
+// topics or an empty one.
+bindField('f-topics', 'topics', v => {
+  const seen = new Set();
+  return String(v).split(',').map(t => t.trim()).filter(t => {
+    if (!t) return false;
+    const key = Paper.topicSlug(t);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+});
 $('f-section').addEventListener('change', () => { if (Ed.doc) { Ed.doc.section = $('f-section').value; touched(); } });
 $('f-form').addEventListener('change', () => { if (Ed.doc) { Ed.doc.form = $('f-form').value; touched(); } });
 $('f-rating').addEventListener('input', () => {
@@ -1384,7 +1419,7 @@ function renderChrome() {
 // away, which is worse than refusing the edit.
 function setReadOnly(on) {
   $('editor').classList.toggle('readonly', on);
-  ['f-title','f-author','f-rating'].forEach(id => { $(id).readOnly = on; });
+  ['f-title','f-author','f-rating','f-topics'].forEach(id => { $(id).readOnly = on; });
   ['f-section','f-form','f-ratingmax'].forEach(id => { $(id).disabled = on; });
   $('blocks').querySelectorAll('textarea, input').forEach(el => {
     if (el.type === 'checkbox' || el.type === 'radio') el.disabled = on;

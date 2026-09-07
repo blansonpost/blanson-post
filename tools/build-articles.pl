@@ -41,6 +41,21 @@ sub jstr {                      # escape a Perl string for a JS double-quoted li
     return '"' . $s . '"';
 }
 
+# A topic's web address. Kept in step with Paper.topicSlug in shared/paper.js:
+# if these two ever disagree, a link built by the build points at a page the
+# site cannot find.
+sub topic_slug {
+    my $s = lc shift;
+    $s =~ s/[^a-z0-9]+/-/g;
+    $s =~ s/^-|-$//g;
+    return $s;
+}
+
+# Two spellings of the same topic ("Sci-Fi" and "sci fi") collapse to one
+# address, so the second one silently files its articles under the first one's
+# name. Worth a warning: it is invisible in the TSV and obvious on the page.
+my %topic_label;
+
 # lines that are metadata or furniture, not article body
 # `rating` is captured structurally from the TSV, so it is dropped here rather
 # than kept as a display string (the star glyphs don't survive cleanly anyway).
@@ -54,11 +69,30 @@ open my $T, '<:encoding(UTF-8)', $tsv or die "no tsv: $!";
 while (my $line = <$T>) {
     chomp $line;
     next if $line =~ /^\s*#/ || $line !~ /\S/;
-    my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer, $date)
-        = split /\t/, $line, 10;
+    my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer,
+        $date, $topics) = split /\t/, $line, 11;
     next unless $slug && $section;
-    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer, $date);
-    s/^\s+|\s+$//g for ($lead, $form, $interviewer, $date);
+    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer, $date, $topics);
+    s/^\s+|\s+$//g for ($lead, $form, $interviewer, $date, $topics);
+
+    # Topics cut across sections: a horror game and a horror film share one.
+    # Free text in the TSV, an address here. Order is kept as typed — the first
+    # one is the one shown when there is only room for one.
+    my @topics;
+    my %seen_topic;
+    for my $t (split /,/, $topics) {
+        $t =~ s/^\s+|\s+$//g;
+        next unless length $t;
+        my $ts = topic_slug($t);
+        unless ($ts) { warn "  topic '$t' on '$slug' has no letters or digits in it. Ignored.\n"; next; }
+        next if $seen_topic{$ts}++;
+        if (exists $topic_label{$ts} && $topic_label{$ts} ne $t) {
+            warn "  '$t' and '$topic_label{$ts}' are the same address ($ts) - " .
+                 "they will share a page. Pick one spelling.\n";
+        }
+        $topic_label{$ts} //= $t;
+        push @topics, $t;
+    }
 
     # The old Wix site never recorded publication dates, so this column is blank
     # for all 41 archived articles. Blank stays blank: the site prints no date
@@ -159,7 +193,7 @@ while (my $line = <$T>) {
         id => $id++, slug => $slug, section => $section, title => $title,
         form => $form, interviewer => $interviewer,
         author => ($author eq '?' ? '' : $author),
-        date => $date,
+        date => $date, topics => \@topics,
         rating => $rv, ratingMax => $rmax,
         featured => ($featured =~ /^y/i ? 1 : 0),
         excerpt => $excerpt, body => \@body, meta => \%meta, images => \@imgs,
@@ -193,6 +227,8 @@ for my $a (@rows) {
     print $O "    title: " . jstr($a->{title}) . ",\n";
     print $O "    author: " . jstr($a->{author}) . ",\n";
     print $O "    date: " . jstr($a->{date}) . ",\n" if $a->{date};
+    print $O "    topics: [" . join(', ', map { jstr($_) } @{ $a->{topics} }) . "],\n"
+        if @{ $a->{topics} };
     print $O "    featured: " . ($a->{featured} ? 'true' : 'false') . ",\n";
     if (defined $a->{rating}) {
         print $O "    rating: $a->{rating},\n    ratingMax: $a->{ratingMax},\n";
@@ -265,3 +301,12 @@ my %c; $c{ $_->{section} }++ for @rows;
 printf "  %-11s %d\n", $_, $c{$_} for sort keys %c;
 my @noby = grep { !$_->{author} } @rows;
 printf "  %d article(s) still need a byline\n", scalar @noby if @noby;
+
+my %tc;
+$tc{$_}++ for map { @{ $_->{topics} } } @rows;
+if (%tc) {
+    printf "  %d topics across %d article(s)\n",
+        scalar keys %tc, scalar grep { @{ $_->{topics} } } @rows;
+}
+my @untopiced = grep { !@{ $_->{topics} } } @rows;
+printf "  %d article(s) have no topic yet\n", scalar @untopiced if @untopiced;

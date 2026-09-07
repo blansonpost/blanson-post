@@ -11,6 +11,7 @@ document.getElementById('nav').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
   `<a href="#/staff" data-sec="staff">The Team</a>` +
   `<a href="#/gallery" data-sec="gallery">Art &amp; Photos</a>` +
+  `<a href="#/topics" data-sec="topics">Topics</a>` +
   `<a href="#/scholarships" data-sec="scholarships">Scholarships</a>`;
 
 document.getElementById('nav').insertAdjacentHTML('beforeend',
@@ -358,6 +359,74 @@ function renderBest() {
   </div>`;
 }
 
+// ── Topics ─────────────────────────────────────────────────────────────────────
+// A section is where a story is filed; a topic is what it is about, and a story
+// can carry more than one. Printed at the foot of the story, where a reader who
+// has just finished it is looking for the next thing.
+const topicChips = a => {
+  const list = Paper.topicsOf(a);
+  if (!list.length) return '';
+  return `<div class="tchips"><span class="tchips-lab">Filed under</span>${
+    list.map(t => `<a class="tchip" href="#/t/${esc(t.slug)}">${esc(t.name)}</a>`).join('')}</div>`;
+};
+
+function renderTopic(slug) {
+  const items = Paper.byTopic(slug);
+  const name = Paper.topicName(slug);
+  const near = Paper.relatedTopics(slug);
+  if (!items.length) return `
+    <div class="wrap"><div class="page-head">
+      <h1>${esc(name)}</h1>
+      <p>Nothing is filed under this yet</p>
+      <a class="best-link" href="#/topics">All topics &rarr;</a>
+    </div></div>`;
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>${esc(name)}</h1>
+      <p>${items.length} ${items.length === 1 ? 'article' : 'articles'}, across
+         ${new Set(items.map(a => a.section)).size} ${
+         new Set(items.map(a => a.section)).size === 1 ? 'section' : 'sections'}</p>
+      <a class="best-link" href="#/topics">All topics &rarr;</a>
+    </div>
+    ${items.map((a, i) => `
+      <a class="list-item" href="#/a/${esc(a.slug)}">
+        <div class="list-num">${String(i + 1).padStart(2, '0')}</div>
+        <div>
+          <div class="kicker">${esc(sectionName(a.section))}</div>
+          <h2 class="list-hed">${esc(a.title)}</h2>
+          <p>${esc(a.excerpt)}</p>
+          ${bylineOf(a)}
+        </div>
+        ${figure(a, 'list-fig')}
+      </a>`).join('')}
+    ${near.length ? `
+      <div class="page-head sub-head"><h2>Often together with</h2>
+        <p>Topics that turn up on the same stories</p></div>
+      <div class="tchips">${near.map(t =>
+        `<a class="tchip" href="#/t/${esc(t.slug)}">${esc(t.name)}</a>`).join('')}</div>` : ''}
+  </div>`;
+}
+
+function renderTopics() {
+  const all = Paper.allTopics();
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Topics</h1>
+      <p>${all.length} ${all.length === 1 ? 'topic' : 'topics'}, most written-about first</p>
+    </div>
+    ${all.length ? `<div class="topic-grid">
+      ${all.map(t => `
+        <a class="topic-card" href="#/t/${esc(t.slug)}">
+          <b>${esc(t.name)}</b>
+          <i>${t.count} ${t.count === 1 ? 'article' : 'articles'}</i>
+        </a>`).join('')}
+    </div>` : `<p class="no-hits">No topics yet. They are set on each article in
+      the newsroom.</p>`}
+  </div>`;
+}
+
 // ── One writer ───────────────────────────────────────────────────────────────
 function renderWriter(slug) {
   const w = Paper.writer(slug);
@@ -620,6 +689,7 @@ function renderArticle(slug) {
       <div class="art-body">${bodyHTML(a)}</div>
       ${correctionsHTML(a)}
       <div class="endmark">❖</div>
+      ${topicChips(a)}
     </article>
 
     ${more.length ? `
@@ -653,6 +723,8 @@ function route() {
                                    app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
   else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
   else if (h === 'best')         { active = 'best'; app.innerHTML = renderBest(); }
+  else if (h === 'topics')       { active = 'topics'; app.innerHTML = renderTopics(); }
+  else if (h.startsWith('t/'))   { active = 'topics'; app.innerHTML = renderTopic(h.slice(2)); }
   else                         { app.innerHTML = renderHome(); }
 
   document.querySelectorAll('#nav a').forEach(el =>

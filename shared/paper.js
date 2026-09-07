@@ -426,6 +426,64 @@ const Paper = (() => {
       .slice(0, limit || 999);
   }
 
+  // ── Topics ─────────────────────────────────────────────────────────────────
+  // A section says where an article lives; a topic says what it is about, and
+  // an article can carry several. That is the whole point — a horror game is
+  // filed under Gaming and a horror film under Film, and until now there was no
+  // way to ask for both.
+  //
+  // Read out of ARTICLES rather than kept in a list, so a topic the newsroom
+  // invents next week works with no edit here, and a topic whose last article
+  // is taken down stops existing instead of leading to an empty page.
+
+  // Must stay identical to topic_slug() in tools/build-articles.pl.
+  const topicSlug = name => String(name || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const topicsOf = a => (a && Array.isArray(a.topics) ? a.topics : [])
+    .map(t => String(t || '').trim())
+    .filter(Boolean)
+    .map(name => ({ name, slug: topicSlug(name) }))
+    .filter(t => t.slug);
+
+  // Counted, and ordered by how much has been written about each — a topic with
+  // five articles behind it is worth more of the reader's attention than one
+  // somebody used once. Ties break alphabetically so the order is stable.
+  function allTopics() {
+    if (typeof ARTICLES === 'undefined') return [];
+    const found = new Map();
+    ARTICLES.forEach(a => topicsOf(a).forEach(t => {
+      const hit = found.get(t.slug);
+      // First spelling seen wins the label, the way the build warns it will.
+      if (hit) hit.count++;
+      else found.set(t.slug, { slug: t.slug, name: t.name, count: 1 });
+    }));
+    return [...found.values()]
+      .sort((x, y) => y.count - x.count || x.name.localeCompare(y.name));
+  }
+
+  const byTopic = slug => (typeof ARTICLES === 'undefined' ? []
+    : ARTICLES.filter(a => topicsOf(a).some(t => t.slug === slug)));
+
+  // Falls back to the address itself rather than to nothing, so a link that has
+  // gone stale still says what it was looking for.
+  const topicName = slug =>
+    (allTopics().find(t => t.slug === slug) || {}).name || String(slug || '');
+
+  // Other topics that turn up on the same articles — how a reader gets from
+  // Horror to Sci-Fi without going back to the index.
+  function relatedTopics(slug, limit) {
+    const near = new Map();
+    byTopic(slug).forEach(a => topicsOf(a).forEach(t => {
+      if (t.slug !== slug) near.set(t.slug, (near.get(t.slug) || 0) + 1);
+    }));
+    return [...near.entries()]
+      .sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))
+      .slice(0, limit || 6)
+      .map(([s]) => ({ slug: s, name: topicName(s) }));
+  }
+
   // ── Search ──────────────────────────────────────────────────────────────
   // Everything is already in memory — 41 archived articles plus anything the
   // newsroom has published — so this is a plain scan, no index to keep in step.
@@ -614,6 +672,7 @@ const Paper = (() => {
     upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
     bestReviews,
+    topicSlug, topicsOf, allTopics, byTopic, topicName, relatedTopics,
     search, highlight,
     scholarships, openCount, deadline, storiesBy, contributors, initials
   };
