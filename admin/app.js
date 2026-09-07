@@ -1279,6 +1279,18 @@ const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB'
 
 async function renderPhotos() {
   const host = $('view-photos');
+  // The tab is hidden for a writer, and a hidden tab is not a refusal: showTab
+  // still runs from the console, and a stale handler can still call this. The
+  // list is other students' unpublished pictures, so say no here as well.
+  if (!can('publish')) {
+    host.innerHTML = `<div class="lib-wrap"><div class="ev-head"><div>
+      <h2>Photos</h2>
+      <p>This lists every picture in the newsroom, including ones in stories
+         nobody has published yet, so it is kept to editors and advisors.
+         The pictures in your own stories are all in the story itself.</p>
+    </div></div></div>`;
+    return;
+  }
   if (Store.mode === 'supabase') {
     host.innerHTML = `<div class="lib-wrap"><div class="ev-head"><div>
       <h2>Photos</h2>
@@ -1375,6 +1387,7 @@ async function placePhoto(id) {
 // Only offered on a picture nothing is using, and it says what it is deleting.
 // This one really is gone: it is not the undoable removal a block does.
 async function deleteLibraryPhoto(id, card) {
+  if (!can('publish')) { toast('Only an editor or an advisor can delete a picture.', 'bad'); return; }
   if (photoUsers(id).length) { toast('That one is in a story. Take it out of the story first.', 'bad'); return; }
   const name = (card.querySelector('b') || {}).textContent || 'this picture';
   if (!confirm(`Delete ${name} for good?\n\nNothing is using it, but this cannot be undone.`)) return;

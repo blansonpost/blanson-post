@@ -443,3 +443,9 @@ table.sch.is-old{opacity:.6;margin-top:4px}
   text-transform:uppercase;color:var(--ink-3)}
 
 .foot-extra{display:block;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule-soft)}
+
+/* Buttons that do nothing on paper, and a "Filed under" strip that is just
+   navigation. The topics still read as words in the story, so nothing is lost. */
+@media print{
+  .share-btn,.save-btn,.share-link,.tchips,.foot-extra{display:none!important}
+}

@@ -425,3 +425,9 @@ mark{background:rgba(77,139,255,.3);color:inherit;border-radius:3px;padding:0 2p
 
 .foot-extra{display:flex;flex-direction:column;gap:8px;margin-top:10px;
   padding-top:10px;border-top:1px solid var(--line)}
+
+/* Buttons that do nothing on paper, and a "Filed under" strip that is just
+   navigation. The topics still read as words in the story, so nothing is lost. */
+@media print{
+  .share-btn,.save-btn,.share-link,.tchips,.foot-extra{display:none!important}
+}
