@@ -993,6 +993,72 @@ async function renderPreview() {
     (parts.join('') || '<p class="pv-empty">Nothing written yet.</p>');
 }
 
+// ── Asking for something ─────────────────────────────────────────────────────
+// A real form, not prompt(). Browsers offer "prevent this page from creating
+// more dialogs" after a couple of prompts, and once that is ticked every later
+// prompt() returns undefined without showing anything — the button simply stops
+// working, with no error a person can see. A <dialog> cannot be switched off,
+// takes more than one field, works on a touchscreen, and can say what it wants.
+function ask(spec) {
+  return new Promise(resolve => {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'ask';
+    dlg.innerHTML = `
+      <form method="dialog">
+        <h2>${esc(spec.title)}</h2>
+        ${spec.intro ? `<p class="ask-intro">${esc(spec.intro)}</p>` : ''}
+        ${spec.fields.map(f => `
+          <label class="ask-field">
+            <span>${esc(f.label)}${f.required ? '' : ' <i>optional</i>'}</span>
+            ${f.type === 'textarea'
+              ? `<textarea name="${esc(f.name)}" rows="3" placeholder="${esc(f.placeholder || '')}"></textarea>`
+              : f.type === 'select'
+              ? `<select name="${esc(f.name)}">${(f.options || []).map(o =>
+                  `<option value="${esc(o.value)}">${esc(o.label)}</option>`).join('')}</select>`
+              : `<input name="${esc(f.name)}" type="${esc(f.type || 'text')}"
+                   placeholder="${esc(f.placeholder || '')}">`}
+            ${f.hint ? `<i class="ask-hint">${esc(f.hint)}</i>` : ''}
+          </label>`).join('')}
+        <p class="ask-error" hidden></p>
+        <div class="ask-actions">
+          <button value="cancel" class="btn ghost" type="submit">Cancel</button>
+          <button value="ok" class="btn primary" type="submit">${esc(spec.confirm || 'Done')}</button>
+        </div>
+      </form>`;
+    document.body.appendChild(dlg);
+
+    const done = value => { dlg.close(); dlg.remove(); resolve(value); };
+    const form = dlg.querySelector('form');
+    const err = dlg.querySelector('.ask-error');
+
+    form.addEventListener('submit', e => {
+      // Which button was pressed. Escape closes with no submitter at all.
+      const how = e.submitter && e.submitter.value;
+      if (how !== 'ok') { e.preventDefault(); done(null); return; }
+      const out = {};
+      for (const f of spec.fields) out[f.name] = (form.elements[f.name].value || '').trim();
+      const missing = spec.fields.find(f => f.required && !out[f.name]);
+      if (missing) {
+        e.preventDefault();
+        err.hidden = false;
+        err.textContent = missing.emptyMessage || ('Please fill in ' + missing.label.toLowerCase() + '.');
+        form.elements[missing.name].focus();
+        return;
+      }
+      const bad = spec.check && spec.check(out);
+      if (bad) { e.preventDefault(); err.hidden = false; err.textContent = bad; return; }
+      e.preventDefault();
+      done(out);
+    });
+    // Escape, or the browser closing it some other way.
+    dlg.addEventListener('cancel', e => { e.preventDefault(); done(null); });
+
+    dlg.showModal();
+    const first = form.querySelector('input, textarea, select');
+    if (first) first.focus();
+  });
+}
+
 // ── Story Board ──────────────────────────────────────────────────────────────
 // How a newsroom actually runs: an editor puts up what needs covering, a writer
 // claims one, and it turns into a draft with their name on it. Everyone can see
@@ -1072,15 +1138,26 @@ function wireTask(row) {
 }
 
 async function addTask() {
-  const title = prompt('What needs covering?\n\ne.g. "Blood drive on Friday" or "Review the new Spider-Man"');
-  if (title === null || !title.trim()) return;
-  const brief = prompt('Anything the writer should know? (optional)\n\n' +
-    'Who to talk to, what angle, how long.') || '';
-  const due = prompt('Due date, as YYYY-MM-DD (optional)') || '';
-  if (due && !Blocks.parseDate(due)) { toast('That date did not look like YYYY-MM-DD.', 'bad'); return; }
+  const got = await ask({
+    title: 'Put a story on the board',
+    intro: 'Anyone can claim it, and it turns into a draft with their name on it.',
+    confirm: 'Put it up',
+    fields: [
+      { name: 'title', label: 'What needs covering', required: true,
+        placeholder: 'e.g. Blood drive on Friday',
+        emptyMessage: 'Say what the story is, or nobody will know what to write.' },
+      { name: 'brief', label: 'Anything the writer should know', type: 'textarea',
+        placeholder: 'Who to talk to, what angle, how long' },
+      { name: 'section', label: 'Section', type: 'select',
+        options: Sections.all().map(x => ({ value: x.slug, label: x.name })) },
+      { name: 'due', label: 'Due date', type: 'date' }
+    ],
+    check: out => (out.due && !Blocks.parseDate(out.due)) ? 'That is not a real date.' : ''
+  });
+  if (!got) return;
   try {
-    await Store.saveAssignment({ id: Paper.newTaskId(), title: title.trim(),
-      brief: brief.trim(), due: due.trim(), section: 'campus',
+    await Store.saveAssignment({ id: Paper.newTaskId(), title: got.title,
+      brief: got.brief, due: got.due, section: got.section || 'campus',
       takenBy: '', takenById: '', by: Ed.user.name });
   } catch (err) { return explain(err); }
   await renderBoard();
@@ -1465,10 +1542,16 @@ $('btn-unpublish').onclick = () => save('draft', false, 'Taken down — it is no
 // in their drafts with no idea what was wrong, which is the opposite of what a
 // review is for. The note is required — an empty one cancels.
 $('btn-sendback').onclick = async () => {
-  const why = prompt('What does ' + (Ed.doc.author || 'the writer') +
-    ' need to change?\n\nThey will see this at the top of the story.');
-  if (why === null) return;
-  if (!why.trim()) { toast('Say what needs changing — that is the point of sending it back.', 'bad'); return; }
+  const got = await ask({
+    title: 'Send it back',
+    intro: (Ed.doc.author || 'The writer') + ' will see this at the top of the story.',
+    confirm: 'Send it back',
+    fields: [{ name: 'why', label: 'What needs changing', type: 'textarea', required: true,
+      placeholder: 'e.g. The second quote needs a name — who said it?',
+      emptyMessage: 'Say what needs changing — that is the point of sending it back.' }]
+  });
+  if (!got) return;
+  const why = got.why;
   Ed.doc.editorNote = why.trim();
   Ed.doc.editorNoteBy = Ed.user.name;
   Ed.doc.editorNoteAt = new Date().toISOString();
@@ -1476,14 +1559,18 @@ $('btn-sendback').onclick = async () => {
 };
 // A published story that got something wrong should say so, not change quietly
 // behind the reader's back. That is the habit a newspaper is supposed to teach.
-$('btn-correct').onclick = () => {
-  const what = prompt('What are you correcting?\n\n' +
-    'This is printed at the bottom of the story, where readers can see it.\n' +
-    'For example: "An earlier version spelled Mr. Harvatine\'s name wrong."');
-  if (what === null) return;
-  if (!what.trim()) { toast('A correction needs to say what was wrong.', 'bad'); return; }
+$('btn-correct').onclick = async () => {
+  const got = await ask({
+    title: 'Add a correction',
+    intro: 'This is printed at the foot of the story, where readers can see it.',
+    confirm: 'Add it',
+    fields: [{ name: 'what', label: 'What was wrong', type: 'textarea', required: true,
+      placeholder: 'e.g. An earlier version spelled Mr. Harvatine\'s name wrong.',
+      emptyMessage: 'A correction needs to say what was wrong.' }]
+  });
+  if (!got) return;
   Ed.doc.corrections = (Ed.doc.corrections || []).concat({
-    text: what.trim(), at: new Date().toISOString(), by: Ed.user.name });
+    text: got.what, at: new Date().toISOString(), by: Ed.user.name });
   save(null, false, 'Correction added');
 };
 
