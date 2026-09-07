@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=36">
+<link rel="stylesheet" href="style.css?v=37">
 </head>
 <body>
 
@@ -74,17 +74,29 @@
   <main id="main">
     <!-- Write -->
     <div class="layout" id="view-write">
-      <aside class="side">
-        <button class="btn primary wide" id="new-article">＋ New article</button>
-        <div class="filters" id="filters" role="group" aria-label="Filter articles"></div>
-        <div class="list" id="list"></div>
-        <div class="space" id="space"></div>
+      <aside class="side" id="side">
+        <!-- The whole panel folds away to a rail. Everything that folds lives in
+             one element so a single `hidden` takes it out of the page for a
+             screen reader too, rather than only hiding it visually. -->
+        <div class="side-head">
+          <button class="side-toggle" id="side-toggle" type="button"
+                  aria-expanded="true" aria-controls="side-body">
+            <span class="side-chev" aria-hidden="true"></span>
+            <span class="side-label">Stories</span>
+          </button>
+        </div>
+        <div class="side-body" id="side-body">
+          <button class="btn primary wide" id="new-article">＋ New article</button>
+          <div class="filters" id="filters" role="group" aria-label="Filter articles"></div>
+          <div class="list" id="list"></div>
+          <div class="space" id="space"></div>
+        </div>
       </aside>
 
       <section class="editor">
         <div class="empty" id="empty">
           <h2>Nothing open</h2>
-          <p>Pick a story on the left, or start a new one.</p>
+          <p>Pick a story from the list, or start a new one.</p>
         </div>
 
         <div id="editor" hidden>
@@ -175,15 +187,15 @@
 <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="../shared/vendor/supabase.js?v=36"></script>
-<script src="../shared/config.js?v=36"></script>
-<script src="../shared/sections.js?v=36"></script>
-<script src="../shared/blocks.js?v=36"></script>
-<script src="../shared/paper.js?v=36"></script>
-<script src="../shared/reserved-slugs.js?v=36"></script>
-<script src="../shared/idb.js?v=36"></script>
-<script src="../shared/photos.js?v=36"></script>
-<script src="../shared/store.js?v=36"></script>
-<script src="app.js?v=36"></script>
+<script src="../shared/vendor/supabase.js?v=37"></script>
+<script src="../shared/config.js?v=37"></script>
+<script src="../shared/sections.js?v=37"></script>
+<script src="../shared/blocks.js?v=37"></script>
+<script src="../shared/paper.js?v=37"></script>
+<script src="../shared/reserved-slugs.js?v=37"></script>
+<script src="../shared/idb.js?v=37"></script>
+<script src="../shared/photos.js?v=37"></script>
+<script src="../shared/store.js?v=37"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

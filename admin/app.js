@@ -159,6 +159,34 @@ $('signout').onclick = async () => {
   showGate();
 };
 
+// ── the story list panel ─────────────────────────────────────────────────────
+// Folds away to a narrow rail so the editor gets the whole width. The choice is
+// remembered, because a panel that reopens itself on every reload is a panel
+// you have to close every time.
+const SIDE_KEY = 'bp-newsroom-side';
+
+function setSide(open) {
+  const side = $('side'), body = $('side-body'), btn = $('side-toggle');
+  if (!side || !body || !btn) return;
+  side.classList.toggle('closed', !open);
+  body.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+  // The label says what pressing it does, not what state you are in.
+  btn.title = open ? 'Hide the story list' : 'Show the story list';
+  btn.setAttribute('aria-label', btn.title);
+  try { localStorage.setItem(SIDE_KEY, open ? 'open' : 'closed'); } catch (e) { /* private mode */ }
+}
+
+(function wireSide() {
+  const btn = $('side-toggle');
+  if (!btn) return;
+  let open = true;
+  // Reading localStorage can throw outright, not merely come back empty.
+  try { open = localStorage.getItem(SIDE_KEY) !== 'closed'; } catch (e) {}
+  setSide(open);
+  btn.onclick = () => setSide($('side-body').hidden);
+})();
+
 // ── tabs ─────────────────────────────────────────────────────────────────────
 $('tabs').onclick = e => {
   const b = e.target.closest('.tab');
