@@ -372,6 +372,83 @@ function renderBest() {
   </section>`;
 }
 
+// ── Share ──────────────────────────────────────────────────────────────────────
+// The address in the bar is #/a/<slug> — a view of this one page, not a page of
+// its own. Chat apps, Instagram and Google Classroom draw their preview by
+// fetching the link on their own servers, and none of them runs our JavaScript,
+// so pasting that address anywhere gets a bare link with no headline and no
+// photo. Every archived story also has a small real page at a/<slug>/ carrying
+// exactly those things, and that is the address worth handing out.
+//
+// A story published from the newsroom has no such page — the build never saw
+// it — so its in-app address is shared instead. A working link with a plain
+// preview beats a tidy-looking one that 404s.
+const hasSharePage = slug => (window.SHARE_PAGES || []).indexOf(slug) !== -1;
+
+const shareUrl = a => hasSharePage(a.slug)
+  ? new URL('../a/' + encodeURIComponent(a.slug) + '/', location.href).href
+  : location.href;
+
+const shareButton = a =>
+  `<button class="share-btn" type="button" data-share="${esc(a.slug)}">Share</button>`;
+
+function shareSaid(btn, msg) {
+  const was = btn.dataset.was || btn.textContent;
+  btn.dataset.was = was;
+  btn.textContent = msg;
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = was; btn.disabled = false; }, 1600);
+}
+
+// Last resort: put the address on screen so it can be copied by hand. Not a
+// prompt() — a browser that has been told to stop showing dialogs returns
+// undefined from those without a word, and the button just stops working.
+function shareShowLink(btn, url) {
+  const box = document.createElement('input');
+  box.className = 'share-link';
+  box.readOnly = true;
+  box.value = url;
+  box.setAttribute('aria-label', 'Link to this story — copy it');
+  btn.replaceWith(box);
+  box.focus();
+  box.select();
+}
+
+async function shareStory(btn) {
+  const a = bySlug(btn.dataset.share);
+  if (!a) return;
+  const url = shareUrl(a);
+
+  // The phone's own share sheet where there is one, because that is the thing
+  // students actually use to put a link in a group chat.
+  if (navigator.share) {
+    try { await navigator.share({ title: a.title, url }); return; }
+    catch (err) {
+      // Closing the sheet is a decision, not a failure: do not go on to copy a
+      // link they just chose not to send. Anything else falls through and tries
+      // the clipboard instead.
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    shareSaid(btn, 'Link copied');
+  } catch (err) {
+    // The clipboard is refused outside a secure page and under some school
+    // browser policies. Showing the address is still useful; failing quietly
+    // is not.
+    shareShowLink(btn, url);
+  }
+}
+
+// Delegated once, on the container: the article page is redrawn from scratch on
+// every route, so a handler bound to the button itself would be thrown away
+// with it.
+document.getElementById('app').addEventListener('click', e => {
+  const btn = e.target.closest('.share-btn');
+  if (btn) shareStory(btn);
+});
+
 // ── Topics ─────────────────────────────────────────────────────────────────────
 // A section is where a story is filed; a topic is what it is about, and a story
 // can carry more than one. Printed at the foot of the story, where a reader who
@@ -699,6 +776,7 @@ function renderArticle(slug) {
           ${updatedText(a) ? `<div class="sub upd">${esc(updatedText(a))}</div>` : ''}
         </div>
         ${a.rating != null ? `<div class="big-score">${stars(a)}<b>${a.rating}/${a.ratingMax}</b></div>` : ''}
+        ${shareButton(a)}
       </div>
     </div>
     ${src ? `<figure class="read-hero"><img src="${esc(src)}" alt=""></figure>` : ''}

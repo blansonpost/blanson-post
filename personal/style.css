@@ -388,3 +388,13 @@ mark{background:#ffe9a8;color:inherit;border-radius:4px;padding:0 2px}
 .topic-card:hover{border-color:var(--gold);background:var(--gold-soft)}
 .topic-card b{font-family:var(--slab);font-size:17px;line-height:1.25;color:var(--ink)}
 .topic-card i{font-style:normal;font-size:12.5px;font-weight:700;color:var(--ink-3)}
+
+/* ── Share ───────────────────────────────────────────────────────────────── */
+.share-btn{margin-left:auto;flex:none;font:inherit;font-size:14px;font-weight:800;
+  color:var(--blue);background:var(--blue-soft);border:0;border-radius:99px;
+  padding:8px 17px;cursor:pointer}
+.share-btn:hover:not(:disabled){background:var(--blue);color:#fff}
+.share-btn:disabled{background:var(--gold-soft);color:var(--gold-ink);cursor:default}
+.share-link{margin-left:auto;flex:none;font:inherit;font-size:13px;color:var(--ink);
+  background:#fff;border:2px solid var(--gold);border-radius:12px;
+  padding:7px 11px;width:min(300px,100%)}
