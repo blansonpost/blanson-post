@@ -338,6 +338,24 @@ const Store = (() => {
     return out;
   }
 
+  // Sorted in place rather than handed back as a copy: the designs, bySection(),
+  // featured() and the front page all read the one ARTICLES, and a second
+  // sorted list would be a second source of truth to keep in step.
+  function orderByDate() {
+    if (typeof ARTICLES === 'undefined') return;
+    const when = a => {
+      const d = Blocks.publishedOn(a);
+      return d ? d.getTime() : null;
+    };
+    ARTICLES.sort((a, b) => {
+      const x = when(a), y = when(b);
+      if (x === null && y === null) return 0;   // both undated: leave them be
+      if (x === null) return 1;                 // undated sinks below dated
+      if (y === null) return -1;
+      return y - x;                             // newest first
+    });
+  }
+
   return {
     mode: backend.name,
     slugify, isIdbRef, resolvePhotos, migrateFromLocalStorage,
@@ -403,6 +421,15 @@ const Store = (() => {
       return { articles, error: null };
     },
 
+    // Newest first — but only among the stories whose date anybody actually
+    // knows. The 41 carried over from the old Wix site have none, so they keep
+    // the order the archive is written in rather than being shuffled by a date
+    // we would have had to invent. Array.sort is stable, so that order holds.
+    //
+    // Nothing visible moves until the club fills the `date` column in
+    // content/articles.tsv. The day one gets filled in, that story goes where
+    // it belongs on its own, and so does everything published after it.
+    //
     // Called by each design before its first render.
     //
     // Memoised: without a guard this is one re-entrant call away from showing
@@ -421,6 +448,7 @@ const Store = (() => {
           }
           ARTICLES.unshift(...extra);
         }
+        orderByDate();
         return { articles: ARTICLES, error };
       })());
     }

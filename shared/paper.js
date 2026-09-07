@@ -434,6 +434,66 @@ const Paper = (() => {
       .slice(0, limit || 999);
   }
 
+  // ── About the paper ────────────────────────────────────────────────────────
+  // What the paper is, how it works, and how to reach it. Here rather than in
+  // three copies of the same HTML, so the club changes it once.
+  //
+  // CLUB: the two lines marked `fillIn` are the ones nobody has told us yet.
+  // Put the real answer in and delete the flag; the page prints the honest
+  // "ask us" wording until you do, instead of inventing a meeting time.
+  const ABOUT = {
+    founded: '2024',
+    school:  'Blanson Career and Technical Education High School',
+    district: 'Aldine ISD',
+    address: '311 West Road, Houston, TX 77038',
+    phone:   '281.591.4950',
+    motto:   'Written by students, for the community',
+
+    what: [
+      'The Blanson Post is written, photographed and edited by Blanson students. ' +
+      'Everything on this site was reported by somebody who goes here.',
+      'We cover what happens at school — SkillsUSA, the pep rallies, Blanson F.C. — ' +
+      'and what students are actually into: films, games, books, poetry, Houston. ' +
+      'Teachers get interviewed. Graduates come back and say what happened next.'
+    ],
+
+    // How a story gets from a student to the site. Worth saying out loud: it is
+    // the part readers cannot see, and it is why the paper can be trusted.
+    how: [
+      { title: 'A student writes it',
+        text: 'Anyone at Blanson can write for the paper. Stories are drafted in ' +
+              'the newsroom, with photos placed where the writer wants them.' },
+      { title: 'An editor reads it',
+        text: 'Nothing goes on the site without a second person seeing it. An ' +
+              'editor can send a story back with a note saying what needs changing.' },
+      { title: 'It gets a byline and a date',
+        text: 'Every story says who wrote it and when it ran. Four pieces carried ' +
+              'over from our old site have no byline anywhere — those say ' +
+              '“The Blanson Post” until somebody can tell us who wrote them.' },
+      { title: 'If we get it wrong, we say so',
+        text: 'Corrections are printed at the foot of the story and collected on ' +
+              'one page, rather than the story quietly changing.' }
+    ],
+
+    join: 'New writers are always welcome, and you do not have to be a great ' +
+          'writer to start — most people here were not. If you can tell somebody ' +
+          'what happened, you can write it down.',
+
+    // Set fillIn to false once the club has answered these.
+    meet:    { fillIn: true,
+               text: 'Ask any of the people on the Team page when the news team meets.' },
+    contact: { fillIn: true,
+               text: 'Got a story, a correction, or a photo? Tell any of the writers ' +
+                     'on the Team page, or catch us in the Audio/Video Production room.' },
+
+    // Where the older stories came from, because a reader deserves to know why
+    // the archive has no dates on it.
+    archive: 'Stories published before this site was built were carried over from ' +
+             'our old Wix site, word for word, typos and all. That site never ' +
+             'recorded publication dates, so those pieces show no date rather ' +
+             'than a guessed one.'
+  };
+
   // ── Topics ─────────────────────────────────────────────────────────────────
   // A section says where an article lives; a topic says what it is about, and
   // an article can carry several. That is the whole point — a horror game is
@@ -559,16 +619,22 @@ const Paper = (() => {
     for (const a of ARTICLES) {
       const title = fold(a.title), author = fold(a.author);
       const sect  = fold(typeof Sections !== 'undefined' ? Sections.name(a.section) : a.section);
+      const topic = fold(topicsOf(a).map(t => t.name).join(' '));
       const body  = fold(textOf(a));
       let score = 0, matchedAll = true;
 
       for (const w of words) {
-        if (!body.includes(w)) { matchedAll = false; break; }
+        // A topic counts as content: "horror" should find the five stories
+        // filed under Horror, not only the ones that happen to use the word.
+        if (!body.includes(w) && !topic.includes(w)) { matchedAll = false; break; }
         if (title === q)             score += 120;
         if (title.startsWith(w))     score += 40;
         if (title.includes(w))       score += 30;
         if (author.includes(w))      score += 20;
         if (sect.includes(w))        score += 10;
+        // Between a section and a headline: somebody typing a topic name means
+        // it more than somebody whose article says the word once in passing.
+        if (topic.includes(w))       score += 25;
         score += 1;
       }
       if (!matchedAll) continue;
@@ -719,6 +785,7 @@ const Paper = (() => {
     upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
     bestReviews,
+    about: () => ABOUT,
     photographers, photographer, corrections,
     topicSlug, topicsOf, allTopics, byTopic, topicName, relatedTopics,
     search, highlight,

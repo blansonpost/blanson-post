@@ -1378,6 +1378,11 @@ const bySection  = s  => ARTICLES.filter(a => a.section === s);
 // those is NaN, which never equals anything.
 const byId       = id => ARTICLES.find(a => String(a.id) === String(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
+// The lead story. ARTICLES is ordered newest-first by Store.hydrate(), so this
+// is the most recent article carrying the `featured` flag rather than whichever
+// one happens to sit highest in articles.tsv. Five rows are flagged today and
+// they are all undated, so the file order still decides between them - fill in
+// the `date` column and the front page starts choosing for itself.
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
 
 const esc        = Blocks.esc;

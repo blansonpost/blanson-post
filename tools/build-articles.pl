@@ -282,6 +282,11 @@ const bySection  = s  => ARTICLES.filter(a => a.section === s);
 // those is NaN, which never equals anything.
 const byId       = id => ARTICLES.find(a => String(a.id) === String(id)) || null;
 const bySlug     = s  => ARTICLES.find(a => a.slug === s) || null;
+// The lead story. ARTICLES is ordered newest-first by Store.hydrate(), so this
+// is the most recent article carrying the `featured` flag rather than whichever
+// one happens to sit highest in articles.tsv. Five rows are flagged today and
+// they are all undated, so the file order still decides between them - fill in
+// the `date` column and the front page starts choosing for itself.
 const featured   = () => ARTICLES.find(a => a.featured) || ARTICLES[0];
 
 const esc        = Blocks.esc;
@@ -549,6 +554,119 @@ HTML
     print $FD "</channel>\n</rss>\n";
     close $FD;
 
+    # ── the page for an address that is not there ────────────────────────────
+    # Adding a/<slug>/ addresses means people will mistype them, and links will
+    # outlive the stories they point at. GitHub Pages serves this file for any
+    # missing path — but it leaves the address bar showing the path that was
+    # asked for, so a relative link from here points at the wrong depth. The
+    # script below works out where the site root actually is instead.
+    #
+    # It also reads the missing address: /a/malignant-review/ becomes a search
+    # for "malignant review", which is usually exactly what the reader wanted.
+    open my $NF, '>:encoding(UTF-8)', "$root/404.html" or die "cannot write 404: $!";
+    print $NF <<"NOTFOUND";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found — The Blanson Post</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{color-scheme:light}
+  body{margin:0 auto;padding:60px 22px;max-width:38rem;background:#f7f4ed;color:#14110d;
+    font:17px/1.65 "Spectral",Georgia,"Times New Roman",serif}
+  a{color:#8f1d1d}
+  .name{font:600 12px/1 system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;
+    color:#736a5c;text-decoration:none;display:inline-block;margin-bottom:26px}
+  h1{font-family:"Playfair Display",Georgia,serif;font-size:2rem;line-height:1.15;margin:0 0 14px}
+  p{margin:0 0 16px}
+  .said{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;
+    background:#efeae0;border:1px solid #cfc7b6;border-radius:4px;padding:3px 8px;
+    word-break:break-all}
+  form{display:flex;gap:8px;margin:26px 0 22px}
+  input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;
+    background:#fff;border:1px solid #cfc7b6;border-radius:4px;color:inherit}
+  button{font:600 14px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+    background:#14110d;color:#f7f4ed;border:0;border-radius:4px;padding:0 20px;cursor:pointer}
+  .links{display:flex;flex-wrap:wrap;gap:8px 20px;
+    font:14px/1.6 system-ui,sans-serif;padding-top:18px;border-top:1px solid #cfc7b6}
+</style>
+</head>
+<body>
+
+<a class="name" id="home-top" href="./">The Blanson Post</a>
+
+<h1>We can&rsquo;t find that page.</h1>
+<p id="said" hidden>You asked for <span class="said"></span>, and there is nothing there.
+   It may have been a typo, or the story may have moved.</p>
+<p id="plain">The address you followed doesn&rsquo;t match anything on the site.</p>
+
+<form id="find" role="search">
+  <input id="q" type="search" aria-label="Search the paper" placeholder="Search the paper">
+  <button type="submit">Search</button>
+</form>
+
+<div class="links">
+  <a id="home" href="./">Front page</a>
+  <a id="all">Every section</a>
+  <a id="team">The team</a>
+  <a id="about">About us</a>
+</div>
+
+<script>
+(function () {
+  // Where the site root is. The address bar still shows the path that was not
+  // found, so "./" from here is not the site root and cannot be trusted.
+  var built = '$base';
+  var basePath = new URL(built).pathname;          // e.g. "/blanson-post/"
+  var root;
+  if (location.origin === new URL(built).origin) {
+    root = basePath;                               // served from where it was built for
+  } else if (location.pathname.indexOf(basePath) === 0) {
+    root = basePath;                               // a copy under the same path
+  } else {
+    root = '/';                                    // a local test server
+  }
+  var design = root + '$design/';
+
+  document.getElementById('home').href = design;
+  document.getElementById('home-top').href = design;
+  document.getElementById('all').href = design + '#/s/campus';
+  document.getElementById('team').href = design + '#/staff';
+  document.getElementById('about').href = design + '#/about';
+
+  // Read the address that failed. /a/malignant-review/ is almost always
+  // somebody after "malignant review", so put that in the box for them.
+  var asked = decodeURIComponent(location.pathname);
+  var guess = '';
+  // new RegExp, not a literal: this file is written from an interpolating
+  // heredoc, and every backslash in a /pattern/ would be eaten on the way out.
+  var m = asked.match(new RegExp('/a/([^/]+)/?\$'));
+  if (m) guess = m[1].replace(/^copy-of-/, '').replace(/-/g, ' ').trim();
+
+  if (asked && asked !== root) {
+    document.getElementById('plain').hidden = true;
+    var said = document.getElementById('said');
+    said.hidden = false;
+    // textContent, not innerHTML: this string came out of the address bar.
+    said.querySelector('.said').textContent = asked;
+  }
+
+  var box = document.getElementById('q');
+  if (guess) box.value = guess;
+  document.getElementById('find').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = box.value.trim();
+    location.href = q ? design + '#/q/' + encodeURIComponent(q) : design;
+  });
+})();
+</script>
+</body>
+</html>
+NOTFOUND
+    close $NF;
+
     # ── robots ───────────────────────────────────────────────────────────────
     # The newsroom is already marked noindex in its own <head>; this says the
     # same thing to anything that reads robots.txt first and never gets there.
@@ -562,7 +680,7 @@ HTML
     close $RB;
 
     printf "  %d shareable page(s) -> a/<slug>/, opening in %s/\n", $pages, $design;
-    print  "  sitemap.xml, feed.xml, robots.txt\n";
+    print  "  sitemap.xml, feed.xml, robots.txt, 404.html\n";
 }
 
 # ── Slug lists for the newsroom and the designs ──────────────────────────────

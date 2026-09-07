@@ -12,6 +12,11 @@
 </head>
 <body>
 
+<!-- Every page starts with a 15-item nav. Without this, reaching the story
+     means tabbing through all of it, on every page, every time. -->
+<a class="skip" href="#app">Skip to the stories</a>
+
+
 <div class="banner">
   <span>🐆 Go Jaguars!</span>
   <span class="banner-mid" id="banner-date"></span>
@@ -29,7 +34,7 @@
   <nav class="menu" id="nav"></nav>
 </header>
 
-<main id="app"></main>
+<main id="app" tabindex="-1"></main>
 
 <footer>
   <div class="foot-wave"></div>
@@ -67,6 +72,7 @@
 <script src="../shared/articles.js?v=33"></script>
 <script src="../shared/reserved-slugs.js?v=33"></script>
 <script src="../shared/saved.js?v=33"></script>
+<script src="../shared/lightbox.js?v=33"></script>
 <script src="../shared/paper.js?v=33"></script>
 <script src="../shared/idb.js?v=33"></script>
 <script src="../shared/photos.js?v=33"></script>

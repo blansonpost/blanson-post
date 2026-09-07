@@ -20,6 +20,7 @@ document.getElementById('foot-sections').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
   // The pages that are not sections and are not worth another nav item.
   `<span class="foot-extra">
+     <a href="#/about">About us</a>
      <a href="#/topics">Topics</a>
      <a href="#/best">Best reviewed</a>
      <a href="#/saved">Reading list</a>
@@ -501,6 +502,27 @@ function creditLink(credit, by) {
     c.slice(at + name.length);
 }
 
+// Gallery photos open in place rather than navigating away to a bare .jpg.
+// Delegated on #app, so a gallery the router redraws keeps working.
+Lightbox.wire(document.getElementById('app'), '.gal-item');
+
+// The skip link must not travel through the router. Every address on this site
+// is a hash, so following "#app" would put "app" in the bar, match no route,
+// and drop the reader on the front page — sending someone who asked to skip the
+// navigation to a different page entirely. Move the focus by hand instead and
+// leave the address alone.
+(function () {
+  const link = document.querySelector('.skip');
+  if (!link) return;
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const main = document.getElementById('app');
+    if (!main) return;
+    main.focus({ preventScroll: true });
+    main.scrollIntoView();
+  });
+})();
+
 // ── Topics ─────────────────────────────────────────────────────────────────────
 // A section is where a story is filed; a topic is what it is about, and a story
 // can carry more than one. Printed at the foot of the story, where a reader who
@@ -651,10 +673,48 @@ function renderPhotographer(slug) {
     <section class="shelf">
       <div class="gal">
         ${g.photos.map((f, i) => `<a class="gal-item" style="--tilt:${[-1.4,1.1,-.7,1.3][i%4]}deg"
-           href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
+           href="${esc(imageUrl(f))}" target="_blank" rel="noopener" data-caption="${esc(g.title)}" data-credit="${esc(g.credit)}">
            <img src="${esc(imageUrl(f))}" alt="${esc(g.title)}" loading="lazy"></a>`).join('')}
       </div>
     </section>`).join('')}`;
+}
+
+// ── About the paper ──────────────────────────────────────────────────────────
+// Content lives in Paper.about() so the club edits it once, not three times.
+function renderAbout() {
+  const a = Paper.about();
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u{1F4F0}</div>
+    <h1>About The Blanson Post</h1>
+    <p>${esc(a.motto)} · Est. ${esc(a.founded)}</p>
+  </section>
+  <section class="shelf about">
+    ${a.what.map(p => `<p class="about-lede">${esc(p)}</p>`).join('')}
+
+    <div class="shelf-head"><h2>How a story gets on the site</h2></div>
+    <ol class="about-steps">
+      ${a.how.map(s => `<li><b>${esc(s.title)}</b><span>${esc(s.text)}</span></li>`).join('')}
+    </ol>
+
+    <div class="shelf-head"><h2>Writing for us</h2></div>
+    <p>${esc(a.join)}</p>
+    <p>${esc(a.meet.text)}</p>
+    <p>${esc(a.contact.text)}</p>
+
+    <div class="shelf-head"><h2>The older stories</h2></div>
+    <p>${esc(a.archive)}</p>
+
+    <div class="shelf-head"><h2>Where to find us</h2></div>
+    <p class="about-where">
+      <b>${esc(a.school)}</b><br>${esc(a.district)}<br>
+      ${esc(a.address)}<br>${esc(a.phone)}
+    </p>
+    <div class="about-links">
+      <a href="#/staff">Meet the team →</a>
+      <a href="#/corrections">Corrections →</a>
+    </div>
+  </section>`;
 }
 
 // ── One writer ───────────────────────────────────────────────────────────────
@@ -720,7 +780,7 @@ function renderGallery() {
     <section class="shelf">
       <div class="gal">
         ${g.photos.map((f, i) => `<a class="gal-item" style="--tilt:${[-1.4,1.1,-.7,1.3][i%4]}deg"
-           href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
+           href="${esc(imageUrl(f))}" target="_blank" rel="noopener" data-caption="${esc(g.title)}" data-credit="${esc(g.credit)}">
            <img src="${esc(imageUrl(f))}" alt="${esc(g.title)}" loading="lazy"></a>`).join('')}
       </div>
     </section>`).join('')}`;
@@ -977,6 +1037,7 @@ function route() {
   else if (h === 'saved')        { active = 'saved'; app.innerHTML = renderSaved(); }
   else if (h === 'corrections')  { app.innerHTML = renderCorrections(); }
   else if (h.startsWith('p/'))   { active = 'gallery'; app.innerHTML = renderPhotographer(h.slice(2)); }
+  else if (h === 'about')        { app.innerHTML = renderAbout(); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));
