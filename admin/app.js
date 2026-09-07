@@ -212,9 +212,28 @@ function buildTopicList() {
     const key = Paper.topicSlug(t);
     if (key && !seen.has(key)) seen.set(key, t);
   };
-  Paper.allTopics().forEach(t => add(t.name));
+  // From the archive by way of the generated list, not Paper.allTopics(): that
+  // reads ARTICLES, which the newsroom never loads, so it returned nothing here
+  // and the box only ever suggested what the newsroom had already used.
+  (window.ARCHIVE_TOPICS || []).forEach(add);
   Ed.articles.forEach(a => (a.topics || []).forEach(add));
   list.innerHTML = [...seen.values()].sort((a, b) => a.localeCompare(b))
+    .map(t => `<option value="${esc(t)}">`).join('');
+
+  // Same idea for series, and the same reason: a story meant to join
+  // "Blanson F.C. Match Reports" that is typed slightly differently starts a
+  // second series of one instead, and the strip never appears on either.
+  const slist = $('series-list');
+  if (!slist) return;
+  const names = new Map();
+  const addSeries = name => {
+    const t = String(name || '').trim();
+    const key = Paper.seriesKey(t);
+    if (key && !names.has(key)) names.set(key, t);
+  };
+  (window.ARCHIVE_SERIES || []).forEach(addSeries);
+  Ed.articles.forEach(a => addSeries(a.series));
+  slist.innerHTML = [...names.values()].sort((a, b) => a.localeCompare(b))
     .map(t => `<option value="${esc(t)}">`).join('');
 }
 
@@ -283,7 +302,7 @@ function blankDoc() {
     slug: '', title: '', section: 'campus', form: 'story',
     author: Ed.user.name, authorId: Ed.user.id, interviewer: '',
     rating: null, ratingMax: 5, status: 'draft', featured: false,
-    topics: [],
+    topics: [], series: '',
     cover: null, blocks: [{ id: Blocks.newId(), type: 'para', text: '' }],
     assets: [], meta: {}, body: [], images: []
   };
@@ -333,7 +352,8 @@ function closeEditor() {
   $('empty').hidden = false;
   // Every field, not just the block list. On a shared school laptop the next
   // student must not find the previous one's headline sitting in the box.
-  ['f-title', 'f-author', 'f-rating', 'f-topics'].forEach(id => { $(id).value = ''; });
+  ['f-title', 'f-author', 'f-rating', 'f-topics', 'f-series']
+    .forEach(id => { $(id).value = ''; });
   $('f-section').selectedIndex = 0;
   $('f-form').selectedIndex = 0;
   $('f-ratingmax').value = '5';
@@ -359,6 +379,7 @@ function mount() {
   $('f-author').value = Ed.doc.author || '';
   $('f-form').value = Ed.doc.form || 'story';
   $('f-topics').value = (Ed.doc.topics || []).join(', ');
+  $('f-series').value = Ed.doc.series || '';
   $('f-rating').value = Ed.doc.rating == null ? '' : Ed.doc.rating;
   $('f-ratingmax').value = Ed.doc.ratingMax || 5;
   syncRatingMax();
@@ -389,6 +410,9 @@ bindField('f-form', 'form');
 // Stored as a list, typed as one line. Split, trimmed and de-duplicated on the
 // way in, so "Horror, horror" and a stray trailing comma cannot become two
 // topics or an empty one.
+// One story is not a series, so the site only draws the strip once a second
+// one joins. Nothing to validate here beyond the spaces.
+bindField('f-series', 'series', v => String(v).trim());
 bindField('f-topics', 'topics', v => {
   const seen = new Set();
   return String(v).split(',').map(t => t.trim()).filter(t => {
@@ -1582,7 +1606,8 @@ function renderChrome() {
 // away, which is worse than refusing the edit.
 function setReadOnly(on) {
   $('editor').classList.toggle('readonly', on);
-  ['f-title','f-author','f-rating','f-topics'].forEach(id => { $(id).readOnly = on; });
+  ['f-title','f-author','f-rating','f-topics','f-series']
+    .forEach(id => { $(id).readOnly = on; });
   ['f-section','f-form','f-ratingmax'].forEach(id => { $(id).disabled = on; });
   $('blocks').querySelectorAll('textarea, input').forEach(el => {
     if (el.type === 'checkbox' || el.type === 'radio') el.disabled = on;

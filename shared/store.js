@@ -405,6 +405,10 @@ const Store = (() => {
           // Topics cut across sections, so they have to survive the trip to the
           // public site or a newsroom story simply never joins one.
           topics: Array.isArray(r.topics) ? r.topics : [],
+          // No `part` alongside it: the archive's numbers come from the order
+          // its rows are written in the TSV, and a newsroom story has no row.
+          // Paper.seriesOf falls back to the publication date for those.
+          series: r.series || '',
           rating: r.rating == null ? undefined : r.rating,
           ratingMax: r.ratingMax == null ? undefined : r.ratingMax,
           meta: r.meta || {}, cover: r.cover || null,

@@ -139,7 +139,11 @@ h1,h2,h3,h4{margin:0}
   border-radius:9px;padding:8px 10px;margin-top:5px}
 /* Topics need room for several words; a quarter of the row is not enough. */
 .row label.wide-field{grid-column:1 / -1}
-.row label.wide-field .hint{display:inline;margin-left:6px}
+/* Series and topics share a row of their own: both need more than a quarter of
+   the width, neither needs all of it. Reset to full width in the one-column
+   layout, or `span 2` would conjure a second column that is not there. */
+.row label.half-field{grid-column:span 2}
+.row label.wide-field .hint,.row label.half-field .hint{display:inline;margin-left:6px}
 .rating-row{display:flex;align-items:center;gap:6px;margin-top:5px}
 .rating-row input{width:64px;margin-top:0}
 .rating-row select{width:auto;margin-top:0}
@@ -256,6 +260,7 @@ table.staff select{background:var(--panel);border:1px solid var(--line);border-r
   .side{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
   .list{max-height:220px}
   .row{grid-template-columns:1fr}
+  .row label.half-field{grid-column:1 / -1}
   .ph{grid-template-columns:1fr}
   .ph-thumb img,.ph-thumb .ph-gone{width:100%;height:150px}
   .title-input{font-size:22px}

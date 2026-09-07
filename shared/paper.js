@@ -635,11 +635,32 @@ const Paper = (() => {
   // the order the rows are written; ARTICLES gets re-sorted by date afterwards,
   // so the parts are put back in their own order here rather than trusting the
   // order they happen to be in.
+  // Matched on a normalised key, the same one topics use. "Meet the staff"
+  // typed in the newsroom joins the archive's "Meet the Staff" rather than
+  // quietly starting a second series of one beside it.
+  const seriesKey = name => topicSlug(name);
+
   function seriesOf(a) {
     if (!a || !a.series || typeof ARTICLES === 'undefined') return null;
+    const key = seriesKey(a.series);
+    if (!key) return null;
+    const when = x => { const d = Blocks.publishedOn(x); return d ? d.getTime() : null; };
     const parts = ARTICLES
-      .filter(x => x.series === a.series)
-      .sort((x, y) => (x.part || 0) - (y.part || 0));
+      .filter(x => x.series && seriesKey(x.series) === key)
+      .sort((x, y) => {
+        // Archived parts are numbered by the build, from the order their rows
+        // are written. A newsroom story has no row to read a number off, so it
+        // falls in by the day it ran — which puts it after the archive, where
+        // it belongs, because the archive carries no dates at all.
+        if (x.part != null && y.part != null) return x.part - y.part;
+        if (x.part != null) return -1;
+        if (y.part != null) return 1;
+        const dx = when(x), dy = when(y);
+        if (dx === null && dy === null) return 0;
+        if (dx === null) return 1;
+        if (dy === null) return -1;
+        return dx - dy;
+      });
     if (parts.length < 2) return null;
     const at = parts.findIndex(x => x.id === a.id);
     return { name: a.series, parts, index: at, part: at + 1, of: parts.length,
@@ -851,7 +872,7 @@ const Paper = (() => {
     upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
     bestReviews,
-    related, seriesOf, everything,
+    related, seriesOf, seriesKey, everything,
     about: () => ABOUT,
     photographers, photographer, corrections,
     topicSlug, topicsOf, allTopics, byTopic, topicName, relatedTopics,

@@ -88,3 +88,34 @@ window.SHARE_PAGES = [
   "advice-to-underclassmen",
   "fogo-de-chao"
 ];
+
+// Topics the archived stories use, for the newsroom's suggestions.
+window.ARCHIVE_TOPICS = [
+  "After Graduation",
+  "Anime",
+  "Blanson F.C.",
+  "Book to Film",
+  "Coming of Age",
+  "Drama",
+  "Dystopia",
+  "Food",
+  "Giving Back",
+  "Horror",
+  "Multiplayer",
+  "NFL",
+  "Romance",
+  "Sci-Fi",
+  "SkillsUSA",
+  "Soccer",
+  "Starting High School",
+  "Superheroes",
+  "Teachers",
+  "Thriller"
+];
+
+// Series the archived stories belong to.
+window.ARCHIVE_SERIES = [
+  "A Thief's Gambit",
+  "Blanson F.C. Match Reports",
+  "Meet the Staff"
+];

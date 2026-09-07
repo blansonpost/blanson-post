@@ -789,5 +789,25 @@ print $S "\n];\n\n";
 print $S "// Stories that also have a shareable page at a/<slug>/.\n";
 print $S "window.SHARE_PAGES = [\n";
 print $S join(",\n", map { "  " . jstr($_) } @share_pages);
+print $S "\n];\n\n";
+
+# The newsroom deliberately does not load articles.js - it has no reason to
+# pull 160 KB of article bodies to offer a few suggestions. Without these two
+# lists its "what it's about" and "part of a series" boxes could only ever
+# suggest what the newsroom itself had already used, so a student had no way to
+# join a topic or a series that only the archive was using, and would spell a
+# near-miss instead.
+my %atopics;
+$atopics{$_} = 1 for map { @{ $_->{topics} } } @rows;
+print $S "// Topics the archived stories use, for the newsroom's suggestions.\n";
+print $S "window.ARCHIVE_TOPICS = [\n";
+print $S join(",\n", map { "  " . jstr($_) } sort keys %atopics);
+print $S "\n];\n\n";
+
+my %aseries;
+$aseries{ $_->{series} } = 1 for grep { $_->{series} } @rows;
+print $S "// Series the archived stories belong to.\n";
+print $S "window.ARCHIVE_SERIES = [\n";
+print $S join(",\n", map { "  " . jstr($_) } sort keys %aseries);
 print $S "\n];\n";
 close $S;
