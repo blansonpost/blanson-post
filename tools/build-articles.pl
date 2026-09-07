@@ -501,6 +501,12 @@ if ($site{base_url}) {
 
 <style>
   :root{color-scheme:light}
+  /* Tinted to the paper, the same as the design these pages hand you on to. */
+  *{scrollbar-width:thin;scrollbar-color:#c0b6a1 transparent}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#c0b6a1;border-radius:99px;
+    border:3px solid transparent;background-clip:padding-box}
   body{margin:0 auto;padding:34px 22px 60px;max-width:44rem;background:#f7f4ed;color:#14110d;
     font:17px/1.65 "Spectral",Georgia,"Times New Roman",serif}
   a{color:#8f1d1d}
@@ -658,6 +664,12 @@ HTML
 <meta name="robots" content="noindex">
 <style>
   :root{color-scheme:light}
+  /* Tinted to the paper, the same as the design these pages hand you on to. */
+  *{scrollbar-width:thin;scrollbar-color:#c0b6a1 transparent}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#c0b6a1;border-radius:99px;
+    border:3px solid transparent;background-clip:padding-box}
   body{margin:0 auto;padding:60px 22px;max-width:38rem;background:#f7f4ed;color:#14110d;
     font:17px/1.65 "Spectral",Georgia,"Times New Roman",serif}
   a{color:#8f1d1d}

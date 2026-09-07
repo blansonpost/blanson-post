@@ -1,5 +1,7 @@
 /* ── The Blanson Post — PERSONAL (school spirit) ─────────────────────────── */
 :root{
+  /* Cream paper, whatever the machine is set to. */
+  color-scheme:light;
   --blue:#003087; --blue-2:#0b4bc4; --blue-soft:#e6edfb;
   --gold:#F4C300; --gold-soft:#fff6d6;
   /* The brand gold is for filled shapes. Gold TEXT on cream measures 1.6:1,
@@ -8,6 +10,7 @@
   --paper:#fffdf7; --paper-2:#fff8e9; --card:#ffffff;
   --ink:#1a1c20; --ink-2:#4d5560; --ink-3:#68717c;   /* small print: 4.5:1 on the cream */
   --line:#e8e2d2;
+  --sb:#c3d0ec; --sb-hover:#9db2df;
   --sans:"Nunito",system-ui,-apple-system,sans-serif;
   --slab:"Archivo Black",system-ui,sans-serif;
   --hand:"Caveat",cursive;
@@ -517,3 +520,23 @@ body.lb-open{overflow:hidden}
 .all-list a:hover{color:var(--blue)}
 .all-list i{font-style:normal;font-size:12.5px;font-weight:700;color:var(--ink-3);
   white-space:nowrap}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────────
+   `color-scheme` is the half that matters most: it tells the browser which way
+   round this page is, so it draws scrollbars, spinners and date pickers to
+   match instead of assuming light. Without it a dark page gets a bright white
+   scrollbar down the side of every list.
+
+   The rest makes them ours rather than the platform's. Both spellings are
+   needed: scrollbar-color is the standard and covers Firefox and current
+   Chrome, ::-webkit-scrollbar covers Safari and older Chromium, and the two
+   ignore each other harmlessly. */
+*{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+/* Padding-box clipping with a transparent border leaves the thumb floating
+   clear of the edge rather than filling the gutter corner to corner. */
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;
+  border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-hover);background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}

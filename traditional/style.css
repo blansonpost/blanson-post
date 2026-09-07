@@ -1,7 +1,10 @@
 /* ── The Blanson Post — TRADITIONAL (broadsheet) ─────────────────────────── */
 :root{
+  /* Printed on paper, whatever the machine is set to. */
+  color-scheme:light;
   --paper:#f7f4ed; --ink:#14110d; --ink-2:#3c362d; --ink-3:#736a5c;
   --rule:#cfc7b6; --rule-soft:#e2dccf; --accent:#8f1d1d;
+  --sb:#c0b6a1; --sb-hover:#a2977e;
   --serif:"Spectral",Georgia,"Times New Roman",serif;
   --display:"Playfair Display",Georgia,serif;
   --cond:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
@@ -521,3 +524,23 @@ body.lb-open{overflow:hidden}
 .all-list a:hover{color:var(--accent)}
 .all-list i{font-family:var(--cond);font-style:normal;font-size:13px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────────
+   `color-scheme` is the half that matters most: it tells the browser which way
+   round this page is, so it draws scrollbars, spinners and date pickers to
+   match instead of assuming light. Without it a dark page gets a bright white
+   scrollbar down the side of every list.
+
+   The rest makes them ours rather than the platform's. Both spellings are
+   needed: scrollbar-color is the standard and covers Firefox and current
+   Chrome, ::-webkit-scrollbar covers Safari and older Chromium, and the two
+   ignore each other harmlessly. */
+*{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+/* Padding-box clipping with a transparent border leaves the thumb floating
+   clear of the edge rather than filling the gutter corner to corner. */
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;
+  border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-hover);background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}

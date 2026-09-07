@@ -11,12 +11,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
 <style>
 :root{
+  /* Dark page: say so, or the browser hands it a white scrollbar. */
+  color-scheme:dark;
   --bg:#0e1014; --panel:#171a20; --panel-2:#1e222a;
   --fg:#f1f3f7; --fg-2:#a4acba; --fg-3:#6d7686;
   --line:#282d37; --accent:#F4C300; --blue:#4d8bff;
+  --sb:#616a7b; --sb-hover:#79839a;
   --sans:"Inter",system-ui,sans-serif; --display:"Fraunces",Georgia,serif;
 }
 *{box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;
+  border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-hover);background-clip:padding-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
   font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
@@ -155,10 +164,10 @@ footer{border-top:1px solid var(--line);padding:24px 0 50px;font-size:13px;color
 </footer>
 
 <script>const MEDIA_PATH = 'assets/media/';</script>
-<script src="shared/sections.js?v=39"></script>
-<script src="shared/blocks.js?v=39"></script>
-<script src="shared/articles.js?v=39"></script>
-<script src="shared/paper.js?v=39"></script>
+<script src="shared/sections.js?v=40"></script>
+<script src="shared/blocks.js?v=40"></script>
+<script src="shared/articles.js?v=40"></script>
+<script src="shared/paper.js?v=40"></script>
 <script>
   document.getElementById('n-articles').textContent = ARTICLES.length;
   document.getElementById('n-writers').textContent =

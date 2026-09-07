@@ -1,8 +1,10 @@
 /* ── The Blanson Post — newsroom ─────────────────────────────────────────── */
 :root{
+  color-scheme:dark;
   --bg:#0d1016; --panel:#151922; --panel-2:#1c212c; --panel-3:#232a37;
   --fg:#eef1f6; --fg-2:#a3abbb; --fg-3:#8b94a5;   /* fg-3 clears 4.5:1 on every surface here */
   --line:#262d3a; --blue:#4d8bff; --gold:#F4C300;
+  --sb:#616a7b; --sb-hover:#79839a;
   --good:#35c98a; --bad:#ff6b6b; --review:#f0a83c;
   --sans:"Inter",system-ui,-apple-system,sans-serif;
   --display:"Fraunces",Georgia,serif;
@@ -491,3 +493,28 @@ table.staff .cbx{display:inline-block}
 table.staff .cbx-button{width:auto;min-width:132px;padding:5px 8px;border-radius:7px}
 .ask-field .cbx-button{background:var(--panel-2);border-radius:9px;padding:9px 11px;font-size:14px}
 .ask-field .cbx-list{background:var(--panel)}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────────
+   `color-scheme` is the half that matters most: it tells the browser which way
+   round this page is, so it draws scrollbars, spinners and date pickers to
+   match instead of assuming light. Without it a dark page gets a bright white
+   scrollbar down the side of every list.
+
+   The rest makes them ours rather than the platform's. Both spellings are
+   needed: scrollbar-color is the standard and covers Firefox and current
+   Chrome, ::-webkit-scrollbar covers Safari and older Chromium, and the two
+   ignore each other harmlessly. */
+*{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+/* Padding-box clipping with a transparent border leaves the thumb floating
+   clear of the edge rather than filling the gutter corner to corner. */
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;
+  border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-hover);background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+
+/* The preview is a light page sitting inside a dark tool, so it keeps a light
+   scrollbar. One blanket dark rule would have put a dark bar down the side of
+   what is meant to look like newsprint. */
+.preview{color-scheme:light;--sb:#c0b6a1;--sb-hover:#a2977e}

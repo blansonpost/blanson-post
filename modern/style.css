@@ -1,8 +1,10 @@
 /* ── The Blanson Post — MODERN (editorial) ───────────────────────────────── */
 :root{
+  color-scheme:light;
   --bg:#ffffff; --bg-2:#f5f6f8; --bg-3:#eceef2;
   --fg:#0d0f14; --fg-2:#4a5160; --fg-3:#666d7a;   /* small print: clears 4.5:1 on the cards, not just on white */
   --line:#e2e5ea; --accent:#1a56ff; --accent-soft:#e8efff;
+  --sb:#c2c8d2; --sb-hover:#a2aab8;
   --gold:#F4C300;
   /* Status colours. Defined per theme rather than written into each rule, which
      is how the newsroom's near-black crept into a design whose default is white. */
@@ -12,9 +14,11 @@
   --r:14px; --max:1240px;
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --bg:#0b0d12; --bg-2:#141821; --bg-3:#1d222d;
   --fg:#f2f4f8; --fg-2:#a9b1c1; --fg-3:#7b8494;   /* same, against the dark page */
   --line:#242a36; --accent:#5b8cff; --accent-soft:#16203a;
+  --sb:#454e60; --sb-hover:#5b6578;
   --good:#35c98a; --warn:#f0a83c; --warn-bg:rgba(240,168,60,.1);
   --warn-line:rgba(240,168,60,.35); --warn-fg:#f7d6a0;
 }
@@ -523,3 +527,23 @@ body.lb-open{overflow:hidden}
 .all-list a{font-family:var(--display);font-size:17px;font-weight:700}
 .all-list a:hover{color:var(--accent)}
 .all-list i{font-style:normal;font-size:12.5px;color:var(--fg-3);white-space:nowrap}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────────
+   `color-scheme` is the half that matters most: it tells the browser which way
+   round this page is, so it draws scrollbars, spinners and date pickers to
+   match instead of assuming light. Without it a dark page gets a bright white
+   scrollbar down the side of every list.
+
+   The rest makes them ours rather than the platform's. Both spellings are
+   needed: scrollbar-color is the standard and covers Firefox and current
+   Chrome, ::-webkit-scrollbar covers Safari and older Chromium, and the two
+   ignore each other harmlessly. */
+*{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+/* Padding-box clipping with a transparent border leaves the thumb floating
+   clear of the edge rather than filling the gutter corner to corner. */
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;
+  border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sb-hover);background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
