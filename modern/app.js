@@ -20,7 +20,6 @@ document.getElementById('nav').innerHTML =
   SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}" data-sec="${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
   `<a href="#/staff" data-sec="staff">The Team</a>` +
   `<a href="#/gallery" data-sec="gallery">Art &amp; Photos</a>` +
-  `<a href="#/a/advice-to-underclassmen">Advice</a>` +
   `<a href="#/scholarships" data-sec="scholarships">Scholarships</a>`;
 
 document.getElementById('nav').insertAdjacentHTML('beforeend',
