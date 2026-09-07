@@ -159,6 +159,81 @@ const Blocks = (() => {
            (shown === exact ? '' : ' title="' + exact + '"') + '>' + esc(shown) + '</time>';
   };
 
+  // ── Video and audio ─────────────────────────────────────────────────────
+  // Blanson's flagship programme is Audio/Video Production, so the paper has to
+  // be able to carry the students' own work.
+  //
+  // The rule that matters: a link a student pastes is NEVER dropped into an
+  // iframe as it arrived. It is matched against a short list of known hosts, the
+  // id is pulled out with a strict pattern, and the embed address is rebuilt
+  // here from a template. Anything that does not match is offered as an ordinary
+  // link instead — so a pasted `javascript:` URL, or a look-alike domain, can
+  // only ever end up as text.
+  // The host is compared as a hostname, not matched inside the string. A regex
+  // looking for "youtube.com/" anywhere would happily accept
+  // https://evil.example/youtube.com/watch?v=ID, because that substring really
+  // is in there. Parsing the URL and reading .hostname cannot be fooled that way.
+  const HOSTS = {
+    'youtube.com':      'YouTube',
+    'm.youtube.com':    'YouTube',
+    'youtu.be':         'YouTube',
+    'vimeo.com':        'Vimeo',
+    'player.vimeo.com': 'Vimeo',
+    'drive.google.com': 'Google Drive'
+  };
+
+  // Pulls the id out of whichever shape of address the site uses.
+  function idFrom(host, u) {
+    if (host === 'YouTube') {
+      if (u.hostname.replace(/^www\./, '') === 'youtu.be') return u.pathname.slice(1).split('/')[0];
+      const v = u.searchParams.get('v');
+      if (v) return v;
+      const m = u.pathname.match(/^\/(?:embed|shorts|live|v)\/([^\/?#]+)/);
+      return m ? m[1] : '';
+    }
+    if (host === 'Vimeo') {
+      const m = u.pathname.match(/(\d{6,12})/);
+      return m ? m[1] : '';
+    }
+    if (host === 'Google Drive') {
+      const m = u.pathname.match(/\/file\/d\/([^\/?#]+)/);
+      return m ? m[1] : '';
+    }
+    return '';
+  }
+
+  const FRAME = {
+    // youtube-nocookie so watching a school video does not follow a student
+    // around the rest of the web.
+    YouTube: id => 'https://www.youtube-nocookie.com/embed/' + id,
+    Vimeo:   id => 'https://player.vimeo.com/video/' + id,
+    'Google Drive': id => 'https://drive.google.com/file/d/' + id + '/preview'
+  };
+  const WATCH = {
+    YouTube: id => 'https://www.youtube.com/watch?v=' + id,
+    Vimeo:   id => 'https://vimeo.com/' + id,
+    'Google Drive': id => 'https://drive.google.com/file/d/' + id + '/view'
+  };
+
+  // Returns { ok, host, id, frame, watch } for something the paper can play, or
+  // { ok:false, reason } — in which case the renderer prints a plain link and
+  // says so rather than showing an empty box.
+  function embedOf(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return { ok: false, reason: 'empty' };
+    let u;
+    try { u = new URL(raw); } catch (e) { return { ok: false, reason: 'not a web address', url: raw }; }
+    if (u.protocol !== 'http:' && u.protocol !== 'https:')
+      return { ok: false, reason: 'not a web address', url: raw };
+    const host = HOSTS[u.hostname.replace(/^www\./, '').toLowerCase()];
+    if (!host) return { ok: false, reason: 'unsupported site', url: raw };
+    const id = idFrom(host, u);
+    // The id goes into an address, so it must be an id and nothing else.
+    if (!id || !/^[A-Za-z0-9_-]{6,64}$/.test(id))
+      return { ok: false, reason: 'no video in that link', url: raw };
+    return { ok: true, host, id, frame: FRAME[host](id), watch: WATCH[host](id) };
+  }
+
   // ── shape ───────────────────────────────────────────────────────────────
   // `form` is explicit on anything the build or the newsroom produces. The
   // fallbacks reproduce the old guesswork exactly, so an article that predates
@@ -281,7 +356,8 @@ const Blocks = (() => {
 
   // Give every block an id and a known type; drop anything unrecognised rather
   // than letting a bad shape reach a renderer.
-  const KNOWN = new Set(['text', 'para', 'photo', 'verse', 'qa', 'quote', 'heading', 'sub']);
+  const KNOWN = new Set(['text', 'para', 'photo', 'verse', 'qa', 'quote', 'heading', 'sub',
+                         'embed']);
   function normalise(blocks) {
     return blocks
       .filter(b => b && KNOWN.has(b.type))
@@ -319,6 +395,7 @@ const Blocks = (() => {
     byline, readingTime, stars,
     parseDate, publishedOn, updatedOn, dateText, dateShort, updatedText, dateTag,
     isVerse, isQA, speakerOf, interviewerOf, isQuestion, SPEAKER_RE,
+    embedOf,
     photoOf, of, fromLegacy, normalise, toPlainText, imageList
   };
 })();

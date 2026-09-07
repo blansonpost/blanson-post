@@ -106,6 +106,20 @@ const Store = (() => {
 
     async deleteEvent(id) { await IDB.del('events', id); },
 
+    async listAssignments() {
+      const rows = await IDB.all('assignments');
+      return rows.sort((a, b) => String(a.due || '9999').localeCompare(String(b.due || '9999')));
+    },
+
+    async saveAssignment(a) {
+      a.updatedAt = new Date().toISOString();
+      if (!a.createdAt) a.createdAt = a.updatedAt;
+      await IDB.put('assignments', a);
+      return a;
+    },
+
+    async deleteAssignment(id) { await IDB.del('assignments', id); },
+
     // Returns a reference, never a data URL — see IDB_REF above.
     async uploadPhoto(file) {
       const meta = await Photos.add(file);
@@ -221,6 +235,15 @@ const Store = (() => {
     },
     async deleteEvent() {
       throw fail('DENIED', 'The calendar is not connected to the database yet.');
+    },
+
+    async listAssignments() { return []; },
+    async saveAssignment() {
+      throw fail('DENIED', 'Story assignments are not connected to the database yet. ' +
+        'Ask whoever set the website up to add the assignments table.');
+    },
+    async deleteAssignment() {
+      throw fail('DENIED', 'Story assignments are not connected to the database yet.');
     }
   };
 
@@ -330,6 +353,9 @@ const Store = (() => {
     listEvents:    () => backend.listEvents(),
     saveEvent:     e  => backend.saveEvent(e),
     deleteEvent:   id => backend.deleteEvent(id),
+    listAssignments: () => backend.listAssignments(),
+    saveAssignment:  a  => backend.saveAssignment(a),
+    deleteAssignment: id => backend.deleteAssignment(id),
     uploadPhoto:   f  => backend.uploadPhoto(f),
     deletePhoto: (ref, path) => backend.deletePhoto(ref, path),
     space: () => IDB.space(),
@@ -365,6 +391,7 @@ const Store = (() => {
           // Dropping these here was why the newsroom stamped a publish date
           // that no reader ever saw.
           publishedAt: r.publishedAt || '', updatedAt: r.updatedAt || '',
+          corrections: r.corrections || [],
           blocks: r.blocks || [], images: r.images || [],
           excerpt: r.excerpt || '',
           body: (r.body || []).filter(l => String(l).trim().length)

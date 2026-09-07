@@ -172,8 +172,10 @@ function showTab(name) {
   panel('view-write', name === 'write');
   panel('view-staff', name === 'staff');
   panel('view-events', name === 'events');
+  panel('view-board', name === 'board');
   if (name === 'staff') renderStaff();
   if (name === 'events') renderEvents();
+  if (name === 'board') renderBoard();
 }
 
 // ── article list ─────────────────────────────────────────────────────────────
@@ -424,13 +426,15 @@ const BLOCK_KINDS = [
   ['photo', '📷', 'Photo'],
   ['quote', '❝',  'Pull quote'],
   ['qa',    '💬', 'Interview line'],
-  ['verse', '✍',  'Poem']
+  ['verse', '✍',  'Poem'],
+  ['embed', '▶',  'Video']
 ];
 
 function makeBlock(type) {
   const b = { id: Blocks.newId(), type };
   if (type === 'verse') b.lines = [''];
   else if (type === 'photo') { b.src = ''; b.alt = ''; b.caption = ''; b.credit = ''; b.decorative = false; }
+  else if (type === 'embed') { b.url = ''; b.caption = ''; }
   else if (type === 'qa') { b.who = ''; b.text = ''; b.role = 'q'; }
   else if (type === 'quote') { b.text = ''; b.attrib = ''; }
   else b.text = '';
@@ -590,6 +594,30 @@ function updateBlockNode(node, b, index, total) {
   if (who && who.value !== (b.who || '')) who.value = b.who || '';
   const at = body.querySelector('[data-role=attrib]');
   if (at && at.value !== (b.attrib || '')) at.value = b.attrib || '';
+
+  const url = body.querySelector('[data-role=url]');
+  if (url) {
+    if (url.value !== (b.url || '')) url.value = b.url || '';
+    const cap = body.querySelector('[data-role=caption]');
+    if (cap && cap.value !== (b.caption || '')) cap.value = b.caption || '';
+    showEmbedNote(body, b);
+  }
+}
+
+// Says straight away whether a pasted link will actually play, rather than
+// leaving an empty box on the page for a reader to find.
+function showEmbedNote(body, b) {
+  const note = body.querySelector('[data-role=note]');
+  if (!note) return;
+  if (!b.url) { note.className = 'embed-note'; note.textContent =
+    'YouTube, Vimeo or a Google Drive video. Drive files have to be shared with anyone at the school, or nobody else can watch.'; return; }
+  const e = Blocks.embedOf(b.url);
+  note.className = 'embed-note ' + (e.ok ? 'good' : 'bad');
+  note.textContent = e.ok
+    ? 'Will play here as a ' + e.host + ' video.'
+    : (e.reason === 'not a web address'
+        ? 'That does not look like a link. Copy the whole address, starting with https://'
+        : 'The paper cannot play links from that site, so it will show as a plain link instead.');
 }
 
 function photoless(b) {
@@ -601,6 +629,13 @@ function photoless(b) {
                 aria-label="Pull quote"></textarea>
               <input class="b-attrib" data-role="attrib" placeholder="Who said it (optional)"
                 aria-label="Quote attribution">`;
+    case 'embed':
+      return `<input class="b-embed" data-role="url"
+                placeholder="Paste a YouTube, Vimeo or Google Drive link"
+                aria-label="Video link">
+              <input class="b-cap" data-role="caption" placeholder="Caption (optional)"
+                aria-label="Caption">
+              <div class="embed-note" data-role="note"></div>`;
     case 'verse':
       return `<textarea class="b-verse" data-role="main" rows="4"
                 placeholder="One line per line — every line break is kept exactly as you type it"
@@ -619,6 +654,12 @@ function photoless(b) {
 }
 
 function wireTextBlock(body, b) {
+  const url = body.querySelector('[data-role=url]');
+  if (url) {
+    url.addEventListener('input', () => { b.url = url.value.trim(); showEmbedNote(body, b); touched(); });
+    const cap = body.querySelector('[data-role=caption]');
+    if (cap) cap.addEventListener('input', () => { b.caption = cap.value; touched(); });
+  }
   const main = body.querySelector('[data-role=main]');
   const who  = body.querySelector('[data-role=who]');
   const at   = body.querySelector('[data-role=attrib]');
@@ -932,6 +973,14 @@ async function renderPreview() {
       case 'heading': parts.push(`<h4>${esc(b.text)}</h4>`); break;
       case 'quote':   parts.push(`<blockquote>${esc(b.text)}${
         b.attrib ? `<cite>${esc(b.attrib)}</cite>` : ''}</blockquote>`); break;
+      case 'embed': {
+        const e = Blocks.embedOf(b.url);
+        parts.push(e.ok
+          ? `<div class="pv-embed"><b>▶ ${esc(e.host)} video</b>${
+              b.caption ? `<span>${esc(b.caption)}</span>` : ''}</div>`
+          : `<div class="pv-embed bad">▶ ${b.url ? 'This link will not play' : 'No video link yet'}</div>`);
+        break;
+      }
       case 'verse':   parts.push(`<div class="pv-verse">${(b.lines || []).map(esc).join('<br>')}</div>`); break;
       case 'qa':      parts.push(`<p class="pv-qa ${b.role === 'q' ? 'q' : 'a'}"><b>${esc(b.who)}</b> ${esc(b.text)}</p>`); break;
       default:        if ((b.text || '').trim()) parts.push(`<p>${esc(b.text)}</p>`);
@@ -942,6 +991,136 @@ async function renderPreview() {
      <div class="pv-by">${esc(Ed.doc.author || 'no byline yet')}${
        Blocks.dateText(Ed.doc) ? ' · ' + esc(Blocks.dateText(Ed.doc)) : ''}</div>` +
     (parts.join('') || '<p class="pv-empty">Nothing written yet.</p>');
+}
+
+// ── Story Board ──────────────────────────────────────────────────────────────
+// How a newsroom actually runs: an editor puts up what needs covering, a writer
+// claims one, and it turns into a draft with their name on it. Everyone can see
+// what is still going.
+
+async function renderBoard() {
+  const host = $('view-board');
+  let tasks;
+  try { tasks = await Store.listAssignments(); }
+  catch (err) {
+    host.innerHTML = `<div class="bd-wrap"><p class="ev-error">${
+      esc(err.message || 'The story board could not be opened.')}</p></div>`;
+    return;
+  }
+  const open = tasks.filter(t => !t.takenBy);
+  const taken = tasks.filter(t => t.takenBy);
+  const canAssign = can('publish');
+
+  host.innerHTML = `
+    <div class="bd-wrap">
+      <div class="ev-head">
+        <div>
+          <h2>Story Board</h2>
+          <p>What the paper still needs. ${open.length
+            ? open.length + (open.length === 1 ? ' story going spare.' : ' stories going spare.')
+            : 'Nothing waiting to be claimed.'}</p>
+        </div>
+        ${canAssign ? `<button class="btn primary" id="bd-add">＋ Put up a story</button>` : ''}
+      </div>
+
+      <div class="bd-list">
+        ${open.map(t => taskCard(t, canAssign)).join('') ||
+          `<p class="ev-empty">${canAssign
+            ? 'Nothing on the board. Put up a story and whoever wants it can claim it.'
+            : 'Nothing needs covering right now. Check back, or just start your own story.'}</p>`}
+      </div>
+
+      ${taken.length ? `
+        <h3 class="ev-past-head">Claimed</h3>
+        <div class="bd-list is-taken">${taken.map(t => taskCard(t, canAssign)).join('')}</div>` : ''}
+    </div>`;
+
+  const add = $('bd-add');
+  if (add) add.onclick = addTask;
+  host.querySelectorAll('.bd').forEach(wireTask);
+}
+
+function taskCard(t, canAssign) {
+  const due = t.due ? Paper.deadline(t.due) : null;
+  const mine = t.takenBy && t.takenById === Ed.user.id;
+  return `
+    <div class="bd${t.takenBy ? ' taken' : ''}" data-id="${esc(t.id)}">
+      <div class="bd-main">
+        <b>${esc(t.title || 'Untitled assignment')}</b>
+        ${t.brief ? `<p>${esc(t.brief)}</p>` : ''}
+        <div class="bd-meta">
+          ${t.section ? `<span>${esc(Sections.name(t.section))}</span>` : ''}
+          ${due ? `<span class="pill p-${esc(due.state)}">${esc(due.label)}${
+            due.when ? ' · ' + esc(due.when) : ''}</span>` : ''}
+          ${t.takenBy ? `<span class="bd-who">Claimed by ${esc(t.takenBy)}</span>` : ''}
+        </div>
+      </div>
+      <div class="bd-actions">
+        ${!t.takenBy ? `<button class="btn small primary" data-act="claim">Claim it</button>` : ''}
+        ${mine ? `<button class="btn small ghost" data-act="drop">Give it back</button>` : ''}
+        ${canAssign ? `<button class="btn small ghost" data-act="del">Remove</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function wireTask(row) {
+  const id = row.dataset.id;
+  const on = (act, fn) => { const b = row.querySelector(`[data-act=${act}]`); if (b) b.onclick = fn; };
+  on('claim', () => claimTask(id));
+  on('drop', () => dropTask(id));
+  on('del', () => removeTask(id, row));
+}
+
+async function addTask() {
+  const title = prompt('What needs covering?\n\ne.g. "Blood drive on Friday" or "Review the new Spider-Man"');
+  if (title === null || !title.trim()) return;
+  const brief = prompt('Anything the writer should know? (optional)\n\n' +
+    'Who to talk to, what angle, how long.') || '';
+  const due = prompt('Due date, as YYYY-MM-DD (optional)') || '';
+  if (due && !Blocks.parseDate(due)) { toast('That date did not look like YYYY-MM-DD.', 'bad'); return; }
+  try {
+    await Store.saveAssignment({ id: Paper.newTaskId(), title: title.trim(),
+      brief: brief.trim(), due: due.trim(), section: 'campus',
+      takenBy: '', takenById: '', by: Ed.user.name });
+  } catch (err) { return explain(err); }
+  await renderBoard();
+  toast('On the board', 'good');
+}
+
+// Claiming turns the assignment into a real draft, so the writer lands in
+// something they can type into rather than a note telling them to start one.
+async function claimTask(id) {
+  const t = (await Store.listAssignments()).find(x => x.id === id);
+  if (!t) return;
+  if (t.takenBy) { toast(t.takenBy + ' already claimed that one.', 'bad'); await renderBoard(); return; }
+  const doc = blankDoc();
+  doc.title = t.title;
+  doc.section = t.section || 'campus';
+  if (t.brief) doc.blocks = [{ id: Blocks.newId(), type: 'para', text: '' }];
+  try {
+    await Store.saveArticle(doc);
+    await Store.saveAssignment({ ...t, takenBy: Ed.user.name, takenById: Ed.user.id, articleId: doc.id });
+  } catch (err) { return explain(err); }
+  await refresh();
+  toast('Yours — it is in your drafts now', 'good');
+  showTab('write');
+  open(doc.id);
+}
+
+async function dropTask(id) {
+  const t = (await Store.listAssignments()).find(x => x.id === id);
+  if (!t) return;
+  try { await Store.saveAssignment({ ...t, takenBy: '', takenById: '', articleId: '' }); }
+  catch (err) { return explain(err); }
+  await renderBoard();
+  toast('Back on the board', 'good');
+}
+
+async function removeTask(id, row) {
+  const name = row.querySelector('b').textContent.trim();
+  if (!confirm(`Take "${name}" off the board?`)) return;
+  try { await Store.deleteAssignment(id); } catch (err) { return explain(err); }
+  await renderBoard();
 }
 
 // ── What's On ────────────────────────────────────────────────────────────────
@@ -1057,6 +1236,18 @@ async function removeEvent(id, row) {
   toast('Event deleted', 'good');
 }
 
+// The editor's note, shown above the story until it is sent back for review.
+function renderEditorNote() {
+  const slot = $('editor-note');
+  if (!slot) return;
+  const d = Ed.doc;
+  if (!d || !d.editorNote) { slot.hidden = true; slot.innerHTML = ''; return; }
+  slot.hidden = false;
+  slot.innerHTML = `<b>Sent back${d.editorNoteBy ? ' by ' + esc(d.editorNoteBy) : ''}${
+    d.editorNoteAt ? ' · ' + esc(Blocks.dateText({ date: d.editorNoteAt })) : ''}</b>
+    <p>${esc(d.editorNote)}</p>`;
+}
+
 // ── status, saving ───────────────────────────────────────────────────────────
 const LABEL = { draft: 'Draft', review: 'With an editor', published: 'Published' };
 
@@ -1086,9 +1277,17 @@ function renderChrome() {
   $('btn-unpublish').hidden = !(pub && s === 'published');
   $('btn-sendback').hidden  = !(pub && s === 'review');
   $('btn-delete').hidden    = !(pub || (s === 'draft' && Ed.doc.authorId === Ed.user.id));
+  // Only worth offering on a story that is actually in front of readers.
+  $('btn-correct').hidden   = !(pub && s === 'published');
   $('btn-save').disabled = $('btn-publish').disabled = Ed.saving;
   $('saved').textContent = Ed.saving ? 'Saving…' : (editable && isDirty() ? 'Unsaved changes' : '');
+  const words = Blocks.toPlainText(Ed.doc).join(' ').split(/\s+/).filter(Boolean).length;
+  $('wordcount').textContent = words
+    ? words.toLocaleString() + (words === 1 ? ' word' : ' words') +
+      ' · about ' + Math.max(1, Math.round(words / 200)) + ' min to read'
+    : '';
 
+  renderEditorNote();
   setReadOnly(!editable);
   $('locked').hidden = editable;
   if (!editable) {
@@ -1248,7 +1447,12 @@ function liveAssetIds() {
 }
 
 $('btn-save').onclick      = () => save(null);
-$('btn-submit').onclick    = () => save('review');
+$('btn-submit').onclick = () => {
+  // The note was about the last version. Once it goes back for review it has
+  // been dealt with, so it should not still be sitting on top of the story.
+  Ed.doc.editorNote = ''; Ed.doc.editorNoteBy = ''; Ed.doc.editorNoteAt = '';
+  return save('review', false, 'Sent to an editor');
+};
 $('btn-withdraw').onclick  = () => {
   // An editor may already be reading it, so make this a decision rather than a
   // stray click.
@@ -1257,7 +1461,32 @@ $('btn-withdraw').onclick  = () => {
 };
 $('btn-publish').onclick   = () => save('published');
 $('btn-unpublish').onclick = () => save('draft', false, 'Taken down — it is no longer on the site');
-$('btn-sendback').onclick  = () => save('draft', false, 'Sent back to the writer');
+// Sending a story back used to flip it to draft in silence: the writer found it
+// in their drafts with no idea what was wrong, which is the opposite of what a
+// review is for. The note is required — an empty one cancels.
+$('btn-sendback').onclick = async () => {
+  const why = prompt('What does ' + (Ed.doc.author || 'the writer') +
+    ' need to change?\n\nThey will see this at the top of the story.');
+  if (why === null) return;
+  if (!why.trim()) { toast('Say what needs changing — that is the point of sending it back.', 'bad'); return; }
+  Ed.doc.editorNote = why.trim();
+  Ed.doc.editorNoteBy = Ed.user.name;
+  Ed.doc.editorNoteAt = new Date().toISOString();
+  await save('draft', false, 'Sent back with your note');
+};
+// A published story that got something wrong should say so, not change quietly
+// behind the reader's back. That is the habit a newspaper is supposed to teach.
+$('btn-correct').onclick = () => {
+  const what = prompt('What are you correcting?\n\n' +
+    'This is printed at the bottom of the story, where readers can see it.\n' +
+    'For example: "An earlier version spelled Mr. Harvatine\'s name wrong."');
+  if (what === null) return;
+  if (!what.trim()) { toast('A correction needs to say what was wrong.', 'bad'); return; }
+  Ed.doc.corrections = (Ed.doc.corrections || []).concat({
+    text: what.trim(), at: new Date().toISOString(), by: Ed.user.name });
+  save(null, false, 'Correction added');
+};
+
 $('btn-delete').onclick = async () => {
   if (!confirm(`Delete “${Ed.doc.title || 'Untitled'}” for good?`)) return;
   try {

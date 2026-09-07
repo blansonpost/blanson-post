@@ -80,6 +80,26 @@ const inlineFig = b => {
    </figure>`;
 };
 
+// A video the students made. The address is rebuilt by Blocks.embedOf from a
+// template — never taken straight from what was typed — so an unknown or unsafe
+// link can only ever come out as a link, not an iframe.
+function embedHTML(b) {
+  const e = Blocks.embedOf(b.url);
+  if (!e.ok) {
+    return e.url
+      ? `<p class="embed-fallback">Video: <a href="${esc(e.url)}" target="_blank" rel="noopener nofollow">${esc(e.url)}</a></p>`
+      : '';
+  }
+  return `<figure class="embed">
+    <div class="embed-frame">
+      <iframe src="${esc(e.frame)}" title="${esc(b.caption || (e.host + ' video'))}"
+        loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"></iframe>
+    </div>
+    ${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}
+  </figure>`;
+}
+
 function bodyHTML(a) {
   tiltSeed = 0;
   if (isVerse(a)) {
@@ -96,6 +116,7 @@ function bodyHTML(a) {
 function renderBlock(a, b) {
   switch (b.type) {
     case 'photo':   return inlineFig(b);
+    case 'embed':   return embedHTML(b);
     case 'heading': return `<h2 class="subhead">${esc(b.text)}</h2>`;
     case 'quote':   return `<blockquote class="pullquote">${esc(b.text)}${b.attrib ? `<cite>${esc(b.attrib)}</cite>` : ''}</blockquote>`;
     case 'verse':   return `<div class="poem">${(b.lines || []).map(esc).join('<br>')}</div>`;
@@ -311,6 +332,31 @@ async function paintEvents() {
   }
 }
 
+// ── Best reviewed ────────────────────────────────────────────────────────────
+function renderBest() {
+  const list = Paper.bestReviews();
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u2B50</div>
+    <h1>Best Reviewed</h1>
+    <p>${list.length} rated ${list.length === 1 ? 'review' : 'reviews'}, highest first</p>
+  </section>
+  <section class="shelf">
+    <div class="grid">
+      ${list.map((x, i) => { const a = x.article; return `
+        <a class="pcard" href="#/a/${esc(a.slug)}">
+          ${pic(a, 'pcard-pic', (i % 3) - 1)}
+          <div class="pcard-body">
+            <h2 class="pcard-hed">${esc(a.title)}</h2>
+            ${hearts(a)}
+            <p>${esc(a.excerpt.slice(0, 100))}…</p>
+            ${who(a)}
+          </div>
+        </a>`; }).join('')}
+    </div>
+  </section>`;
+}
+
 // ── One writer ───────────────────────────────────────────────────────────────
 function renderWriter(slug) {
   const w = Paper.writer(slug);
@@ -514,6 +560,11 @@ function alumniBlock() {
   </section>`;
 }
 
+// Offered on section pages that actually hold rated reviews, rather than as
+// another nav item — that nav is already long enough to have overflowed once.
+const bestLink = slug => bySection(slug).some(a => a.rating != null)
+  ? `<a class="best-link" href="#/best">★ Best reviewed &rarr;</a>` : '';
+
 function renderSection(slug) {
   const items = bySection(slug);
   const extra = slug === 'alumni' ? alumniBlock() : (slug === 'sports' ? fcBlock() : '');
@@ -523,6 +574,7 @@ function renderSection(slug) {
     <div class="sechead-icon">${icon(slug)}</div>
     <h1>${esc(sectionName(slug))}</h1>
     <p>${items.length} ${items.length === 1 ? 'story' : 'stories'}</p>
+    ${bestLink(slug)}
   </section>
   <section class="shelf">
     <div class="grid">
@@ -538,6 +590,19 @@ function renderSection(slug) {
         </a>`).join('')}
     </div>
   </section>` + extra;
+}
+
+// Printed at the foot of a story that has been corrected. A newspaper says what
+// it got wrong rather than editing the past quietly, and the paper is the place
+// students learn that.
+function correctionsHTML(a) {
+  const list = a.corrections || [];
+  if (!list.length) return '';
+  return `<aside class="corrections" aria-label="Corrections">
+    <b>${list.length === 1 ? 'Correction' : 'Corrections'}</b>
+    ${list.map(c => `<p>${esc(c.text)}${
+      c.at ? ` <i>${esc(Blocks.dateText({ date: c.at }))}</i>` : ''}</p>`).join('')}
+  </aside>`;
 }
 
 function renderArticle(slug) {
@@ -567,6 +632,7 @@ function renderArticle(slug) {
     ${facts(a)}
     <div class="story-body">${bodyHTML(a)}</div>
 
+    ${correctionsHTML(a)}
     <div class="thanks">Thanks for reading! 🐆</div>
   </article>
 
@@ -600,6 +666,7 @@ function route() {
   else if (h.startsWith('q/'))   { active = 'search';
                                    app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
   else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
+  else if (h === 'best')         { active = 'best'; app.innerHTML = renderBest(); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));

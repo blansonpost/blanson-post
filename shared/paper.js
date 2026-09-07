@@ -391,6 +391,7 @@ const Paper = (() => {
   }
 
   const newEventId = () => 'e_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const newTaskId  = () => 't_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   // ── Writers ─────────────────────────────────────────────────────────────
   // Every byline gets a page, whether or not the person is on the About page.
@@ -408,6 +409,21 @@ const Paper = (() => {
     if (!stories.length) return null;
     const name = stories[0].author;
     return { name, slug, stories, profile: STAFF.find(m => m.name === name) || null };
+  }
+
+  // ── Reviews ─────────────────────────────────────────────────────────────
+  // The paper has a pile of rated reviews and no way to ask "what was good?".
+  // Ratings are stored out of different maximums, so they are compared as a
+  // fraction rather than as the raw number — 8/10 must not beat 4.5/5.
+  function bestReviews(limit) {
+    if (typeof ARTICLES === 'undefined') return [];
+    return ARTICLES
+      .filter(a => a.rating != null && a.ratingMax)
+      .map(a => ({ article: a, score: Number(a.rating) / Number(a.ratingMax) }))
+      .filter(x => Number.isFinite(x.score))
+      .sort((a, b) => b.score - a.score ||
+        String(a.article.title).localeCompare(String(b.article.title)))
+      .slice(0, limit || 999);
   }
 
   // ── Search ──────────────────────────────────────────────────────────────
@@ -595,8 +611,9 @@ const Paper = (() => {
     artwork: () => ARTWORK.slice(),
     fc: () => FC,
     photoCount: () => GALLERIES.reduce((n, g) => n + g.photos.length, 0) + ARTWORK.length,
-    upcoming, whenText, dayBadge, newEventId,
+    upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
+    bestReviews,
     search, highlight,
     scholarships, openCount, deadline, storiesBy, contributors, initials
   };

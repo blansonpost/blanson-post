@@ -308,3 +308,41 @@ table.staff select{background:var(--panel);border:1px solid var(--line);border-r
   border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center}
 .ev-error{color:#f7d6a0;border-color:rgba(240,168,60,.4);background:rgba(240,168,60,.08)}
 @media(max-width:700px){ .ev{grid-template-columns:1fr;gap:10px} .ev-when{padding-top:0} }
+
+/* ── Editor's note, corrections, word count ─────────────────────────────── */
+.editor-note{margin:0 0 14px;padding:13px 16px;border-radius:10px;
+  background:rgba(240,168,60,.1);border:1px solid rgba(240,168,60,.4)}
+.editor-note b{display:block;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--review)}
+.editor-note p{margin:6px 0 0;font-size:14.5px;line-height:1.6;color:#f7d6a0}
+.wordcount{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+
+/* ── Video block ────────────────────────────────────────────────────────── */
+.b-embed{width:100%}
+.embed-note{font-size:12px;line-height:1.5;color:var(--fg-3);margin-top:2px}
+.embed-note.good{color:var(--good)}
+.embed-note.bad{color:var(--review)}
+.pv-embed{background:var(--panel-2);border:1px dashed var(--line);border-radius:8px;
+  padding:12px;margin:8px 0;font-size:12.5px}
+.pv-embed b{display:block;color:var(--fg)}
+.pv-embed span{display:block;margin-top:3px;color:var(--fg-3)}
+.pv-embed.bad{color:var(--fg-3)}
+
+/* ── Story Board ────────────────────────────────────────────────────────── */
+.bd-wrap{max-width:940px;margin:0 auto;padding:26px 24px 60px}
+.bd-list{display:grid;gap:12px}
+.bd{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.bd.taken{opacity:.68}
+.bd-main{min-width:0}
+.bd-main b{font-size:16px}
+.bd-main p{margin:5px 0 0;font-size:13.5px;line-height:1.55;color:var(--fg-2)}
+.bd-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px;
+  font-size:12px;color:var(--fg-3)}
+.bd-who{color:var(--gold);font-weight:600}
+.bd-actions{display:flex;gap:7px;flex:none}
+.bd .pill{font-size:10.5px;font-weight:650;border-radius:999px;padding:2px 8px;
+  border:1px solid currentColor}
+.bd .p-open{color:var(--good)}.bd .p-soon{color:var(--review)}
+.bd .p-closed{color:var(--bad)}.bd .p-window{color:var(--fg-3)}
+@media(max-width:640px){ .bd{flex-direction:column} }

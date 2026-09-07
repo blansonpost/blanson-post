@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 </head>
 <body>
 
@@ -58,6 +58,7 @@
     <div class="bar-brand">The Blanson <span>Post</span> <em>Newsroom</em></div>
     <nav class="tabs" id="tabs" aria-label="Newsroom sections">
       <button class="tab on" data-tab="write" aria-current="page">Write</button>
+      <button class="tab" data-tab="board">Story Board</button>
       <button class="tab" data-tab="events" hidden>What&rsquo;s On</button>
       <button class="tab" data-tab="staff">Staff</button>
     </nav>
@@ -91,6 +92,7 @@
             <div class="ed-actions">
               <span class="status-pill" id="f-status"></span>
               <span class="saved" id="saved" aria-live="polite"></span>
+              <span class="wordcount" id="wordcount"></span>
               <span class="spacer"></span>
               <button class="btn ghost" type="button" id="btn-delete">Delete</button>
               <button class="btn" type="button" id="btn-save">Save</button>
@@ -99,10 +101,12 @@
               <button class="btn publish" type="button" id="btn-publish">Publish</button>
               <button class="btn ghost" type="button" id="btn-unpublish">Take down</button>
               <button class="btn ghost" type="button" id="btn-sendback">Send back</button>
+              <button class="btn ghost" type="button" id="btn-correct">Add a correction</button>
             </div>
           </div>
 
           <div class="slugline" id="slugline"></div>
+          <div class="editor-note" id="editor-note" role="status" hidden></div>
           <div class="locked" id="locked" role="status" hidden></div>
 
           <div class="ed-cols">
@@ -144,6 +148,9 @@
 
     <!-- Staff -->
     <!-- What's On -->
+    <!-- Story Board -->
+    <div class="boardview" id="view-board" hidden></div>
+
     <div class="eventsview" id="view-events" hidden></div>
 
     <div class="staffview" id="view-staff" hidden></div>
@@ -153,15 +160,15 @@
 <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="../shared/vendor/supabase.js?v=30"></script>
-<script src="../shared/config.js?v=30"></script>
-<script src="../shared/sections.js?v=30"></script>
-<script src="../shared/blocks.js?v=30"></script>
-<script src="../shared/paper.js?v=30"></script>
-<script src="../shared/reserved-slugs.js?v=30"></script>
-<script src="../shared/idb.js?v=30"></script>
-<script src="../shared/photos.js?v=30"></script>
-<script src="../shared/store.js?v=30"></script>
-<script src="app.js?v=30"></script>
+<script src="../shared/vendor/supabase.js?v=31"></script>
+<script src="../shared/config.js?v=31"></script>
+<script src="../shared/sections.js?v=31"></script>
+<script src="../shared/blocks.js?v=31"></script>
+<script src="../shared/paper.js?v=31"></script>
+<script src="../shared/reserved-slugs.js?v=31"></script>
+<script src="../shared/idb.js?v=31"></script>
+<script src="../shared/photos.js?v=31"></script>
+<script src="../shared/store.js?v=31"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>
