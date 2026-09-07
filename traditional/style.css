@@ -41,7 +41,12 @@ img{max-width:100%;display:block}
 /* ── Ticker ───────────────────────────────────────────────────────────────── */
 .ticker{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--rule-soft);
   overflow:hidden;background:#f2eee5}
-.ticker-label{flex:none;background:var(--accent);color:#fff;font-family:var(--cond);
+/* Positioned so it paints above the headlines sliding past. The track animates a
+   transform, which gives it its own stacking context, and a transformed element
+   paints over a static sibling however early that sibling appears in the markup —
+   so without this the headlines scroll straight across the badge. */
+.ticker-label{flex:none;position:relative;z-index:1;
+  background:var(--accent);color:#fff;font-family:var(--cond);
   font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:7px 14px}
 .ticker-track{display:flex;white-space:nowrap;animation:slide 90s linear infinite;
   font-family:var(--cond);font-size:14px;letter-spacing:.06em;color:var(--ink-2)}
