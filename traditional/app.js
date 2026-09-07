@@ -202,7 +202,7 @@ function renderHome() {
       </div>
 
       <aside>
-        <h2 class="col-head">In This Issue</h2>
+        <h2 class="col-head">Elsewhere in the Paper</h2>
         ${secondCol.map(a => `
           <a class="brief" href="#/a/${esc(a.slug)}">
             <div class="kicker">${esc(sectionName(a.section))}</div>
