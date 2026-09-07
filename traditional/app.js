@@ -24,6 +24,7 @@ document.getElementById('foot-sections').innerHTML =
   // The pages that are not sections and are not worth another nav item.
   `<span class="foot-extra">
      <a href="#/about">About us</a>
+     <a href="#/all">Every story</a>
      <a href="#/topics">Topics</a>
      <a href="#/best">Best reviewed</a>
      <a href="#/saved">Reading list</a>
@@ -707,6 +708,49 @@ function renderAbout() {
   </div>`;
 }
 
+// ── Series ───────────────────────────────────────────────────────────────────
+// Two stories that are parts of one thing. Printed under the byline rather than
+// at the foot, because knowing you are halfway through something changes how
+// you read it.
+function seriesStrip(a) {
+  const s = Paper.seriesOf(a);
+  if (!s) return '';
+  return `<nav class="series" aria-label="Part of a series">
+    <b>Part ${s.part} of ${s.of} &middot; ${esc(s.name)}</b>
+    <span>
+      ${s.prev ? `<a href="#/a/${esc(s.prev.slug)}">&larr; ${esc(s.prev.title)}</a>` : ''}
+      ${s.next ? `<a href="#/a/${esc(s.next.slug)}">${esc(s.next.title)} &rarr;</a>` : ''}
+    </span>
+  </nav>`;
+}
+
+// ── The whole paper ──────────────────────────────────────────────────────────
+// Every story in one place. Sections, topics, writers and search all slice the
+// paper up; this is the page that does not.
+function renderAll() {
+  const groups = Paper.everything();
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  return `
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Every Story</h1>
+      <p>${total} in ${groups.length} ${groups.length === 1 ? 'section' : 'sections'}</p>
+    </div>
+    <nav class="all-jump" aria-label="Jump to a section">
+      ${groups.map(g => `<a href="#/s/${esc(g.slug)}">${esc(g.name)} <i>${g.items.length}</i></a>`).join('')}
+    </nav>
+    ${groups.map(g => `
+      <div class="page-head sub-head"><h2>${esc(g.name)}</h2>
+        <p>${g.items.length} ${g.items.length === 1 ? 'article' : 'articles'}</p></div>
+      <ul class="all-list">
+        ${g.items.map(a => `<li>
+          <a href="#/a/${esc(a.slug)}">${esc(a.title)}</a>
+          <i>${esc(byline(a))}${when(a) ? ' &middot; ' + when(a) : ''}</i>
+        </li>`).join('')}
+      </ul>`).join('')}
+  </div>`;
+}
+
 // ── One writer ───────────────────────────────────────────────────────────────
 function renderWriter(slug) {
   const w = Paper.writer(slug);
@@ -952,7 +996,8 @@ function correctionsHTML(a) {
 function renderArticle(slug) {
   const a = bySlug(slug);
   if (!a) return `<div class="wrap"><div class="page-head"><h1>Article not found</h1></div></div>`;
-  const more = bySection(a.section).filter(x => x.id !== a.id).slice(0, 3);
+  const near = Paper.related(a, 3);
+  const more = near.items;
 
   return `
   <div class="wrap">
@@ -970,6 +1015,7 @@ function renderArticle(slug) {
         ${shareButton(a)}
       </div>
       ${updatedText(a) ? `<div class="art-updated">${esc(updatedText(a))}</div>` : ''}
+      ${seriesStrip(a)}
       ${figure(a, 'art-fig')}
       ${metaRow(a)}
       <div class="art-body">${bodyHTML(a)}</div>
@@ -980,7 +1026,10 @@ function renderArticle(slug) {
 
     ${more.length ? `
       <section class="band">
-        <div class="band-head"><h2 class="band-title">More from ${esc(sectionName(a.section))}</h2></div>
+        <div class="band-head"><h2 class="band-title">${
+          near.by === 'topic' ? 'More on ' + esc(near.label)
+                              : 'More from ' + esc(near.label)}</h2>
+          <a class="band-note" href="#/${near.by === 'topic' ? 't' : 's'}/${esc(near.slug)}">All &rarr;</a></div>
         <div class="grid-3">
           ${more.map(x => `
             <article class="story"><a href="#/a/${esc(x.slug)}">
@@ -1015,6 +1064,7 @@ function route() {
   else if (h === 'corrections')  { app.innerHTML = renderCorrections(); }
   else if (h.startsWith('p/'))   { active = 'gallery'; app.innerHTML = renderPhotographer(h.slice(2)); }
   else if (h === 'about')        { app.innerHTML = renderAbout(); }
+  else if (h === 'all')          { active = 'all'; app.innerHTML = renderAll(); }
   else                         { app.innerHTML = renderHome(); }
 
   document.querySelectorAll('#nav a').forEach(el =>

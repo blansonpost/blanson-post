@@ -591,6 +591,72 @@ const Paper = (() => {
     return out.sort((x, y) => String(y.at || '').localeCompare(String(x.at || '')));
   }
 
+  // ── What to read next ──────────────────────────────────────────────────────
+  // The foot of every story used to offer three more from the same section, so
+  // a horror film pointed at other films and never at the horror games two
+  // sections over. Topics are the thing that knows they belong together.
+  //
+  // Returns { items, by, label, slug }. `label` is what the heading should say,
+  // and it is only ever a topic when every story returned really is filed under
+  // it — a heading that is true of two out of three is worse than a plain one.
+  function related(a, limit) {
+    const n = limit || 3;
+    const section = () => ({
+      items: (typeof ARTICLES === 'undefined' ? []
+        : ARTICLES.filter(x => x.id !== a.id && x.section === a.section)).slice(0, n),
+      by: 'section',
+      label: (typeof Sections !== 'undefined' ? Sections.name(a.section) : a.section),
+      slug: a.section
+    });
+    if (typeof ARTICLES === 'undefined' || !a) return section();
+
+    const mine = new Set(topicsOf(a).map(t => t.slug));
+    if (!mine.size) return section();
+
+    const hits = ARTICLES.filter(x =>
+      x.id !== a.id && topicsOf(x).some(t => mine.has(t.slug)));
+    if (hits.length < 2) return section();
+
+    // Whichever shared topic explains the most of them is the one worth naming.
+    const count = new Map();
+    hits.forEach(x => topicsOf(x).forEach(t => {
+      if (mine.has(t.slug)) count.set(t.slug, (count.get(t.slug) || 0) + 1);
+    }));
+    const best = [...count.entries()]
+      .sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))[0][0];
+
+    const inBest = hits.filter(x => topicsOf(x).some(t => t.slug === best));
+    if (inBest.length < 2) return section();
+    return { items: inBest.slice(0, n), by: 'topic', label: topicName(best), slug: best };
+  }
+
+  // ── Series ─────────────────────────────────────────────────────────────────
+  // Two stories that are parts of one thing. `part` is numbered by the build in
+  // the order the rows are written; ARTICLES gets re-sorted by date afterwards,
+  // so the parts are put back in their own order here rather than trusting the
+  // order they happen to be in.
+  function seriesOf(a) {
+    if (!a || !a.series || typeof ARTICLES === 'undefined') return null;
+    const parts = ARTICLES
+      .filter(x => x.series === a.series)
+      .sort((x, y) => (x.part || 0) - (y.part || 0));
+    if (parts.length < 2) return null;
+    const at = parts.findIndex(x => x.id === a.id);
+    return { name: a.series, parts, index: at, part: at + 1, of: parts.length,
+             prev: at > 0 ? parts[at - 1] : null,
+             next: at > -1 && at < parts.length - 1 ? parts[at + 1] : null };
+  }
+
+  // ── The whole paper ────────────────────────────────────────────────────────
+  // Everything published, grouped by section in the order the navigation uses.
+  // Sections nobody has written for are left out rather than shown empty.
+  function everything() {
+    if (typeof ARTICLES === 'undefined' || typeof Sections === 'undefined') return [];
+    return Sections.all()
+      .map(sec => ({ ...sec, items: ARTICLES.filter(a => a.section === sec.slug) }))
+      .filter(sec => sec.items.length);
+  }
+
   // ── Search ──────────────────────────────────────────────────────────────
   // Everything is already in memory — 41 archived articles plus anything the
   // newsroom has published — so this is a plain scan, no index to keep in step.
@@ -785,6 +851,7 @@ const Paper = (() => {
     upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
     bestReviews,
+    related, seriesOf, everything,
     about: () => ABOUT,
     photographers, photographer, corrections,
     topicSlug, topicsOf, allTopics, byTopic, topicName, relatedTopics,

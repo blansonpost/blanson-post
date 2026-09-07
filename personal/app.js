@@ -21,6 +21,7 @@ document.getElementById('foot-sections').innerHTML =
   // The pages that are not sections and are not worth another nav item.
   `<span class="foot-extra">
      <a href="#/about">About us</a>
+     <a href="#/all">Every story</a>
      <a href="#/topics">Topics</a>
      <a href="#/best">Best reviewed</a>
      <a href="#/saved">Reading list</a>
@@ -717,6 +718,48 @@ function renderAbout() {
   </section>`;
 }
 
+// ── Series ───────────────────────────────────────────────────────────────────
+// Two stories that are parts of one thing. Printed under the byline rather than
+// at the foot, because knowing you are halfway through something changes how
+// you read it.
+function seriesStrip(a) {
+  const s = Paper.seriesOf(a);
+  if (!s) return '';
+  return `<nav class="series" aria-label="Part of a series">
+    <b>Part ${s.part} of ${s.of} &middot; ${esc(s.name)}</b>
+    <span>
+      ${s.prev ? `<a href="#/a/${esc(s.prev.slug)}">&larr; ${esc(s.prev.title)}</a>` : ''}
+      ${s.next ? `<a href="#/a/${esc(s.next.slug)}">${esc(s.next.title)} &rarr;</a>` : ''}
+    </span>
+  </nav>`;
+}
+
+// ── The whole paper ──────────────────────────────────────────────────────────
+function renderAll() {
+  const groups = Paper.everything();
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  return `
+  <section class="sechead">
+    <div class="sechead-icon">\u{1F4DA}</div>
+    <h1>Every Story</h1>
+    <p>${total} in ${groups.length} ${groups.length === 1 ? 'section' : 'sections'}</p>
+  </section>
+  <section class="shelf">
+    <nav class="all-jump" aria-label="Jump to a section">
+      ${groups.map(g => `<a href="#/s/${esc(g.slug)}">${icon(g.slug)} ${esc(g.name)} <i>${g.items.length}</i></a>`).join('')}
+    </nav>
+    ${groups.map(g => `
+      <div class="shelf-head"><h2>${icon(g.slug)} ${esc(g.name)}</h2>
+        <a href="#/s/${esc(g.slug)}">${g.items.length} &rarr;</a></div>
+      <ul class="all-list">
+        ${g.items.map(a => `<li>
+          <a href="#/a/${esc(a.slug)}">${esc(a.title)}</a>
+          <i>${esc(byline(a))}${when(a) ? ' · ' + when(a) : ''}</i>
+        </li>`).join('')}
+      </ul>`).join('')}
+  </section>`;
+}
+
 // ── One writer ───────────────────────────────────────────────────────────────
 function renderWriter(slug) {
   const w = Paper.writer(slug);
@@ -970,7 +1013,8 @@ function correctionsHTML(a) {
 function renderArticle(slug) {
   const a = bySlug(slug);
   if (!a) return `<section class="shelf"><h1>Can't find that one!</h1></section>`;
-  const more = bySection(a.section).filter(x => x.id !== a.id).slice(0, 3);
+  const near = Paper.related(a, 3);
+  const more = near.items;
   const src = leadImage(a);
 
   return `
@@ -992,6 +1036,7 @@ function renderArticle(slug) {
       ${shareButton(a)}
     </div>
 
+    ${seriesStrip(a)}
     ${src ? `<div class="story-pic"><img src="${esc(src)}" alt=""></div>` : ''}
     ${facts(a)}
     <div class="story-body">${bodyHTML(a)}</div>
@@ -1003,7 +1048,9 @@ function renderArticle(slug) {
 
   ${more.length ? `
   <section class="shelf">
-    <div class="shelf-head"><h2>More ${esc(sectionName(a.section))}</h2></div>
+    <div class="shelf-head"><h2>${
+        near.by === 'topic' ? 'More on ' + esc(near.label) : 'More ' + esc(near.label)}</h2>
+      <a href="#/${near.by === 'topic' ? 't' : 's'}/${esc(near.slug)}">see all →</a></div>
     <div class="shelf-row">
       ${more.map((x, i) => `
         <a class="pcard" href="#/a/${esc(x.slug)}">
@@ -1038,6 +1085,7 @@ function route() {
   else if (h === 'corrections')  { app.innerHTML = renderCorrections(); }
   else if (h.startsWith('p/'))   { active = 'gallery'; app.innerHTML = renderPhotographer(h.slice(2)); }
   else if (h === 'about')        { app.innerHTML = renderAbout(); }
+  else if (h === 'all')          { active = 'all'; app.innerHTML = renderAll(); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));

@@ -22,45 +22,54 @@
 # game and a horror film sit together. Free text — write it the way it should
 # read on the page. Reuse the exact wording of an existing topic to join it;
 # the build warns if two spellings would collapse into one address.
-# slug	section	title	author	rating	featured	lead-image	form	interviewer	date	topics
-copy-of-harvatine-interview	campus	Blanson SkillsUSA Champions the Future Through Santa Donations Project	?		yes		story			SkillsUSA, Giving Back
-copy-of-blanson-skillsusa-champions	campus	Blanson SkillsUSA Students Return to Grantham	?		no		story			SkillsUSA
-jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film	Jason Borrego		yes	6deed7_84279e32147442ea950945d0b87f16fd.png	qa	Borrego		Teachers
-harvatine-interview	interviews	Meet Mr. Harvatine: From the Classroom to the Front Office	Jason Borrego		no		qa	Borrego		Teachers
-copy-of-bittersweet	sports	Neymar Jr: The Prince That Never Stood Up	José Manuel González		yes		story			Soccer
-copy-of-test-your-limits	sports	The Fall of Manchester United!	José Manuel González		no		story			Soccer
-nfl-2025-2026-season	sports	NFL 2025-2026 Season	Joseph Zapata	3/5	no		review			NFL
-copy-of-phantoms-of-water	life	Test Your Limits!	Nathaniel Castro		no		story			Starting High School
-blanson-f-c-2-0	sports	Blanson F.C. Beats Victory 4-0	?		no		story			Soccer, Blanson F.C.
-blanson-vs-avalos	sports	Blanson F.C. Beats Avalos 3-0	?		no		story			Soccer, Blanson F.C.
-night-in-the-woods	gaming	Night in the Woods	Monzerrat Palacios	4/5	no		review			Coming of Age
-copy-of-paincore	gaming	Emissary Zero	Monzerrat Palacios	4/5	no		review			Horror, Sci-Fi
-copy-of-night-in-the-woods	gaming	Paincore	Monzerrat Palacios	4/5	no		review			Horror
-pathologic-ii	gaming	Pathologic II	Monzerrat Palacios		no		story			Horror
-yapyap	gaming	YAPYAP	Monzerrat Palacios		no		story			Multiplayer
-copy-of-eternal-sunshine-of-the-spotl	books	All the Bright Places	Keydith Manjarres	8/10	no		review			Romance
-lovely-bones	books	Lovely Bones	Keydith Manjarres	9/10	no		review			Book to Film, Drama
-the-giver-by-lois-lowry	books	The Giver by Lois Lowry	Melanie Tamez		no		story			Dystopia, Coming of Age
-copy-of-neymar-jr-the-prince-that-ne	books	The Intruder by Freida McFadden	Marlene Garcia	3/5	no		review			Thriller
-copy-of-the-intruder-by-freida-mcfadden	books	"Rock Paper Scissors" by Alice Feeney	Marlene Garcia	5/5	no		review			Thriller
-mid90s	film	Mid90s	Josue Reyes		yes		story			Coming of Age, Drama
-copy-of-rock-paper-scissors-by-alic	film	Whiplash	Kelly Martinez		no		story			Drama
-superman-2025	film	Superman (2025)	Oliver Romero		no		story			Superheroes
-copy-of-dazed-confused	film	Eternal Sunshine of the Spotless Mind	Martha Ramirez		no		story			Romance, Sci-Fi
-13-going-on-30	film	13 Going on 30	Esther Ramirez	4.5/5	no		review			Romance
-copy-of-as-above-so-below	film	Dazed & Confused	Ashley Choudja		no		story			Coming of Age
-as-above-so-below	film	As Above, So Below	Keydith Manjarres		no		story			Horror
-alien	poetry	Alien	Josue Reyes		no		verse			
-malignant-review	film	Malignant	Keydith Manjarres	9/10	no		review			Horror
-copy-of-as-above-so-below-1	film	Pride & Prejudice	Kelly Martinez	4.6/5	no		review			Romance, Book to Film
-full-metal-alchemist-brotherhood	film	Full Metal Alchemist: Brotherhood	Oliver Romero		no		story			Anime
-a-thief-s-gambit	poetry	A Thief's Gambit #1	Melanie Cardenas		yes		story			
-copy-of-a-thief-s-gambit-1	poetry	A Thief's Gambit #2	Melanie Cardenas		no		story			
-copy-of-jenkins-interview	poetry	Believe	Josue Reyes		no	6deed7_acfc48f40ced44d4ade6efe7cc5d8b4d.jpg	verse			
-bittersweet	poetry	Bittersweet	Josue Reyes		no		verse			
-bittersweet-flame	poetry	Bittersweet Flame	Jason Borrego		no		verse			
-phantoms-of-water	poetry	Phantoms of Water	Jason Borrego		no		verse			
-copy-of-alien	poetry	The Balloon	Jason Borrego		no		verse			
-life-after-blanson	alumni	Life After Blanson	Samuel Solis		no		story			After Graduation
-advice-to-underclassmen	life	Advice to Underclassmen	Jean Folgar		no		story			Starting High School
-fogo-de-chao	houston	Fogo de Chão	Melanie Tamez		no		story			Food
+#
+# series: stories that are parts of one thing. Two rows sharing a name are
+# part 1 and part 2, numbered in the order they appear in this file - there
+# is no part-number column to keep in step, and the archive has no dates to
+# sort by. A name used only once is dropped with a warning: a series of one
+# is just a story.
+#
+# CLUB: "Meet the Staff" is our name for the two "Meet Mr. ..." interviews,
+# not one the old site used. Rename it here if you had another.
+# slug	section	title	author	rating	featured	lead-image	form	interviewer	date	topics	series
+copy-of-harvatine-interview	campus	Blanson SkillsUSA Champions the Future Through Santa Donations Project	?		yes		story			SkillsUSA, Giving Back	
+copy-of-blanson-skillsusa-champions	campus	Blanson SkillsUSA Students Return to Grantham	?		no		story			SkillsUSA	
+jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film	Jason Borrego		yes	6deed7_84279e32147442ea950945d0b87f16fd.png	qa	Borrego		Teachers	Meet the Staff
+harvatine-interview	interviews	Meet Mr. Harvatine: From the Classroom to the Front Office	Jason Borrego		no		qa	Borrego		Teachers	Meet the Staff
+copy-of-bittersweet	sports	Neymar Jr: The Prince That Never Stood Up	José Manuel González		yes		story			Soccer	
+copy-of-test-your-limits	sports	The Fall of Manchester United!	José Manuel González		no		story			Soccer	
+nfl-2025-2026-season	sports	NFL 2025-2026 Season	Joseph Zapata	3/5	no		review			NFL	
+copy-of-phantoms-of-water	life	Test Your Limits!	Nathaniel Castro		no		story			Starting High School	
+blanson-f-c-2-0	sports	Blanson F.C. Beats Victory 4-0	?		no		story			Soccer, Blanson F.C.	Blanson F.C. Match Reports
+blanson-vs-avalos	sports	Blanson F.C. Beats Avalos 3-0	?		no		story			Soccer, Blanson F.C.	Blanson F.C. Match Reports
+night-in-the-woods	gaming	Night in the Woods	Monzerrat Palacios	4/5	no		review			Coming of Age	
+copy-of-paincore	gaming	Emissary Zero	Monzerrat Palacios	4/5	no		review			Horror, Sci-Fi	
+copy-of-night-in-the-woods	gaming	Paincore	Monzerrat Palacios	4/5	no		review			Horror	
+pathologic-ii	gaming	Pathologic II	Monzerrat Palacios		no		story			Horror	
+yapyap	gaming	YAPYAP	Monzerrat Palacios		no		story			Multiplayer	
+copy-of-eternal-sunshine-of-the-spotl	books	All the Bright Places	Keydith Manjarres	8/10	no		review			Romance	
+lovely-bones	books	Lovely Bones	Keydith Manjarres	9/10	no		review			Book to Film, Drama	
+the-giver-by-lois-lowry	books	The Giver by Lois Lowry	Melanie Tamez		no		story			Dystopia, Coming of Age	
+copy-of-neymar-jr-the-prince-that-ne	books	The Intruder by Freida McFadden	Marlene Garcia	3/5	no		review			Thriller	
+copy-of-the-intruder-by-freida-mcfadden	books	"Rock Paper Scissors" by Alice Feeney	Marlene Garcia	5/5	no		review			Thriller	
+mid90s	film	Mid90s	Josue Reyes		yes		story			Coming of Age, Drama	
+copy-of-rock-paper-scissors-by-alic	film	Whiplash	Kelly Martinez		no		story			Drama	
+superman-2025	film	Superman (2025)	Oliver Romero		no		story			Superheroes	
+copy-of-dazed-confused	film	Eternal Sunshine of the Spotless Mind	Martha Ramirez		no		story			Romance, Sci-Fi	
+13-going-on-30	film	13 Going on 30	Esther Ramirez	4.5/5	no		review			Romance	
+copy-of-as-above-so-below	film	Dazed & Confused	Ashley Choudja		no		story			Coming of Age	
+as-above-so-below	film	As Above, So Below	Keydith Manjarres		no		story			Horror	
+alien	poetry	Alien	Josue Reyes		no		verse				
+malignant-review	film	Malignant	Keydith Manjarres	9/10	no		review			Horror	
+copy-of-as-above-so-below-1	film	Pride & Prejudice	Kelly Martinez	4.6/5	no		review			Romance, Book to Film	
+full-metal-alchemist-brotherhood	film	Full Metal Alchemist: Brotherhood	Oliver Romero		no		story			Anime	
+a-thief-s-gambit	poetry	A Thief's Gambit #1	Melanie Cardenas		yes		story				A Thief's Gambit
+copy-of-a-thief-s-gambit-1	poetry	A Thief's Gambit #2	Melanie Cardenas		no		story				A Thief's Gambit
+copy-of-jenkins-interview	poetry	Believe	Josue Reyes		no	6deed7_acfc48f40ced44d4ade6efe7cc5d8b4d.jpg	verse				
+bittersweet	poetry	Bittersweet	Josue Reyes		no		verse				
+bittersweet-flame	poetry	Bittersweet Flame	Jason Borrego		no		verse				
+phantoms-of-water	poetry	Phantoms of Water	Jason Borrego		no		verse				
+copy-of-alien	poetry	The Balloon	Jason Borrego		no		verse				
+life-after-blanson	alumni	Life After Blanson	Samuel Solis		no		story			After Graduation	
+advice-to-underclassmen	life	Advice to Underclassmen	Jean Folgar		no		story			Starting High School	
+fogo-de-chao	houston	Fogo de Chão	Melanie Tamez		no		story			Food	

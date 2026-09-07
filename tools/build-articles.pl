@@ -89,10 +89,11 @@ while (my $line = <$T>) {
     chomp $line;
     next if $line =~ /^\s*#/ || $line !~ /\S/;
     my ($slug, $section, $title, $author, $rating, $featured, $lead, $form, $interviewer,
-        $date, $topics) = split /\t/, $line, 11;
+        $date, $topics, $series) = split /\t/, $line, 12;
     next unless $slug && $section;
-    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer, $date, $topics);
-    s/^\s+|\s+$//g for ($lead, $form, $interviewer, $date, $topics);
+    $_ //= '' for ($author, $rating, $featured, $lead, $form, $interviewer, $date,
+                   $topics, $series);
+    s/^\s+|\s+$//g for ($lead, $form, $interviewer, $date, $topics, $series);
 
     # Topics cut across sections: a horror game and a horror film share one.
     # Free text in the TSV, an address here. Order is kept as typed — the first
@@ -212,13 +213,30 @@ while (my $line = <$T>) {
         id => $id++, slug => $slug, section => $section, title => $title,
         form => $form, interviewer => $interviewer,
         author => ($author eq '?' ? '' : $author),
-        date => $date, topics => \@topics,
+        date => $date, topics => \@topics, series => $series,
         rating => $rv, ratingMax => $rmax,
         featured => ($featured =~ /^y/i ? 1 : 0),
         excerpt => $excerpt, body => \@body, meta => \%meta, images => \@imgs,
     };
 }
 close $T;
+
+# ── series numbering ─────────────────────────────────────────────────────────
+# Done after the whole file is read, because a part cannot know how many parts
+# there are until the last one has been seen.
+my %series_rows;
+push @{ $series_rows{ $_->{series} } }, $_ for grep { $_->{series} } @rows;
+for my $name (keys %series_rows) {
+    my @in = @{ $series_rows{$name} };
+    if (@in < 2) {
+        warn "  series '$name' has only one story in it - a series of one is " .
+             "just a story, so it is dropped.\n";
+        $_->{series} = '' for @in;
+        next;
+    }
+    my $n = 0;
+    for my $a (@in) { $a->{part} = ++$n; $a->{of} = scalar @in; }
+}
 
 # ── emit ─────────────────────────────────────────────────────────────────────
 open my $O, '>:encoding(UTF-8)', $out or die "cannot write $out: $!";
@@ -248,6 +266,14 @@ for my $a (@rows) {
     print $O "    date: " . jstr($a->{date}) . ",\n" if $a->{date};
     print $O "    topics: [" . join(', ', map { jstr($_) } @{ $a->{topics} }) . "],\n"
         if @{ $a->{topics} };
+    # `part` is the position among the rows sharing this series name, in the
+    # order they are written in the TSV. One column instead of two: nobody has
+    # to keep a part number in step with the row above it, and the archive has
+    # no dates to sort a series by.
+    if ($a->{series}) {
+        print $O "    series: " . jstr($a->{series}) . ",\n";
+        print $O "    part: $a->{part}, ofParts: $a->{of},\n";
+    }
     print $O "    featured: " . ($a->{featured} ? 'true' : 'false') . ",\n";
     if (defined $a->{rating}) {
         print $O "    rating: $a->{rating},\n    ratingMax: $a->{ratingMax},\n";
@@ -322,6 +348,10 @@ if (%tc) {
 }
 my @untopiced = grep { !@{ $_->{topics} } } @rows;
 printf "  %d article(s) have no topic yet\n", scalar @untopiced if @untopiced;
+
+my %sc; $sc{ $_->{series} }++ for grep { $_->{series} } @rows;
+printf "  %d series: %s\n", scalar keys %sc,
+    join(', ', map { "$_ ($sc{$_})" } sort keys %sc) if %sc;
 
 # ── Shareable pages ──────────────────────────────────────────────────────────
 # The site is one page with #/a/<slug> addresses, which is fine for a reader and
@@ -519,6 +549,60 @@ HTML
         push @share_pages, $a->{slug};
         $pages++;
     }
+
+    # ── link previews for the three front pages ──────────────────────────────
+    # The story pages got these; the front pages did not, and "here is our
+    # paper" is the link people paste most. Written into each design's <head>
+    # between markers rather than kept in three hand-edited copies, because the
+    # addresses have to be absolute and only content/site.conf knows the site's
+    # real address.
+    #
+    # The picture is whatever is currently leading the front page. It changes
+    # when the lead changes, which is the point.
+    my ($front) = grep { $_->{featured} } @rows;
+    $front ||= $rows[0];
+    my $front_img = ($front && @{ $front->{images} })
+        ? $base . 'assets/media/' . $front->{images}[0] : '';
+    my $blurb = 'The student newspaper of Blanson CTE High School in Houston, Texas. '
+              . scalar(@rows) . ' stories written, photographed and edited by students.';
+
+    for my $d (qw(traditional modern personal)) {
+        my $file = "$root/$d/index.html";
+        open my $IN, '<:encoding(UTF-8)', $file or do { warn "  no $file\n"; next; };
+        my $html = do { local $/; <$IN> };
+        close $IN;
+
+        my $tags = join "\n",
+            qq{<meta property="og:type" content="website">},
+            qq{<meta property="og:site_name" content="The Blanson Post">},
+            qq{<meta property="og:title" content="The Blanson Post">},
+            qq{<meta property="og:description" content="} . hesc($blurb) . qq{">},
+            qq{<meta property="og:url" content="} . hesc($base . $d . '/') . qq{">},
+            ($front_img ? qq{<meta property="og:image" content="} . hesc($front_img) . qq{">} : ()),
+            qq{<meta name="twitter:card" content="} . ($front_img ? 'summary_large_image' : 'summary') . qq{">},
+            qq{<meta name="twitter:title" content="The Blanson Post">},
+            qq{<meta name="twitter:description" content="} . hesc($blurb) . qq{">},
+            ($front_img ? qq{<meta name="twitter:image" content="} . hesc($front_img) . qq{">} : ());
+
+        # Everything between the markers is replaced, so re-running the build
+        # never stacks a second copy of the tags on top of the first.
+        # Plain groups, and the markers quoted rather than pre-compiled. A qr//
+        # carrying its own parentheses shifts every group number after it,
+        # which is how the first version of this ate the closing marker and
+        # left the next build with nothing to replace.
+        my $BEGIN = '<!-- SOCIAL:BEGIN';
+        my $END   = '<!-- SOCIAL:END -->';
+        unless ($html =~ /\Q$BEGIN\E.*?-->.*?\Q$END\E/s) {
+            warn "  $d/index.html has no SOCIAL markers - link preview tags not written.\n";
+            next;
+        }
+        $html =~ s/(\Q$BEGIN\E.*?-->)(.*?)(\Q$END\E)/$1\n$tags\n$3/s;
+
+        open my $OUT, '>:encoding(UTF-8)', $file or do { warn "  cannot write $file\n"; next; };
+        print $OUT $html;
+        close $OUT;
+    }
+    print "  link preview tags -> traditional, modern, personal\n";
 
     # ── sitemap ──────────────────────────────────────────────────────────────
     open my $SM, '>:encoding(UTF-8)', "$root/sitemap.xml" or die "cannot write sitemap: $!";

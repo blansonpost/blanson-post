@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="The Blanson Post">
+  <!-- The paper's own mark: the "BP" badge the modern and personal designs
+       already use, in the school's gold and blue.
+
+       Built from rectangles rather than <text> or arcs. A favicon is rasterised
+       outside the page, where there is no promise about which fonts exist; and
+       an SVG arc gets its radius scaled up by the renderer when the chord
+       between its two points is longer than the diameter, which is exactly how
+       the first attempt at this ended up with a B whose bowl swallowed the P.
+
+       The holes in the letters are painted back in gold on top. Every shape is
+       axis-aligned, so what this looks like at 16 pixels is predictable.
+
+       One icon for the whole site. Whichever design the teacher picks, the tab
+       should look the same. -->
+
+  <rect width="64" height="64" rx="14" fill="#F4C300"/>
+
+  <g fill="#003087">
+    <!-- B -->
+    <rect x="11" y="16" width="7"  height="32"/>
+    <rect x="14" y="16" width="13" height="15" rx="7"/>
+    <rect x="14" y="31" width="15" height="17" rx="8"/>
+    <!-- P -->
+    <rect x="35" y="16" width="7"  height="32"/>
+    <rect x="38" y="16" width="15" height="19" rx="8"/>
+  </g>
+
+  <!-- The holes. Kept small and only slightly rounded: at 16 pixels a generous
+       counter eats the stroke and the letters stop being letters. -->
+  <g fill="#F4C300">
+    <rect x="18" y="21" width="4" height="5" rx="2"/>
+    <rect x="18" y="36" width="5" height="7" rx="2.5"/>
+    <rect x="42" y="21" width="5" height="9" rx="2.5"/>
+  </g>
+</svg>

@@ -502,3 +502,24 @@ body.lb-open{overflow:hidden}
 .about-where{font-size:15px}
 .about-links{display:flex;flex-wrap:wrap;gap:18px;margin-top:22px}
 .about-links a{font-size:14px;font-weight:600;color:var(--accent)}
+
+/* ── Series, and the whole-paper index ───────────────────────────────────── */
+.series{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;
+  margin:0 0 24px;padding:11px 14px;background:var(--bg-2);
+  border:1px solid var(--line);border-radius:var(--r)}
+.series b{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--fg-3)}
+.series span{display:flex;flex-wrap:wrap;gap:6px 16px}
+.series a{font-size:14px;font-weight:600;color:var(--accent)}
+
+.all-jump{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.all-jump a{font-size:13.5px;font-weight:500;color:var(--fg-2);background:var(--bg-2);
+  border:1px solid var(--line);padding:5px 13px;border-radius:99px}
+.all-jump a:hover{border-color:var(--accent);color:var(--accent)}
+.all-jump i{font-style:normal;color:var(--fg-3)}
+.all-list{list-style:none;margin:0 0 34px;padding:0}
+.all-list li{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+  gap:6px 18px;padding:9px 0;border-bottom:1px solid var(--line)}
+.all-list a{font-family:var(--display);font-size:17px;font-weight:700}
+.all-list a:hover{color:var(--accent)}
+.all-list i{font-style:normal;font-size:12.5px;color:var(--fg-3);white-space:nowrap}
