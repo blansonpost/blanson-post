@@ -369,3 +369,34 @@ dialog.ask h2{margin:0;font-family:var(--display);font-size:20px}
 .ask-hint{font-size:11.5px;color:var(--fg-3);font-style:normal}
 .ask-error{margin:0;font-size:13px;color:var(--bad)}
 .ask-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:2px}
+
+/* ── Photo library ──────────────────────────────────────────────────────── */
+.photosview{padding:22px 24px 60px}
+.lib-wrap{max-width:1080px;margin:0 auto}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px}
+.lib-card{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;display:flex;flex-direction:column}
+/* overflow + min-height:0 on the image: a grid item's automatic minimum size is
+   its content, so a square photo stretched the 4:3 frame to a square and the
+   row of cards came out ragged. */
+.lib-thumb{aspect-ratio:4/3;background:var(--panel-2);display:grid;place-items:center;
+  overflow:hidden}
+.lib-thumb img{width:100%;height:100%;min-width:0;min-height:0;object-fit:cover}
+.lib-card figcaption{padding:10px 12px 4px;display:grid;gap:3px;min-width:0}
+.lib-card b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-card i{font-style:normal;font-size:11.5px;color:var(--fg-3)}
+.lib-use{font-size:11.5px;color:var(--fg-2);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-actions{display:flex;gap:7px;padding:9px 12px 12px;margin-top:auto}
+
+/* ── Before publishing ──────────────────────────────────────────────────── */
+.check-dlg{max-width:520px}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.checklist li{display:grid;grid-template-columns:20px 1fr;gap:9px;align-items:start;
+  font-size:14px;line-height:1.5}
+.checklist li>span:first-child{font-weight:700;text-align:center}
+.checklist li.yes>span:first-child{color:var(--good)}
+.checklist li.no>span:first-child{color:var(--bad)}
+.checklist li.no>span:last-child{color:var(--fg)}
+.checklist li.yes>span:last-child{color:var(--fg-2)}
+.check-dlg .ask-intro code{background:var(--panel-2);border-radius:5px;padding:1px 6px}

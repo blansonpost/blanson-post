@@ -124,6 +124,12 @@ async function showShell() {
   // is kept to the people who already decide what gets published.
   const evTab = $('tabs').querySelector('[data-tab="events"]');
   if (evTab) evTab.hidden = !can('publish');
+  // Same reasoning as the calendar. The photo store is shared by everyone who
+  // uses this newsroom, so listing all of it shows a student every other
+  // student's pictures — including ones still in an unfinished draft. Editors
+  // already see every article, so it tells them nothing they cannot see anyway.
+  const phTab = $('tabs').querySelector('[data-tab="photos"]');
+  if (phTab) phTab.hidden = !can('publish');
   buildSelects();
   buildFilters();
   await refresh();
@@ -173,9 +179,15 @@ function showTab(name) {
   panel('view-staff', name === 'staff');
   panel('view-events', name === 'events');
   panel('view-board', name === 'board');
+  panel('view-photos', name === 'photos');
   if (name === 'staff') renderStaff();
   if (name === 'events') renderEvents();
   if (name === 'board') renderBoard();
+  if (name === 'photos') renderPhotos();
+  // The library hands out an object URL per thumbnail. Leaving the tab drops
+  // them, so browsing it does not slowly pin every photo in the browser's
+  // memory for the rest of the session.
+  else Photos.releaseScope('library');
 }
 
 // ── article list ─────────────────────────────────────────────────────────────
@@ -1235,6 +1247,144 @@ async function removeTask(id, row) {
   await renderBoard();
 }
 
+// ── Photo library ────────────────────────────────────────────────────────────
+// Every picture already in this newsroom, once, with what is using it. Without
+// it the same football shot gets uploaded four times for four articles, each
+// copy taking its own room in a browser that runs out at a few hundred photos.
+//
+// Local mode only: with a database connected the photos live in a bucket and
+// this browser keeps none of them, so the page says that rather than showing an
+// empty grid and letting an editor think the pictures have gone.
+
+// Which articles a picture appears in. Read from every article the newsroom can
+// see, not just the open one — the point is to find out whether deleting it
+// would tear a hole in somebody else's story.
+function photoUsers(id) {
+  const out = [];
+  const seen = new Set();
+  const check = (a, hit) => { if (hit && !seen.has(a.id)) { seen.add(a.id); out.push(a); } };
+  Ed.articles.forEach(a => {
+    check(a, (a.blocks || []).some(b => b.assetId === id));
+    check(a, a.cover && a.cover.assetId === id);
+  });
+  if (Ed.doc) {
+    check(Ed.doc, (Ed.doc.blocks || []).some(b => b.assetId === id));
+    check(Ed.doc, Ed.doc.cover && Ed.doc.cover.assetId === id);
+  }
+  return out;
+}
+
+const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB'
+                             : Math.max(1, Math.round(n / 1024)) + ' KB';
+
+async function renderPhotos() {
+  const host = $('view-photos');
+  if (Store.mode === 'supabase') {
+    host.innerHTML = `<div class="lib-wrap"><div class="ev-head"><div>
+      <h2>Photos</h2>
+      <p>With the website connected to a database the pictures live there, not in
+         this browser, so there is nothing here to list.</p></div></div></div>`;
+    return;
+  }
+
+  let all;
+  try { all = await IDB.all('photos'); }
+  catch (err) {
+    host.innerHTML = `<div class="lib-wrap"><p class="ev-error">${
+      esc(err.message || 'The photos could not be read.')}</p></div>`;
+    return;
+  }
+  all.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  const bytes = all.reduce((n, r) => n + (r.bytes || 0), 0);
+  const canPlace = Ed.doc && canEditDoc(Ed.doc);
+
+  host.innerHTML = `
+    <div class="lib-wrap">
+      <div class="ev-head">
+        <div>
+          <h2>Photos</h2>
+          <p>${all.length ? `${all.length} picture${all.length === 1 ? '' : 's'} · ${kb(bytes)} · `
+                          : 'No pictures have been added yet. '}${
+             canPlace ? 'Adding one puts it at the end of the open story.'
+                      : 'Open a story you can edit to place one.'}</p>
+        </div>
+      </div>
+      ${all.length ? `<div class="lib-grid">${all.map(r => photoCard(r, canPlace)).join('')}</div>`
+                   : `<p class="ev-empty">Pictures added to a story show up here, so the
+                      next person can use one again instead of uploading it twice.</p>`}
+    </div>`;
+
+  // Thumbnails are blob: URLs handed out one at a time; setting them after the
+  // grid is in place keeps the page from waiting on all of them.
+  for (const rec of all) {
+    const img = host.querySelector(`.lib-card[data-id="${CSS.escape(rec.id)}"] img`);
+    if (!img) continue;
+    const url = await Photos.url(rec.id, 'library', 'thumb');
+    if (url) img.src = url;
+  }
+  host.querySelectorAll('.lib-card').forEach(wirePhotoCard);
+}
+
+function photoCard(r, canPlace) {
+  const users = photoUsers(r.id);
+  return `
+    <figure class="lib-card" data-id="${esc(r.id)}">
+      <div class="lib-thumb"><img alt="${esc(r.name || 'Photo')}" loading="lazy"></div>
+      <figcaption>
+        <b title="${esc(r.name || '')}">${esc(r.name || 'Untitled')}</b>
+        <i>${r.w}&times;${r.h} · ${esc(kb(r.bytes || 0))}</i>
+        <span class="lib-use">${users.length
+          ? users.map(a => esc(a.title || 'Untitled')).join(', ')
+          : (r.orphanedAt ? 'Not used — will be cleared out after a day'
+                          : 'Not used yet')}</span>
+      </figcaption>
+      <div class="lib-actions">
+        ${canPlace ? `<button class="btn small primary" data-act="place">Add to story</button>` : ''}
+        ${users.length ? '' : `<button class="btn small ghost" data-act="del">Delete</button>`}
+      </div>
+    </figure>`;
+}
+
+function wirePhotoCard(card) {
+  const id = card.dataset.id;
+  const on = (act, fn) => { const b = card.querySelector(`[data-act="${act}"]`); if (b) b.onclick = fn; };
+  on('place', () => placePhoto(id));
+  on('del', () => deleteLibraryPhoto(id, card));
+}
+
+// Places the picture that is already stored — no second copy, no second upload.
+async function placePhoto(id) {
+  if (!Ed.doc || !canEditDoc(Ed.doc)) { toast('Open a story you can edit first.', 'bad'); return; }
+  const rec = await IDB.get('photos', id);
+  if (!rec) { toast('That picture is no longer here.', 'bad'); await renderPhotos(); return; }
+
+  const b = makeBlock('photo');
+  b.src = 'idb:' + rec.id;
+  b.assetId = rec.id;
+  b.w = rec.w; b.h = rec.h; b.bytes = rec.bytes; b.name = rec.name;
+  Ed.doc.blocks.push(b);
+  const meta = { id: rec.id, name: rec.name, mime: rec.mime, w: rec.w, h: rec.h,
+                 bytes: rec.bytes, src: 'idb:' + rec.id };
+  Ed.doc.assets = (Ed.doc.assets || []).filter(a => a.id !== rec.id).concat([meta]);
+  touched();
+  renderBlocks();
+  await renderPhotos();
+  toast('Added to “' + (Ed.doc.title || 'Untitled') + '” — describe it before publishing', 'good');
+}
+
+// Only offered on a picture nothing is using, and it says what it is deleting.
+// This one really is gone: it is not the undoable removal a block does.
+async function deleteLibraryPhoto(id, card) {
+  if (photoUsers(id).length) { toast('That one is in a story. Take it out of the story first.', 'bad'); return; }
+  const name = (card.querySelector('b') || {}).textContent || 'this picture';
+  if (!confirm(`Delete ${name} for good?\n\nNothing is using it, but this cannot be undone.`)) return;
+  try { await IDB.del('photos', id); }
+  catch (err) { return explain(err); }
+  await renderPhotos();
+  renderSpace();
+  toast('Deleted', 'good');
+}
+
 // ── What's On ────────────────────────────────────────────────────────────────
 // A calendar the club keeps itself. Each event is a row you edit in place —
 // there is no separate "edit" mode to get stuck in, and no save button to
@@ -1438,24 +1588,99 @@ function problems() {
   return out;
 }
 
-function warnings() {
-  const out = [];
-  const noAlt = Ed.doc.blocks.filter(b => b.type === 'photo' && b.src && !b.decorative && !(b.alt || '').trim());
-  if (noAlt.length) out.push(`${noAlt.length} photo${noAlt.length > 1 ? 's have' : ' has'} no description.
-    People using a screen reader will not know what ${noAlt.length > 1 ? 'they show' : 'it shows'}.`);
-  const empty = Ed.doc.blocks.filter(b => b.type === 'photo' && !b.src);
-  if (empty.length) out.push(`${empty.length} photo block${empty.length > 1 ? 's have' : ' has'} no picture in ${empty.length > 1 ? 'them' : 'it'}.`);
-  if (Ed.doc.rating != null && Ed.doc.rating > (Ed.doc.ratingMax || 5)) {
-    out.push(`The rating (${Ed.doc.rating}) is higher than the maximum (${Ed.doc.ratingMax}).`);
-  }
-  if (!Ed.doc.author.trim()) out.push('There is no byline, so this will publish as “The Blanson Post”.');
-  return out;
+// One list of checks, read by both the panel beside the editor and the dialog
+// that comes up on Publish. Two lists would drift, and a story would pass the
+// panel and then be stopped by the dialog for something the panel never said.
+//
+// None of these blocks publishing — problems() does that. These are the things
+// a person should have looked at, which is a different question.
+function checks() {
+  const d = Ed.doc;
+  const photos = d.blocks.filter(b => b.type === 'photo');
+  const noAlt = photos.filter(b => b.src && !b.decorative && !(b.alt || '').trim());
+  const empty = photos.filter(b => !b.src);
+  const overRated = d.rating != null && d.rating > (d.ratingMax || 5);
+
+  const author = String(d.author || '').trim();
+
+  return [
+    { ok: !!author,
+      good: 'Byline: ' + esc(author),
+      bad:  'There is no byline, so this will publish as “The Blanson Post”.' },
+
+    { ok: !noAlt.length,
+      good: photos.length ? 'Every photo is described' : 'No photos to describe',
+      bad:  `${noAlt.length} photo${noAlt.length > 1 ? 's have' : ' has'} no description.
+             People using a screen reader will not know what ${
+             noAlt.length > 1 ? 'they show' : 'it shows'}.` },
+
+    { ok: !empty.length,
+      good: 'No empty photo blocks',
+      bad:  `${empty.length} photo block${empty.length > 1 ? 's have' : ' has'} no picture in ${
+             empty.length > 1 ? 'them' : 'it'}.` },
+
+    { ok: !overRated,
+      good: d.rating != null ? `Rated ${esc(d.rating)}/${esc(d.ratingMax)}` : 'Not a rated review',
+      bad:  `The rating (${esc(d.rating)}) is higher than the maximum (${esc(d.ratingMax)}).` },
+
+    { ok: !!(d.topics && d.topics.length),
+      good: 'Topics: ' + (d.topics || []).map(esc).join(', '),
+      bad:  'No topics, so this will not turn up when somebody browses by topic. ' +
+            'It still appears in its section.' }
+  ];
 }
+
+// Only the failures, for the panel that sits open beside the story.
+const warnings = () => checks().filter(c => !c.ok).map(c => c.bad);
 
 function renderWarnings() {
   const w = warnings();
   $('warnings-panel').hidden = !w.length;
   $('warnings').innerHTML = w.map(t => `<p class="warn-item">${t}</p>`).join('');
+}
+
+// Shown once, on the way to the site. Publishing is the one action here a
+// writer cannot undo on their own, so it is worth a look at the whole list
+// rather than a warning panel they have stopped seeing.
+function confirmPublish() {
+  const rows = checks();
+  const bad = rows.filter(c => !c.ok).length;
+  return new Promise(resolve => {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'ask check-dlg';
+    dlg.innerHTML = `
+      <form method="dialog">
+        <h2>Before it goes on the site</h2>
+        <p class="ask-intro">${esc(Ed.doc.title || 'This story')} will be readable by
+          anyone, at <code>#/a/${esc(computeSlug())}</code>.</p>
+        <ul class="checklist">
+          ${rows.map(c => `<li class="${c.ok ? 'yes' : 'no'}">
+            <span aria-hidden="true">${c.ok ? '✓' : '!'}</span>
+            <span>${c.ok ? c.good : c.bad}</span>
+          </li>`).join('')}
+        </ul>
+        ${bad ? `<p class="ask-error" role="status">${bad === 1
+          ? 'One thing is worth another look. You can publish anyway.'
+          : bad + ' things are worth another look. You can publish anyway.'}</p>` : ''}
+        <div class="ask-actions">
+          <button value="cancel" class="btn ghost" type="submit">Back to the story</button>
+          <button value="ok" class="btn publish" type="submit">${
+            bad ? 'Publish anyway' : 'Publish'}</button>
+        </div>
+      </form>`;
+    document.body.appendChild(dlg);
+    const done = v => { dlg.close(); dlg.remove(); resolve(v); };
+    dlg.querySelector('form').addEventListener('submit', e => {
+      e.preventDefault();
+      done(!!(e.submitter && e.submitter.value === 'ok'));
+    });
+    // Escape means no, the same as the Back button.
+    dlg.addEventListener('cancel', e => { e.preventDefault(); done(false); });
+    dlg.showModal();
+    // Focus lands on Back, not on Publish: the safe one, so a stray Return
+    // keypress cannot put a story on the site.
+    dlg.querySelector('[value="cancel"]').focus();
+  });
 }
 
 function scheduleAutosave() {
@@ -1571,7 +1796,13 @@ $('btn-withdraw').onclick  = () => {
   if (!confirm('Take this back from the editors?\n\nIt goes back to being your draft, and they will no longer see it waiting.')) return;
   save('draft', false, 'Taken back — it is your draft again');
 };
-$('btn-publish').onclick   = () => save('published');
+$('btn-publish').onclick = async () => {
+  // The hard requirements first, so the checklist is not shown for a story that
+  // cannot go out anyway.
+  const missing = problems();
+  if (missing.length) { toast('Still needs ' + missing.join(' and ') + '.', 'bad'); return; }
+  if (await confirmPublish()) save('published');
+};
 $('btn-unpublish').onclick = () => save('draft', false, 'Taken down — it is no longer on the site');
 // Sending a story back used to flip it to draft in silence: the writer found it
 // in their drafts with no idea what was wrong, which is the opposite of what a
