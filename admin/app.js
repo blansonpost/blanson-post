@@ -263,6 +263,11 @@ function buildSuggestions() {
 Combobox.attach($('f-series'), { options: () => Ed.seriesNames });
 Combobox.attach($('f-topics'), { options: () => Ed.topicNames, multi: true });
 
+// The dropdowns keep their <select> underneath and stay the value; only the
+// list the reader sees is ours. Their options are read live, so buildSelects()
+// filling Section and Kind of piece needs no telling.
+['f-section', 'f-form', 'f-ratingmax'].forEach(id => Combobox.select($(id)));
+
 function buildFilters() {
   $('filters').innerHTML = STATUSES.map(([v, n]) =>
     `<button class="chip${v === Ed.filter ? ' on' : ''}" data-f="${v}"
@@ -392,6 +397,7 @@ function closeEditor() {
   $('saved').textContent = '';
   $('locked').hidden = true;
   setReadOnly(false);          // don't leave the lock on for the next article
+  Combobox.refresh();
   nodes.clear(); adders.clear();
   renderList();
 }
@@ -417,6 +423,10 @@ function mount() {
   // That was already odd for the web address, and it hid the run date entirely
   // on a published story, which is the one place you would go looking for it.
   updateSlugline();
+  // Assigning .value fires nothing, so the dropdown buttons are told by hand.
+  // Firing a real change event instead would run the editor's own handlers and
+  // mark a freshly opened story as edited.
+  Combobox.refresh();
   renderList();
 }
 
@@ -1150,8 +1160,9 @@ function ask(spec) {
     // Escape, or the browser closing it some other way.
     dlg.addEventListener('cancel', e => { e.preventDefault(); done(null); });
 
+    Combobox.selectsIn(dlg);
     dlg.showModal();
-    const first = form.querySelector('input, textarea, select');
+    const first = form.querySelector('input, textarea, .cbx-button');
     if (first) first.focus();
   });
 }
@@ -1641,6 +1652,9 @@ function setReadOnly(on) {
   });
   $('blocks').querySelectorAll('button').forEach(b => { b.disabled = on; });
   $('cover').querySelectorAll('button').forEach(b => { b.disabled = on; });
+  // The native selects are what setReadOnly disables; the buttons standing in
+  // for them have to follow, or a locked story still looks editable.
+  Combobox.refresh();
 }
 
 function problems() {
@@ -1963,6 +1977,7 @@ async function renderStaff() {
       </div>
     </div>`;
 
+  Combobox.selectsIn(host);
   host.querySelectorAll('select[data-who]').forEach(sel => sel.onchange = async () => {
     const who = sel.dataset.who, role = sel.value;
     const person = people.find(p => p.email === who);
@@ -1970,6 +1985,7 @@ async function renderStaff() {
     if (person.role === 'advisor' && role !== 'advisor' && advisors <= 1) {
       toast('There has to be at least one advisor.', 'bad');
       sel.value = 'advisor';
+      Combobox.refresh();          // put the button back to what the select says
       return;
     }
     if (!confirm(`Make ${person.name} ${role === 'advisor' ? 'an' : 'a'} ${role}?`)) {
