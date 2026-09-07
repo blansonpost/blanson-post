@@ -92,6 +92,22 @@ const Store = (() => {
 
     async deleteArticle(id) { await IDB.del('articles', id); },
 
+    // Takes the lead-story flag off everything except one article.
+    //
+    // Deliberately not routed through saveArticle: that stamps updatedAt, and
+    // every story it touched would start telling readers it had been revised
+    // today when all that changed was a flag on a different article.
+    async clearFeatured(exceptId) {
+      let cleared = 0;
+      for (const a of await IDB.all('articles')) {
+        if (a.id === exceptId || !a.featured) continue;
+        a.featured = false;
+        await IDB.put('articles', a);
+        cleared++;
+      }
+      return cleared;
+    },
+
     async listEvents() {
       const rows = await IDB.all('events');
       return rows.sort((a, b) => String(a.date).localeCompare(String(b.date)));
@@ -204,6 +220,12 @@ const Store = (() => {
 
     async deleteArticle(id) {
       const { error } = await this.client().from('articles').delete().eq('id', id);
+      if (error) throw fail('DENIED', error.message);
+    },
+
+    async clearFeatured(exceptId) {
+      const { error } = await this.client()
+        .from('articles').update({ featured: false }).neq('id', exceptId).eq('featured', true);
       if (error) throw fail('DENIED', error.message);
     },
 
@@ -368,6 +390,7 @@ const Store = (() => {
     listArticles:  () => backend.listArticles(),
     saveArticle:   a  => backend.saveArticle(a),
     deleteArticle: id => backend.deleteArticle(id),
+    clearFeatured: id => backend.clearFeatured(id),
     listEvents:    () => backend.listEvents(),
     saveEvent:     e  => backend.saveEvent(e),
     deleteEvent:   id => backend.deleteEvent(id),

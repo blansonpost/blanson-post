@@ -523,3 +523,7 @@ table.staff .cbx-button{width:auto;min-width:132px;padding:5px 8px;border-radius
 /* ── Backup ──────────────────────────────────────────────────────────────── */
 .backup-row{display:flex;flex-wrap:wrap;gap:9px}
 .backup-note{margin:12px 0 0;font-size:13px;color:var(--fg-2);min-height:1.2em}
+
+/* ── Lead story ──────────────────────────────────────────────────────────── */
+#btn-lead.on{background:rgba(244,195,0,.14);border-color:rgba(244,195,0,.5);color:var(--gold)}
+#btn-lead.on:hover{background:rgba(244,195,0,.22)}

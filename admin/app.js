@@ -1613,6 +1613,19 @@ function renderChrome() {
   $('btn-unpublish').hidden = !(pub && s === 'published');
   $('btn-sendback').hidden  = !(pub && s === 'review');
   $('btn-delete').hidden    = !(pub || (s === 'draft' && Ed.doc.authorId === Ed.user.id));
+  // Which story headlines the front page is an editor's call, not a writer's.
+  const lead = $('btn-lead');
+  const isLead = !!Ed.doc.featured;
+  lead.hidden = !pub;
+  lead.classList.toggle('on', isLead);
+  lead.setAttribute('aria-pressed', String(isLead));
+  lead.textContent = isLead ? '\u2605 Lead story' : '\u2606 Make it the lead';
+  // A draft can carry the flag, but the front page only ever shows published
+  // stories, so say when it will actually mean anything.
+  lead.title = isLead
+    ? (s === 'published' ? 'This is the big story at the top of the front page.'
+                         : 'It will lead the front page once it is published.')
+    : 'Put this at the top of the front page.';
   // Only worth offering on a story that is actually in front of readers.
   $('btn-correct').hidden   = !(pub && s === 'published');
   $('btn-save').disabled = $('btn-publish').disabled = Ed.saving;
@@ -1874,6 +1887,24 @@ $('btn-withdraw').onclick  = () => {
   if (!confirm('Take this back from the editors?\n\nIt goes back to being your draft, and they will no longer see it waiting.')) return;
   save('draft', false, 'Taken back — it is your draft again');
 };
+$('btn-lead').onclick = async () => {
+  if (!can('publish')) { toast('Only an editor or an advisor can choose the lead story.', 'bad'); return; }
+  const on = !Ed.doc.featured;
+  Ed.doc.featured = on;
+  // There is one lead, so taking the slot means giving it up everywhere else.
+  // The five flagged in the archive cannot be reached from here — they have no
+  // date, and the front page reads the newest flagged story first, so a dated
+  // one always outranks them anyway.
+  if (on) {
+    try { await Store.clearFeatured(Ed.doc.id); }
+    catch (err) { Ed.doc.featured = !on; return explain(err); }
+  }
+  const ok = await save(null, false,
+    on ? 'This is the lead story now' : 'No longer the lead story');
+  if (!ok) Ed.doc.featured = !on;
+  renderChrome();
+};
+
 $('btn-publish').onclick = async () => {
   // The hard requirements first, so the checklist is not shown for a story that
   // cannot go out anyway.
