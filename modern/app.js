@@ -28,7 +28,14 @@ document.getElementById('nav').insertAdjacentHTML('beforeend',
      <input id="q" type="search" placeholder="Search" aria-label="Search the paper"
             autocomplete="off"></form>`);
 document.getElementById('foot-sections').innerHTML =
-  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('');
+  SECTIONS.map(s => `<a href="#/s/${esc(s.slug)}">${esc(s.name)}</a>`).join('') +
+  // The pages that are not sections and are not worth another nav item.
+  `<span class="foot-extra">
+     <a href="#/topics">Topics</a>
+     <a href="#/best">Best reviewed</a>
+     <a href="#/saved">Reading list</a>
+     <a href="#/corrections">Corrections</a>
+   </span>`;
 
 addEventListener('scroll', () => {
   const max = document.body.scrollHeight - innerHeight;
@@ -445,9 +452,56 @@ async function shareStory(btn) {
 // every route, so a handler bound to the button itself would be thrown away
 // with it.
 document.getElementById('app').addEventListener('click', e => {
-  const btn = e.target.closest('.share-btn');
-  if (btn) shareStory(btn);
+  const share = e.target.closest('.share-btn');
+  if (share) { shareStory(share); return; }
+  const save = e.target.closest('.save-btn');
+  if (save) toggleSaved(save);
 });
+
+// ── Reading list ─────────────────────────────────────────────────────────────
+// Kept in this browser and nowhere else. There is no account behind it, so a
+// list made on a school Chromebook is not on anybody's phone — the page says
+// that outright rather than letting a reader assume otherwise.
+const savedButton = a => {
+  const on = Saved.has(a.slug);
+  return `<button class="save-btn${on ? ' on' : ''}" type="button"
+    data-save="${esc(a.slug)}" aria-pressed="${on}">${on ? 'Saved' : 'Save'}</button>`;
+};
+
+function toggleSaved(btn) {
+  const slug = btn.dataset.save;
+  const was = Saved.has(slug);
+  const now = Saved.toggle(slug);
+  // toggle() reports where it ended up, not where it was aimed. A private
+  // window has the storage API and refuses every write, and a button that went
+  // on claiming "Saved" would be lying to the reader.
+  if (now === was) {
+    btn.textContent = 'Can’t save here';
+    btn.disabled = true;
+    btn.title = 'This browser is not letting the page remember anything — ' +
+                'usually a private window, or site data turned off.';
+    return;
+  }
+  btn.classList.toggle('on', now);
+  btn.setAttribute('aria-pressed', String(now));
+  btn.textContent = now ? 'Saved' : 'Save';
+  // Un-saving from the list itself has to take the row away with it.
+  if (location.hash.replace(/^#\/?/, '') === 'saved') route();
+}
+
+// ── Photographers ────────────────────────────────────────────────────────────
+// The credit line is printed exactly as the old site printed it; only the name
+// inside it becomes a link.
+function creditLink(credit, by) {
+  const c = esc(credit || '');
+  if (!by) return c;
+  const name = esc(by);
+  const at = c.indexOf(name);
+  if (at === -1) return c;
+  return c.slice(0, at) +
+    `<a href="#/p/${esc(Paper.writerSlug(by))}">${name}</a>` +
+    c.slice(at + name.length);
+}
 
 // ── Topics ─────────────────────────────────────────────────────────────────────
 // A section is where a story is filed; a topic is what it is about, and a story
@@ -515,16 +569,98 @@ function renderTopics() {
   </section>`;
 }
 
+// ── Saved stories ────────────────────────────────────────────────────────────
+function renderSaved() {
+  const rows = Saved.list();
+  return `
+  <section class="sec-head">
+    <h1>Reading List</h1>
+    <p>${rows.length ? rows.length + (rows.length === 1 ? ' story' : ' stories') + ' saved'
+                     : 'Nothing saved yet'}</p>
+  </section>
+  <section class="block">
+    <p class="list-note">${Saved.usable()
+      ? 'Kept in this browser on this computer. It is not an account, so it will not follow you to a phone or to the library machines.'
+      : 'This browser will not let the page remember anything — usually a private window, or site data turned off — so nothing can be saved here.'}</p>
+    ${rows.length ? `<div class="cards">
+      ${rows.map(r => `
+        <div class="card saved-card">
+          <a href="#/a/${esc(r.article.slug)}">${thumb(r.article, 'card-img')}</a>
+          <div class="card-body">
+            ${chip(r.article)}
+            <h2 class="card-hed"><a href="#/a/${esc(r.article.slug)}">${esc(r.article.title)}</a></h2>
+            <p>${esc(r.article.excerpt.slice(0, 120))}…</p>
+            ${savedButton(r.article)}
+          </div>
+        </div>`).join('')}
+    </div>` : `<p>Press <b>Save</b> on any story and it will wait for you here.</p>`}
+  </section>`;
+}
+
+// ── Corrections ──────────────────────────────────────────────────────────────
+function renderCorrections() {
+  const rows = Paper.corrections();
+  return `
+  <section class="sec-head">
+    <h1>Corrections</h1>
+    <p>${rows.length ? rows.length + (rows.length === 1 ? ' correction' : ' corrections')
+                     : 'Nothing to correct so far'}</p>
+  </section>
+  <section class="block">
+    <p class="list-note">When we get something wrong we say so here and at the foot
+      of the story itself, rather than changing it quietly.</p>
+    ${rows.length ? rows.map(c => `
+      <div class="corr-row">
+        <a class="corr-hed" href="#/a/${esc(c.article.slug)}">${esc(c.article.title)}</a>
+        <p>${esc(c.text)}</p>
+        <div class="corr-by">${esc(Blocks.dateText({ date: c.at }) || '')}${
+          c.by ? ' · ' + esc(c.by) : ''}</div>
+      </div>`).join('') : `<p>No corrections have been run yet.</p>`}
+  </section>`;
+}
+
+// ── One photographer ─────────────────────────────────────────────────────────
+function renderPhotographer(slug) {
+  const p = Paper.photographer(slug);
+  if (!p) return `<section class="sec-head"><h1>No such photographer</h1></section>`;
+  const alsoWrites = Paper.writer(slug);
+  return `
+  <section class="sec-head">
+    <h1>${esc(p.name)}</h1>
+    <p>${p.count} ${p.count === 1 ? 'picture' : 'pictures'} in the paper${
+      alsoWrites ? ` · <a href="#/w/${esc(slug)}">also writes for us</a>` : ''}</p>
+  </section>
+  ${p.artwork.length ? `<section class="block"><div class="art-solo">
+    ${p.artwork.map(a => `
+      <figure class="solo">
+        <img src="${esc(imageUrl(a.file))}" alt="${esc(a.title + ' by ' + a.by)}" loading="lazy">
+        <figcaption><b>${esc(a.title)}</b><span>${esc(a.credit)}</span></figcaption>
+      </figure>`).join('')}
+  </div></section>` : ''}
+  ${p.galleries.map(g => `
+    <section class="sec-head"><h1>${esc(g.title)}</h1>
+      <p>${esc(g.year ? g.year + ' · ' : '')}${g.photos.length} photos${
+        g.note ? ' · ' + esc(g.note) : ''}</p></section>
+    <section class="block">
+      <div class="gal">
+        ${g.photos.map(f => `<a class="gal-item" href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
+           <img src="${esc(imageUrl(f))}" alt="${esc(g.title)}" loading="lazy"></a>`).join('')}
+      </div>
+    </section>`).join('')}`;
+}
+
 // ── One writer ───────────────────────────────────────────────────────────────
 function renderWriter(slug) {
   const w = Paper.writer(slug);
   if (!w) return `<section class="sec-head"><h1>No such writer</h1></section>`;
   const p = w.profile;
+  const shoots = Paper.photographer(slug);
   return `
   <section class="sec-head">
     <h1>${esc(w.name)}</h1>
     <p>${w.stories.length} ${w.stories.length === 1 ? 'story' : 'stories'}${
-      p ? ' · ' + esc(p.beats) : ''}</p>
+      p ? ' · ' + esc(p.beats) : ''}${
+      shoots ? ` · <a href="#/p/${esc(slug)}">${shoots.count} photographs</a>` : ''}</p>
   </section>
   <section class="block">
     ${p ? `<div class="person writer-card">
@@ -567,7 +703,7 @@ function renderGallery() {
   </section>
   ${gals.map(g => `
     <section class="sec-head"><h1>${esc(g.title)}</h1>
-      <p>${esc(g.year ? g.year + ' · ' : '')}${esc(g.credit)}${g.note ? ' · ' + esc(g.note) : ''}</p></section>
+      <p>${esc(g.year ? g.year + ' · ' : '')}${creditLink(g.credit, g.by)}${g.note ? ' · ' + esc(g.note) : ''}</p></section>
     <section class="block">
       <div class="gal">
         ${g.photos.map(f => `<a class="gal-item" href="${esc(imageUrl(f))}" target="_blank" rel="noopener">
@@ -776,6 +912,7 @@ function renderArticle(slug) {
           ${updatedText(a) ? `<div class="sub upd">${esc(updatedText(a))}</div>` : ''}
         </div>
         ${a.rating != null ? `<div class="big-score">${stars(a)}<b>${a.rating}/${a.ratingMax}</b></div>` : ''}
+        ${savedButton(a)}
         ${shareButton(a)}
       </div>
     </div>
@@ -819,6 +956,9 @@ function route() {
   else if (h === 'best')         { active = 'best'; app.innerHTML = renderBest(); }
   else if (h === 'topics')       { active = 'topics'; app.innerHTML = renderTopics(); }
   else if (h.startsWith('t/'))   { active = 'topics'; app.innerHTML = renderTopic(h.slice(2)); }
+  else if (h === 'saved')        { active = 'saved'; app.innerHTML = renderSaved(); }
+  else if (h === 'corrections')  { app.innerHTML = renderCorrections(); }
+  else if (h.startsWith('p/'))   { active = 'gallery'; app.innerHTML = renderPhotographer(h.slice(2)); }
   else                         { app.innerHTML = renderHome(); }
   document.querySelectorAll('#nav a').forEach(el =>
     el.classList.toggle('on', el.dataset.sec === active));

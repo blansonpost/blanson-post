@@ -423,3 +423,23 @@ table.sch.is-old{opacity:.6;margin-top:4px}
 .share-link{margin-left:auto;font-family:var(--cond);font-size:13px;color:var(--ink);
   background:var(--paper);border:1px solid var(--accent);border-radius:2px;
   padding:5px 10px;min-width:min(280px,100%)}
+
+/* ── Reading list, corrections, footer extras ────────────────────────────── */
+.save-btn{font-family:var(--cond);font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);background:none;border:1px solid var(--rule);border-radius:2px;
+  padding:5px 14px;cursor:pointer}
+.save-btn:hover:not(:disabled){border-color:var(--ink);color:var(--ink)}
+.save-btn.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.save-btn:disabled{color:var(--ink-3);border-style:dashed;cursor:not-allowed}
+.art-meta .save-btn{margin-left:auto}
+.art-meta .save-btn+.share-btn{margin-left:8px}
+
+.list-note{max-width:62ch;margin:0 0 26px;font-size:15px;color:var(--ink-3);line-height:1.65}
+.corr-row{border-top:1px solid var(--rule-soft);padding:16px 0}
+.corr-hed{display:block;font-family:var(--display);font-size:20px;font-weight:700}
+.corr-hed:hover{color:var(--accent)}
+.corr-row p{margin:6px 0 6px;max-width:70ch}
+.corr-by{font-family:var(--cond);font-size:12.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+
+.foot-extra{display:block;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule-soft)}

@@ -236,8 +236,13 @@ const Paper = (() => {
   // The three single pieces were checked by opening the files, not by trusting
   // the page order: the comic really is a comic, "Intruder" really is the dark
   // bedroom scene, and Clarissa's is a designed photography spread.
+  // `credit` is the line the old site printed, kept word for word. `by` is the
+  // same person as a name the code can group on, so every photographer gets a
+  // page the way every writer does — nine of these photos are Joseph Zapata's
+  // and until now his name appeared once, in small type, linking to nothing.
   const GALLERIES = [
     { title: 'Homecoming', year: '2025 – 2026', credit: 'Provided by Clarissa Ortega',
+      by: 'Clarissa Ortega',
       photos: [
         "ad9c70_e0ec9b20751f4f5fb246463afdcaafcb.jpg",
         "ad9c70_da772cb6ab8e43bcbe170b1190be8cd0.jpg",
@@ -251,6 +256,7 @@ const Paper = (() => {
         "ad9c70_ed8dc3b24e504a01916be8dc840ff86d.jpg"
       ] },
     { title: 'Trunk or Treat', year: '2025 – 2026', credit: 'Provided by Mr. Martin',
+      by: 'Mr. Martin',
       photos: [
         "ad9c70_c19a2d9467ca4b4694e805e504dd8406.jpg",
         "ad9c70_01f884d277604e7f8fc893f22871fb7c.jpg",
@@ -269,6 +275,7 @@ const Paper = (() => {
         "ad9c70_f74d083e90d4432b9ccf75dab249b006.jpg"
       ] },
     { title: 'Vase Competition', year: '2024 – 2025', credit: 'Provided by Mr. Peel',
+      by: 'Mr. Peel',
       photos: [
         "ad9c70_84a9873a1ed44ad4a18242fd7b457160.jpg",
         "ad9c70_776ac1da583c40578193e44fc687ab49.jpg",
@@ -309,6 +316,7 @@ const Paper = (() => {
     // kept together under his name rather than split up on a guess; move them
     // into separate entries here once someone can say which is which.
     { title: 'Night photography', year: '', credit: 'Photos taken by Joseph Zapata',
+      by: 'Joseph Zapata',
       note: 'From “Nature is Better at Night”, “The Night of the Lone Wolf in a Pack”, ' +
             'and a Critical Mass Houston bike ride.',
       photos: [
@@ -482,6 +490,45 @@ const Paper = (() => {
       .sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))
       .slice(0, limit || 6)
       .map(([s]) => ({ slug: s, name: topicName(s) }));
+  }
+
+  // ── Photographers ──────────────────────────────────────────────────────────
+  // A byline is a byline whether it is on words or on pictures. Writers have
+  // had a page each since the archive went up; the people who took the photos
+  // had a line of small print.
+  //
+  // Slugs come from writerSlug, so somebody who does both is the same person at
+  // #/w/ and #/p/ and the two pages can point at each other.
+  function photographers() {
+    const found = new Map();
+    const get = name => {
+      const slug = writerSlug(name);
+      if (!slug) return null;
+      if (!found.has(slug)) found.set(slug, { name, slug, galleries: [], artwork: [] });
+      return found.get(slug);
+    };
+    GALLERIES.forEach(g => { const p = g.by && get(g.by); if (p) p.galleries.push(g); });
+    ARTWORK.forEach(a => { const p = a.by && get(a.by); if (p) p.artwork.push(a); });
+    return [...found.values()]
+      .map(p => ({ ...p, count: p.galleries.reduce((n, g) => n + g.photos.length, 0) + p.artwork.length }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }
+
+  const photographer = slug => photographers().find(p => p.slug === slug) || null;
+
+  // ── Corrections ────────────────────────────────────────────────────────────
+  // Every correction the paper has run, in one place. Real papers keep this
+  // page, and it is the whole reason for having a correction rather than a
+  // quiet edit: the record is public, or it is not a record.
+  //
+  // Newest first, on the day it was made rather than the day the story ran.
+  function corrections() {
+    if (typeof ARTICLES === 'undefined') return [];
+    const out = [];
+    ARTICLES.forEach(a => (a.corrections || []).forEach(c => {
+      if (c && String(c.text || '').trim()) out.push({ article: a, ...c });
+    }));
+    return out.sort((x, y) => String(y.at || '').localeCompare(String(x.at || '')));
   }
 
   // ── Search ──────────────────────────────────────────────────────────────
@@ -672,6 +719,7 @@ const Paper = (() => {
     upcoming, whenText, dayBadge, newEventId, newTaskId,
     writerSlug, writer,
     bestReviews,
+    photographers, photographer, corrections,
     topicSlug, topicsOf, allTopics, byTopic, topicName, relatedTopics,
     search, highlight,
     scholarships, openCount, deadline, storiesBy, contributors, initials

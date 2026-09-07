@@ -403,3 +403,25 @@ mark{background:rgba(77,139,255,.3);color:inherit;border-radius:3px;padding:0 2p
 .share-link{margin-left:auto;flex:none;font:inherit;font-size:13px;color:var(--fg);
   background:var(--bg-2);border:1px solid var(--accent);border-radius:10px;
   padding:7px 12px;width:min(300px,100%)}
+
+/* ── Reading list, corrections, footer extras ────────────────────────────── */
+.save-btn{flex:none;font:inherit;font-size:13.5px;font-weight:600;color:var(--fg-2);
+  background:var(--bg-2);border:1px solid var(--line);border-radius:99px;
+  padding:7px 16px;cursor:pointer}
+.save-btn:hover:not(:disabled){border-color:var(--fg-3);color:var(--fg)}
+.save-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .save-btn.on{color:#08111f}
+.save-btn:disabled{color:var(--fg-3);border-style:dashed;cursor:not-allowed}
+.read-meta .save-btn{margin-left:auto}
+.read-meta .save-btn+.share-btn{margin-left:8px}
+.saved-card .save-btn{margin-top:10px;align-self:start}
+
+.list-note{max-width:62ch;margin:0 0 22px;color:var(--fg-3);font-size:14.5px;line-height:1.65}
+.corr-row{border-top:1px solid var(--line);padding:16px 0}
+.corr-hed{display:block;font-family:var(--display);font-size:19px;font-weight:700}
+.corr-hed:hover{color:var(--accent)}
+.corr-row p{margin:6px 0;max-width:70ch}
+.corr-by{font-size:12.5px;color:var(--fg-3)}
+
+.foot-extra{display:flex;flex-direction:column;gap:8px;margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--line)}
