@@ -1970,11 +1970,18 @@ async function renderStaff() {
         <button class="btn" disabled>Send an invitation</button>
       </div>
 
+      ${can('publish') ? `
       <div class="invite">
-        <h3>Export everything</h3>
-        <p>Downloads every article as one file — worth doing before anyone graduates.</p>
-        <button class="btn" id="export">Download a backup</button>
-      </div>
+        <h3>Backup</h3>
+        <p>Every article, every photo and the staff list in one file — worth doing
+           before anyone graduates, or before a laptop gets wiped. Putting one back
+           only adds what is missing: nothing already here is overwritten or deleted.</p>
+        <div class="backup-row">
+          <button class="btn" id="export">Download a backup</button>
+          <button class="btn ghost" id="restore">Restore from a backup</button>
+        </div>
+        <p class="backup-note" id="backup-note" role="status"></p>
+      </div>` : ''}
     </div>`;
 
   Combobox.selectsIn(host);
@@ -1996,16 +2003,197 @@ async function renderStaff() {
   });
 
   const ex = $('export');
-  if (ex) ex.onclick = async () => {
-    const data = { exportedAt: new Date().toISOString(), articles: await Store.listArticles(), staff: people };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  if (ex) ex.onclick = () => downloadBackup(people);
+  const rs = $('restore');
+  if (rs) rs.onclick = () => $('restore-input').click();
+}
+
+// ── Backup ───────────────────────────────────────────────────────────────────
+// The old export wrote out the articles and nothing else, and every photo in
+// them is stored as `idb:<id>` — a reference to a file in this browser. Restore
+// that on a wiped laptop and you get every story back with every picture
+// missing, which is not a backup. The pictures travel with it now.
+//
+// One JSON file rather than a zip: a zip needs a library, and a file you can
+// open and read is worth something on its own.
+
+const BACKUP_FORMAT = 'blanson-post-backup';
+
+function backupSay(msg) {
+  const el = $('backup-note');
+  if (el) el.textContent = msg || '';
+}
+
+// btoa wants a binary string. Built in chunks because String.fromCharCode with
+// a megabyte of arguments overflows the call stack.
+async function toBase64(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  const CHUNK = 0x8000;
+  let out = '';
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(out);
+}
+
+function fromBase64(b64, mime) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime || 'application/octet-stream' });
+}
+
+// Every photo the given articles actually point at. Orphans are left behind on
+// purpose: a backup should hold what the paper is using, not what it forgot.
+function assetIdsIn(articles) {
+  const ids = new Set();
+  articles.forEach(a => {
+    (a.blocks || []).forEach(b => { if (b.assetId) ids.add(b.assetId); });
+    if (a.cover && a.cover.assetId) ids.add(a.cover.assetId);
+  });
+  return [...ids];
+}
+
+async function downloadBackup(people) {
+  const btn = $('export');
+  if (btn) btn.disabled = true;
+  backupSay('Gathering everything…');
+  try {
+    const articles = await Store.listArticles();
+    const ids = assetIdsIn(articles);
+    const photos = [];
+    for (const id of ids) {
+      const rec = await IDB.get('photos', id);
+      if (!rec || !rec.blob) continue;          // already swept; the story survives
+      backupSay(`Packing photo ${photos.length + 1} of ${ids.length}…`);
+      photos.push({
+        id: rec.id, mime: rec.mime, w: rec.w, h: rec.h, bytes: rec.bytes,
+        name: rec.name, createdAt: rec.createdAt,
+        data: await toBase64(rec.blob),
+        thumb: rec.thumb ? await toBase64(rec.thumb) : null
+      });
+    }
+    const data = {
+      format: BACKUP_FORMAT, version: 1,
+      exportedAt: new Date().toISOString(),
+      articles, staff: people, photos
+    };
+    // Not pretty-printed: the photos are long base64 strings and the indentation
+    // was adding megabytes to say nothing.
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `blanson-post-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  };
+    const mb = (blob.size / 1048576).toFixed(1);
+    backupSay(`Saved ${articles.length} article${articles.length === 1 ? '' : 's'} and ` +
+              `${photos.length} photo${photos.length === 1 ? '' : 's'} — ${mb} MB.`);
+  } catch (err) {
+    explain(err);
+    backupSay('The backup could not be made.');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
+
+$('restore-input').onchange = async e => {
+  const file = e.target.files[0];
+  e.target.value = '';                     // so the same file can be picked twice
+  if (!file) return;
+  if (!can('publish')) { toast('Only an editor or an advisor can restore a backup.', 'bad'); return; }
+
+  let data;
+  backupSay('Reading the file…');
+  try {
+    data = JSON.parse(await file.text());
+  } catch (err) {
+    backupSay('');
+    toast('That file is not a backup — it could not be read as one.', 'bad');
+    return;
+  }
+  if (!data || !Array.isArray(data.articles)) {
+    backupSay('');
+    toast('That file does not look like a Blanson Post backup.', 'bad');
+    return;
+  }
+
+  const photos = Array.isArray(data.photos) ? data.photos : [];
+  const when = data.exportedAt ? Blocks.dateText({ date: data.exportedAt }) : '';
+  const ok = await ask({
+    title: 'Restore from this backup',
+    intro: `${file.name}${when ? ' — made ' + when : ''}. It holds ` +
+           `${data.articles.length} article${data.articles.length === 1 ? '' : 's'} and ` +
+           `${photos.length} photo${photos.length === 1 ? '' : 's'}.` +
+           (photos.length ? '' : ' It carries no photos, so any pictures in these stories will be missing.') +
+           '\n\nOnly what is missing gets added. Anything already in this newsroom is ' +
+           'left exactly as it is — nothing is overwritten and nothing is deleted.',
+    confirm: 'Put it back',
+    // Nothing to fill in — ask() is being used for the one thing it is good at
+    // here, which is a modal that cannot be switched off. A field carrying only
+    // a hint would have drawn an empty box asking to be typed into.
+    fields: []
+  });
+  if (!ok) { backupSay(''); return; }
+
+  const added = { photos: 0, articles: 0, people: 0 };
+  const skipped = { photos: 0, articles: 0, people: 0 };
+  try {
+    // Photos first, so an article that lands afterwards can already find its
+    // pictures rather than rendering a gap for a moment.
+    for (let i = 0; i < photos.length; i++) {
+      const p = photos[i];
+      if (!p || !p.id || !p.data) { skipped.photos++; continue; }
+      if (await IDB.get('photos', p.id)) { skipped.photos++; continue; }
+      backupSay(`Putting back photo ${i + 1} of ${photos.length}…`);
+      await IDB.put('photos', {
+        id: p.id, mime: p.mime, w: p.w, h: p.h, bytes: p.bytes,
+        name: p.name, createdAt: p.createdAt,
+        blob: fromBase64(p.data, p.mime),
+        thumb: p.thumb ? fromBase64(p.thumb, p.mime) : null
+      });
+      added.photos++;
+    }
+
+    const here = new Set((await Store.listArticles()).map(a => a.id));
+    for (const a of data.articles) {
+      if (!a || !a.id) { skipped.articles++; continue; }
+      if (here.has(a.id)) { skipped.articles++; continue; }
+      await Store.saveArticle(a);
+      added.articles++;
+    }
+
+    // Roles are not touched. Somebody already on staff keeps whatever they are
+    // now: a backup from last term must not quietly demote this term's editor.
+    const staff = Array.isArray(data.staff) ? data.staff : [];
+    for (const u of staff) {
+      if (!u || !u.email) { skipped.people++; continue; }
+      if (await IDB.get('users', u.email)) { skipped.people++; continue; }
+      await IDB.put('users', { email: u.email, name: u.name, role: u.role || 'writer' });
+      added.people++;
+    }
+  } catch (err) {
+    // Whatever landed before this stays landed, so say how far it got rather
+    // than implying nothing happened.
+    explain(err);
+    await refresh();
+    await renderStaff();
+    backupSay(`Stopped partway: ${added.articles} article(s) and ${added.photos} photo(s) put back.`);
+    return;
+  }
+
+  await refresh();
+  await renderStaff();          // async: awaited, or it redraws over the summary
+  const bits = [];
+  if (added.articles) bits.push(`${added.articles} article${added.articles === 1 ? '' : 's'}`);
+  if (added.photos)   bits.push(`${added.photos} photo${added.photos === 1 ? '' : 's'}`);
+  if (added.people)   bits.push(`${added.people} person${added.people === 1 ? '' : 's'} on staff`);
+  const wasThere = skipped.articles + skipped.photos + skipped.people;
+  backupSay(bits.length
+    ? `Put back ${bits.join(', ')}.` + (wasThere ? ` ${wasThere} thing(s) were already here and were left alone.` : '')
+    : 'Everything in that backup was already here. Nothing changed.');
+  toast(bits.length ? 'Restored' : 'Nothing to put back', 'good');
+};
 
 // Anything boot() throws used to land nowhere: both the sign-in card and the
 // newsroom start hidden, so a failure left a blank page with no clue what went

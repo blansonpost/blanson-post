@@ -390,7 +390,8 @@ dialog.ask{border:1px solid var(--line);border-radius:14px;background:var(--pane
 dialog.ask::backdrop{background:rgba(4,6,10,.62)}
 dialog.ask form{padding:22px 24px 20px;display:grid;gap:14px}
 dialog.ask h2{margin:0;font-family:var(--display);font-size:20px}
-.ask-intro{margin:-6px 0 0;font-size:13.5px;line-height:1.55;color:var(--fg-2)}
+.ask-intro{margin:-6px 0 0;font-size:13.5px;line-height:1.55;color:var(--fg-2);
+  white-space:pre-line}
 .ask-field{display:grid;gap:5px}
 .ask-field>span{font-size:12px;color:var(--fg-2);font-weight:600}
 .ask-field>span i{font-weight:400;color:var(--fg-3);font-style:normal}
@@ -518,3 +519,7 @@ table.staff .cbx-button{width:auto;min-width:132px;padding:5px 8px;border-radius
    scrollbar. One blanket dark rule would have put a dark bar down the side of
    what is meant to look like newsprint. */
 .preview{color-scheme:light;--sb:#c0b6a1;--sb-hover:#a2977e}
+
+/* ── Backup ──────────────────────────────────────────────────────────────── */
+.backup-row{display:flex;flex-wrap:wrap;gap:9px}
+.backup-note{margin:12px 0 0;font-size:13px;color:var(--fg-2);min-height:1.2em}
