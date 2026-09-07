@@ -321,6 +321,9 @@ const leadImage  = Blocks.leadImage;
 const byline     = Blocks.byline;
 const readingTime= Blocks.readingTime;
 const stars      = Blocks.stars;
+// True only when the rating sits inside its own scale. 99/5 is a typo, not
+// a rating, and the site shows nothing rather than five filled stars.
+const hasRating  = Blocks.hasRating;
 const isVerse    = Blocks.isVerse;
 const isQA       = Blocks.isQA;
 const speakerOf  = Blocks.speakerOf;

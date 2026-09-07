@@ -43,7 +43,7 @@ const icon = s => ICON[s] || '📰';
 
 const tag = a => `<span class="tag">${icon(a.section)} ${esc(sectionName(a.section))}</span>`;
 
-const hearts = a => a.rating == null ? '' :
+const hearts = a => !hasRating(a) ? '' :
   `<span class="stars" title="${esc(a.rating)} out of ${esc(a.ratingMax)}">${stars(a)}</span>`;
 
 const who = a => `<span class="who"><span class="dot"></span>${esc(byline(a))}${
@@ -196,7 +196,7 @@ function renderHome() {
             ${pic(a, 'pcard-pic', [-1.5, 1, -1][i])}
             <div class="pcard-body">
               <h2 class="pcard-hed">${esc(a.title)}</h2>
-              ${a.rating != null ? hearts(a) : ''}
+              ${hasRating(a) ? hearts(a) : ''}
               <p>${esc(a.excerpt.slice(0, 100))}…</p>
               ${who(a)}
             </div>
@@ -246,7 +246,7 @@ function syncSearchBox(q) {
 // The address is the real query, so read it back from there.
 function currentQuery() {
   const h = location.hash.replace(/^#\/?/, '');
-  return h.startsWith('q/') ? decodeURIComponent(h.slice(2)) : '';
+  return h.startsWith('q/') ? decodeQuery(h.slice(2)) : '';
 }
 
 // Browsers put back whatever was last typed in a search box when the page is
@@ -377,6 +377,14 @@ function renderBest() {
         </a>`; }).join('')}
     </div>
   </section>`;
+}
+
+// A stray % in the address makes decodeURIComponent throw. That used to abort
+// route() halfway through: the page kept showing the previous story while the
+// address bar said something else, and the nav highlight, the scroll to top and
+// the calendar never ran. An address we cannot decode is searched for as typed.
+function decodeQuery(s) {
+  try { return decodeURIComponent(s); } catch (e) { return s; }
 }
 
 // ── Share ──────────────────────────────────────────────────────────────────────
@@ -967,7 +975,7 @@ function alumniBlock() {
 
 // Offered on section pages that actually hold rated reviews, rather than as
 // another nav item — that nav is already long enough to have overflowed once.
-const bestLink = slug => bySection(slug).some(a => a.rating != null)
+const bestLink = slug => bySection(slug).some(hasRating)
   ? `<a class="best-link" href="#/best">★ Best reviewed &rarr;</a>` : '';
 
 function renderSection(slug) {
@@ -988,7 +996,7 @@ function renderSection(slug) {
           ${pic(a, 'pcard-pic', (i % 3) - 1)}
           <div class="pcard-body">
             <h2 class="pcard-hed">${esc(a.title)}</h2>
-            ${a.rating != null ? hearts(a) : ''}
+            ${hasRating(a) ? hearts(a) : ''}
             <p>${esc(a.excerpt.slice(0, 110))}…</p>
             ${who(a)}
           </div>
@@ -1031,7 +1039,7 @@ function renderArticle(slug) {
         <i>${when(a, true) ? when(a, true) + ' · ' : ''}${readingTime(a)} min read${
           updatedText(a) ? ' · ' + esc(updatedText(a)) : ''}</i>
       </div>
-      ${a.rating != null ? `<div class="ratebox">${stars(a)}<b>${a.rating}/${a.ratingMax}</b></div>` : ''}
+      ${hasRating(a) ? `<div class="ratebox">${stars(a)}<b>${esc(a.rating)}/${esc(a.ratingMax)}</b></div>` : ''}
       ${savedButton(a)}
       ${shareButton(a)}
     </div>
@@ -1076,7 +1084,7 @@ function route() {
   else if (h === 'scholarships') { active = 'scholarships'; app.innerHTML = renderScholarships(); }
   else if (h === 'gallery')      { active = 'gallery'; app.innerHTML = renderGallery(); }
   else if (h.startsWith('q/'))   { active = 'search';
-                                   app.innerHTML = renderSearch(decodeURIComponent(h.slice(2))); }
+                                   app.innerHTML = renderSearch(decodeQuery(h.slice(2))); }
   else if (h.startsWith('w/'))   { app.innerHTML = renderWriter(h.slice(2)); }
   else if (h === 'best')         { active = 'best'; app.innerHTML = renderBest(); }
   else if (h === 'topics')       { active = 'topics'; app.innerHTML = renderTopics(); }

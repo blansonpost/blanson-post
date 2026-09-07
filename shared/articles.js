@@ -223,8 +223,6 @@ const ARTICLES = [
     author: "Joseph Zapata",
     topics: ["NFL"],
     featured: false,
-    rating: 3,
-    ratingMax: 5,
     excerpt: "The NFL is suffering an injury crisis at the BEGINNING of the season. Fans are speculating the injuries are stemming from the type of the grass, cleats, and failed recovery. Regardless of the cause the NFL is in serious trouble if they cannot help prevent injuries at this high rate. We have seen…",
     body: [
       "What is going on in the NFL?",
@@ -552,8 +550,6 @@ const ARTICLES = [
     author: "Marlene Garcia",
     topics: ["Thriller"],
     featured: false,
-    rating: 3,
-    ratingMax: 5,
     images: ["2c639b_4a068f8c21ff4eb19b3c821334113d44.jpg"],
     excerpt: "Casey has been fired from her job as a teacher and is now living in a cabin in the woods in New Hampshire. When a storm hits her cabin, she notices a girl outside of her cabin, covered in blood. Casey decides to give her shelter from the storm, but the girl refuses to tell Casey what happened to…",
     body: [
@@ -576,7 +572,7 @@ const ARTICLES = [
     author: "Marlene Garcia",
     topics: ["Thriller"],
     featured: false,
-    rating: 5,
+    rating: 2.8,
     ratingMax: 5,
     images: ["154bbc_60bf1d5f2513456593e43fc561990fdc.jpg"],
     excerpt: "Adam, a workaholic and famous screenwriter with faceblindness, and his wife, Amelia, a worker at a dog shelter, have been experiencing marital problems. Adam seems only to be focused on his work nowadays, and Amelia is tired of not being seen by her husband. When Amelia wins a free weekend away to…",
@@ -1403,6 +1399,9 @@ const leadImage  = Blocks.leadImage;
 const byline     = Blocks.byline;
 const readingTime= Blocks.readingTime;
 const stars      = Blocks.stars;
+// True only when the rating sits inside its own scale. 99/5 is a typo, not
+// a rating, and the site shows nothing rather than five filled stars.
+const hasRating  = Blocks.hasRating;
 const isVerse    = Blocks.isVerse;
 const isQA       = Blocks.isQA;
 const speakerOf  = Blocks.speakerOf;

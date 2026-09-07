@@ -314,16 +314,42 @@ function renderList() {
   $('list').querySelectorAll('.item').forEach(b => b.onclick = () => open(b.dataset.id));
 }
 
+// Two different numbers, and they were being run together.
+//
+// What this newsroom holds is the student's own work, and it is the only figure
+// worth putting in front of them: it goes up when they add a photo and down
+// when they take one out. navigator.storage.estimate() reports the whole
+// ORIGIN - every cache the browser keeps for this site, plus database space
+// that has been freed and not yet reclaimed - which is how this line came to
+// announce "1209 MB used" over a newsroom holding nothing at all.
+//
+// The estimate is still what the warning rests on, because that one really does
+// predict a save failing.
 async function renderSpace() {
-  const s = await Store.space();
-  if (!s) { $('space').textContent = ''; return; }
-  const used = (s.usage / 1048576).toFixed(0);
-  const pct  = Math.round(s.ratio * 100);
-  // A rough count is more useful to a student than a percentage.
-  const room = Math.max(0, Math.floor(s.free / 400000));
-  $('space').innerHTML = pct >= 90
-    ? `<span class="warn">Storage almost full (${pct}%). Publish or export soon.</span>`
-    : `${used} MB used · room for about ${room} more photos`;
+  const el = $('space');
+  const [room, mine] = await Promise.all([Store.space(), Store.held()]);
+  if (!mine) { el.textContent = ''; return; }
+
+  // "0 articles · 1 KB" is a strange thing to tell somebody who has not
+  // started yet.
+  if (!mine.articles && !mine.photos) { el.textContent = 'Nothing saved here yet.'; return; }
+
+  const size = mine.bytes < 1048576
+    ? Math.max(1, Math.round(mine.bytes / 1024)) + ' KB'
+    : (mine.bytes / 1048576).toFixed(1) + ' MB';
+  const n = mine.photos;
+  const held = `${mine.articles} article${mine.articles === 1 ? '' : 's'}` +
+               (n ? ` and ${n} photo${n === 1 ? '' : 's'}` : '') + ` \u00b7 ${size}`;
+
+  const pct = room ? Math.round(room.ratio * 100) : 0;
+  if (room && pct >= 90) {
+    el.innerHTML = `<span class="warn">This browser is almost full (${pct}%).
+      Download a backup before adding more.</span><br>${esc(held)}`;
+    return;
+  }
+  // A rough count of what will still fit beats a percentage nobody can act on.
+  const more = room ? Math.max(0, Math.floor(room.free / 400000)) : 0;
+  el.innerHTML = esc(held) + (room ? ` \u00b7 room for about ${more} more photos` : '');
 }
 
 // ── open / close ─────────────────────────────────────────────────────────────
@@ -1687,6 +1713,10 @@ function problems() {
 // a person should have looked at, which is a different question.
 function checks() {
   const d = Ed.doc;
+  // renderChrome already returns early without a story open, so this never
+  // fires today — but a list of checks that throws when there is nothing to
+  // check is a trap for whoever calls it next.
+  if (!d) return [];
   const photos = d.blocks.filter(b => b.type === 'photo');
   const noAlt = photos.filter(b => b.src && !b.decorative && !(b.alt || '').trim());
   const empty = photos.filter(b => !b.src);

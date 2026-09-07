@@ -71,10 +71,23 @@ const Blocks = (() => {
   const readingTime = a =>
     Math.max(1, Math.round(plainText(a).split(/\s+/).filter(Boolean).length / 200));
 
+  // Whether there is a rating worth showing at all.
+  //
+  // A number outside its own scale is not a rating, it is a typo. Left to the
+  // old `rating != null` test, a review saved as 99/5 printed "99/5" next to
+  // five filled stars — the same story told two contradictory ways, one of them
+  // saying it was perfect. The newsroom warns before publishing; this is what
+  // the site does when somebody publishes anyway.
+  const hasRating = a => {
+    if (!a || a.rating == null) return false;
+    const v = Number(a.rating), max = Number(a.ratingMax);
+    return Number.isFinite(v) && Number.isFinite(max) && max > 0 && v >= 0 && v <= max;
+  };
+
   // Clamped deliberately: unclamped this throws RangeError inside the router,
   // before innerHTML is assigned, blanking every page of every design.
   const stars = a => {
-    if (a.rating == null || !a.ratingMax) return '';
+    if (!hasRating(a)) return '';
     const raw = Math.round((Number(a.rating) / Number(a.ratingMax)) * 5);
     if (!Number.isFinite(raw)) return '';
     const n = Math.max(0, Math.min(5, raw));
@@ -392,7 +405,7 @@ const Blocks = (() => {
   return {
     esc, newId,
     isAbsolute, isStoredRef, imageUrl, leadImage,
-    byline, readingTime, stars,
+    byline, readingTime, stars, hasRating,
     parseDate, publishedOn, updatedOn, dateText, dateShort, updatedText, dateTag,
     isVerse, isQA, speakerOf, interviewerOf, isQuestion, SPEAKER_RE,
     embedOf,

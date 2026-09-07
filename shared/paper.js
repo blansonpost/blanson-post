@@ -426,7 +426,7 @@ const Paper = (() => {
   function bestReviews(limit) {
     if (typeof ARTICLES === 'undefined') return [];
     return ARTICLES
-      .filter(a => a.rating != null && a.ratingMax)
+      .filter(a => Blocks.hasRating(a))
       .map(a => ({ article: a, score: Number(a.rating) / Number(a.ratingMax) }))
       .filter(x => Number.isFinite(x.score))
       .sort((a, b) => b.score - a.score ||
@@ -601,6 +601,12 @@ const Paper = (() => {
   // it — a heading that is true of two out of three is worse than a plain one.
   function related(a, limit) {
     const n = limit || 3;
+    // Checked before the fallback is built, not after: `section` reads a.section
+    // the moment it is called, so the old order threw on the very input the
+    // guard was there to catch.
+    if (!a || typeof ARTICLES === 'undefined') {
+      return { items: [], by: 'section', label: '', slug: '' };
+    }
     const section = () => ({
       items: (typeof ARTICLES === 'undefined' ? []
         : ARTICLES.filter(x => x.id !== a.id && x.section === a.section)).slice(0, n),
@@ -608,7 +614,6 @@ const Paper = (() => {
       label: (typeof Sections !== 'undefined' ? Sections.name(a.section) : a.section),
       slug: a.section
     });
-    if (typeof ARTICLES === 'undefined' || !a) return section();
 
     const mine = new Set(topicsOf(a).map(t => t.slug));
     if (!mine.size) return section();

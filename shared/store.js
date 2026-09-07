@@ -400,6 +400,8 @@ const Store = (() => {
     uploadPhoto:   f  => backend.uploadPhoto(f),
     deletePhoto: (ref, path) => backend.deletePhoto(ref, path),
     space: () => IDB.space(),
+    // What this newsroom holds, as opposed to what the whole origin is using.
+    held:  () => IDB.held(),
     persist: () => IDB.persist(),
 
     // Published articles, shaped like the built-in ones so the three designs

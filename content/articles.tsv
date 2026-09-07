@@ -38,7 +38,7 @@ jenkins-interview	interviews	Meet Mr. Jenkins: A Loud and Proud Passion for Film
 harvatine-interview	interviews	Meet Mr. Harvatine: From the Classroom to the Front Office	Jason Borrego		no		qa	Borrego		Teachers	Meet the Staff
 copy-of-bittersweet	sports	Neymar Jr: The Prince That Never Stood Up	José Manuel González		yes		story			Soccer	
 copy-of-test-your-limits	sports	The Fall of Manchester United!	José Manuel González		no		story			Soccer	
-nfl-2025-2026-season	sports	NFL 2025-2026 Season	Joseph Zapata	3/5	no		review			NFL	
+nfl-2025-2026-season	sports	NFL 2025-2026 Season	Joseph Zapata		no		review			NFL	
 copy-of-phantoms-of-water	life	Test Your Limits!	Nathaniel Castro		no		story			Starting High School	
 blanson-f-c-2-0	sports	Blanson F.C. Beats Victory 4-0	?		no		story			Soccer, Blanson F.C.	Blanson F.C. Match Reports
 blanson-vs-avalos	sports	Blanson F.C. Beats Avalos 3-0	?		no		story			Soccer, Blanson F.C.	Blanson F.C. Match Reports
@@ -50,8 +50,8 @@ yapyap	gaming	YAPYAP	Monzerrat Palacios		no		story			Multiplayer
 copy-of-eternal-sunshine-of-the-spotl	books	All the Bright Places	Keydith Manjarres	8/10	no		review			Romance	
 lovely-bones	books	Lovely Bones	Keydith Manjarres	9/10	no		review			Book to Film, Drama	
 the-giver-by-lois-lowry	books	The Giver by Lois Lowry	Melanie Tamez		no		story			Dystopia, Coming of Age	
-copy-of-neymar-jr-the-prince-that-ne	books	The Intruder by Freida McFadden	Marlene Garcia	3/5	no		review			Thriller	
-copy-of-the-intruder-by-freida-mcfadden	books	"Rock Paper Scissors" by Alice Feeney	Marlene Garcia	5/5	no		review			Thriller	
+copy-of-neymar-jr-the-prince-that-ne	books	The Intruder by Freida McFadden	Marlene Garcia		no		review			Thriller	
+copy-of-the-intruder-by-freida-mcfadden	books	"Rock Paper Scissors" by Alice Feeney	Marlene Garcia	2.8/5	no		review			Thriller	
 mid90s	film	Mid90s	Josue Reyes		yes		story			Coming of Age, Drama	
 copy-of-rock-paper-scissors-by-alic	film	Whiplash	Kelly Martinez		no		story			Drama	
 superman-2025	film	Superman (2025)	Oliver Romero		no		story			Superheroes	

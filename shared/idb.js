@@ -129,6 +129,30 @@ const IDB = (() => {
     kvSet: (k, v) => IDB.put('kv', { k, v }),
     kvDel: k => IDB.del('kv', k),
 
+    // What this newsroom is actually holding.
+    //
+    // Not the same question as space() below, and confusing the two was telling
+    // students that a newsroom containing nothing at all was using 1.2 GB.
+    // navigator.storage.estimate() reports the whole ORIGIN: every cache the
+    // browser keeps for this site, plus database space that has been freed but
+    // not yet reclaimed. None of that is the student's articles, and none of it
+    // goes away by deleting their work.
+    async held() {
+      const photos = await IDB.all('photos');
+      let bytes = 0;
+      for (const rec of photos) {
+        // .size is metadata on a Blob, so this does not read any of them.
+        if (rec.blob)  bytes += rec.blob.size;
+        if (rec.thumb) bytes += rec.thumb.size;
+      }
+      const articles = await IDB.all('articles');
+      // Articles are text, and a few dozen of them serialise in no time.
+      const text = articles.reduce((n, a) => n + JSON.stringify(a).length, 0);
+      return { photos: photos.length, photoBytes: bytes,
+               articles: articles.length, textBytes: text,
+               bytes: bytes + text };
+    },
+
     // How much room is left, so the newsroom can warn before a save fails
     // rather than after the article is written.
     async space() {
