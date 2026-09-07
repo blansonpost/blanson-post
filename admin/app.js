@@ -25,6 +25,8 @@ const Ed = {
   saveSeq: 0,
   saving: false,
   filter: 'all',
+  topicNames: [],
+  seriesNames: [],
   tab: 'write',
   autosaveTimer: null,
   crashTimer: null
@@ -227,43 +229,39 @@ function buildSelects() {
   ].map(([v, n]) => `<option value="${v}">${esc(n)}</option>`).join('');
 }
 
-// Every topic anyone has used, from the archive and from the newsroom, offered
-// as you type. Near-miss spellings are the way a topic quietly splits in two —
-// "Sci-Fi" and "Sci Fi" would end up as one address with one of the two labels,
-// and neither writer would ever see it happen.
-function buildTopicList() {
-  const list = $('topic-list');
-  if (!list) return;
-  const seen = new Map();
-  const add = name => {
-    const t = String(name || '').trim();
-    const key = Paper.topicSlug(t);
-    if (key && !seen.has(key)) seen.set(key, t);
+// Every topic and series anyone has used, from the archive and from the
+// newsroom, offered as you type. Near-miss spellings are the way a topic
+// quietly splits in two — "Sci-Fi" and "Sci Fi" would end up as one address
+// carrying one of the two labels, and neither writer would ever see it happen.
+//
+// Kept as plain lists rather than written into the page: the suggestion box is
+// drawn by Combobox, which asks for these each time it opens, so a topic used
+// on a story saved a moment ago is offered on the next one without anything
+// having to be rebuilt.
+function buildSuggestions() {
+  const gather = (seed, keyOf, pick) => {
+    const seen = new Map();
+    const add = name => {
+      const t = String(name || '').trim();
+      const key = keyOf(t);
+      if (key && !seen.has(key)) seen.set(key, t);
+    };
+    // From the archive by way of the generated list, not Paper.allTopics():
+    // that reads ARTICLES, which the newsroom never loads, so it returned
+    // nothing here and the box only ever offered what the newsroom itself had
+    // already used — exactly the case it exists to prevent.
+    (seed || []).forEach(add);
+    Ed.articles.forEach(a => pick(a).forEach(add));
+    return [...seen.values()].sort((a, b) => a.localeCompare(b));
   };
-  // From the archive by way of the generated list, not Paper.allTopics(): that
-  // reads ARTICLES, which the newsroom never loads, so it returned nothing here
-  // and the box only ever suggested what the newsroom had already used.
-  (window.ARCHIVE_TOPICS || []).forEach(add);
-  Ed.articles.forEach(a => (a.topics || []).forEach(add));
-  list.innerHTML = [...seen.values()].sort((a, b) => a.localeCompare(b))
-    .map(t => `<option value="${esc(t)}">`).join('');
 
-  // Same idea for series, and the same reason: a story meant to join
-  // "Blanson F.C. Match Reports" that is typed slightly differently starts a
-  // second series of one instead, and the strip never appears on either.
-  const slist = $('series-list');
-  if (!slist) return;
-  const names = new Map();
-  const addSeries = name => {
-    const t = String(name || '').trim();
-    const key = Paper.seriesKey(t);
-    if (key && !names.has(key)) names.set(key, t);
-  };
-  (window.ARCHIVE_SERIES || []).forEach(addSeries);
-  Ed.articles.forEach(a => addSeries(a.series));
-  slist.innerHTML = [...names.values()].sort((a, b) => a.localeCompare(b))
-    .map(t => `<option value="${esc(t)}">`).join('');
+  Ed.topicNames  = gather(window.ARCHIVE_TOPICS, Paper.topicSlug, a => a.topics || []);
+  Ed.seriesNames = gather(window.ARCHIVE_SERIES, Paper.seriesKey, a => a.series ? [a.series] : []);
 }
+
+// Attached once. The lists are read at the moment the box opens, not now.
+Combobox.attach($('f-series'), { options: () => Ed.seriesNames });
+Combobox.attach($('f-topics'), { options: () => Ed.topicNames, multi: true });
 
 function buildFilters() {
   $('filters').innerHTML = STATUSES.map(([v, n]) =>
@@ -277,7 +275,7 @@ function buildFilters() {
 async function refresh() {
   try { Ed.articles = await Store.listArticles(); }
   catch (e) { Ed.articles = []; explain(e); }
-  buildTopicList();
+  buildSuggestions();
   renderList();
   renderSpace();
 }

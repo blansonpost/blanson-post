@@ -432,3 +432,21 @@ dialog.ask h2{margin:0;font-family:var(--display);font-size:20px}
 .checklist li.no>span:last-child{color:var(--fg)}
 .checklist li.yes>span:last-child{color:var(--fg-2)}
 .check-dlg .ask-intro code{background:var(--panel-2);border-radius:5px;padding:1px 6px}
+
+/* ── Suggestions under a field ───────────────────────────────────────────── */
+/* Drawn by the page rather than by the operating system, so it matches the
+   newsroom instead of whatever the machine happens to look like. */
+.cbx{position:relative}
+.cbx-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:40;
+  margin:0;padding:4px;list-style:none;background:var(--panel-2);
+  border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 14px 34px rgba(0,0,0,.5);max-height:232px;overflow-y:auto}
+.cbx-list[hidden]{display:none}
+.cbx-item{padding:7px 10px;border-radius:7px;font-size:13.5px;color:var(--fg-2);
+  cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbx-item:hover{background:var(--panel-3);color:var(--fg)}
+/* The keyboard's position is a stronger state than the pointer's: it is the one
+   Return will act on. */
+.cbx-item.on{background:var(--blue);color:#fff}
+.cbx-item b{color:var(--fg);font-weight:700}
+.cbx-item.on b{color:#fff}
